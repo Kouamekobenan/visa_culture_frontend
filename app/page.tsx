@@ -1,3 +1,4 @@
+import { Button } from "./frontend/components/ui/Button";
 // src/app/page.tsx
 export default function Home() {
   return (
@@ -18,6 +19,16 @@ export default function Home() {
             Réserver
           </button>
         </div>
+      </div>
+      <div className="p-10 flex flex-col gap-4">
+        <Button>Acheter (Vert)</Button>
+        <Button variant="title" size="lg">
+          Gros Bouton Orange
+        </Button>
+        <Button variant="outline" size="sm">
+          Petit contour
+        </Button>
+        <Button isLoading>En cours...</Button>
       </div>
     </div>
   );
