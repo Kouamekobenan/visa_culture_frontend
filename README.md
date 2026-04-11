@@ -1,40 +1,52 @@
 
 
 ## Getting Started
+# 🚀 Visa Culture Frontend
 
-First, run the development server:
+Application frontend du projet **Visa Culture**, construite avec **Next.js** et **Tailwind CSS v4**.
+
+---
+
+## ⚙️ Getting Started
+
+Lance le serveur de développement :
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-
 
 ## Learn More
 
-🎨 Charte Graphique & Design System
+🎨 Design System & Charte Graphique
 
-Ce projet utilise une architecture CSS-first basée sur Tailwind CSS v4. La gestion du thème est centralisée dans le fichier src/app/globals.css via des variables CSS natives pour faciliter la maintenance.
+Ce projet adopte une approche CSS-first avec Tailwind CSS v4.
 
-🌓 Mode Sombre (Dark Mode)
-Le site supporte nativement le mode sombre via la classe .dark appliquée sur l'élément <html>. Le basculement se fait dynamiquement sans rechargement de page.
+La gestion des styles est centralisée dans :
+src/app/globals.css
+
+👉 Utilisation de variables CSS natives pour :
+
+🛠️améliorer la maintenabilité
+👥faciliter le dark mode
+👩‍🦳garantir la cohérence UI
+
+🌓 Dark Mode
+
+Le mode sombre est géré dynamiquement via la classe :
+<html class="dark">
+✔️ Activation sans rechargement
+✔️ Compatible avec toutes les pages
 
 🎨 Palette de Couleurs (Design System)
 
-Fonction,Classe Tailwind,Mode Clair,Mode Sombre
-Fond de page,bg-background,#FFFFFF,#030712
-Texte principal,text-foreground,#111827,#F3F4F6
-Cartes & Sections,bg-surface,#F9FAFB,#111827
-Titres (Orange),text-title,#F97316,#FB923C
-Boutons (Vert),bg-btn,#22C55E,#4ADE80
-Texte discret,text-muted,#6B7280,#9CA3AF
-Erreur/Alerte,text-error,#EF4444,#EF4444
+| Fonction            | Classe Tailwind  | Mode Clair | Mode Sombre |
+|--------------------|------------------|------------|-------------|
+| 🎨 Fond de page    | bg-background    | #FFFFFF    | #030712     |
+| 📝 Texte principal | text-foreground  | #111827    | #F3F4F6     |
+| 🧩 Cartes          | bg-surface       | #F9FAFB    | #111827     |
+| 🔥 Titres          | text-title       | #F97316    | #FB923C     |
+| ✅ Boutons         | bg-btn           | #22C55E    | #4ADE80     |
+| ⚪ Texte discret   | text-muted       | #6B7280    | #9CA3AF     |
+| ❌ Erreur          | text-error       | #EF4444    | #EF4444     |
 
 
 ## Deploy on Vercel
