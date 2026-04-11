@@ -40,7 +40,6 @@ interface EventData {
 export default function EventList() {
   // 2. Passe l'interface au hook (au lieu de le laisser en 'any')
   const { data, loading } = useFetch<EventData[]>("/api/events");
-
   return (
     <div>
       {data?.map(event => (

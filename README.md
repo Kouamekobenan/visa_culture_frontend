@@ -53,6 +53,36 @@ Le mode sombre est géré dynamiquement via la classe :
 | ⚪ Texte discret   | text-muted      | #6B7280    | #9CA3AF     |
 | ❌ Erreur          | text-error      | #EF4444    | #EF4444     |
 
+## 🖋️ Typographie (Fonts)
+
+1. Space Grotesk — La police de caractère
+   Utilisation : Titres (h1, h2, h3) et éléments d'accentuation.
+
+2. Inter — La police d'interface
+   Utilisation : Corps de texte, prix, formulaires et navigation.
+
+## ⚙️ Implémentation Technique -->
+
+Les polices sont intégrées via Tailwind CSS v4 dans le fichier globals.css :
+
+```bash
+@theme {
+  /* Définition des familles de polices */
+  --font-sans: "Inter", ui-sans-serif, system-ui;
+  --font-title: "Space Grotesk", sans-serif;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans); /* Appliqué par défaut partout */
+  }
+
+  h1, h2, h3, .font-title {
+    font-family: var(--font-title); /* Appliqué aux titres */
+  }
+}
+```
+
 ## Deploy on Vercel
 
 ```
