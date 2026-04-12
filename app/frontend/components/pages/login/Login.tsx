@@ -28,7 +28,6 @@ export default function LoginPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
   const [errors, setErrors] = useState({
     email: "",
     password: "",
@@ -37,7 +36,6 @@ export default function LoginPage() {
   const validateForm = (): boolean => {
     const newErrors = { email: "", password: "", general: "" };
     let isValid = true;
-
     if (!formData.email.trim()) {
       newErrors.email = "L'adresse email est requise";
       isValid = false;
@@ -45,16 +43,13 @@ export default function LoginPage() {
       newErrors.email = "Format d'email invalide";
       isValid = false;
     }
-
     if (!formData.password) {
       newErrors.password = "Le mot de passe est requis";
       isValid = false;
     }
-
     setErrors(newErrors);
     return isValid;
   };
-
   const router = useRouter();
   const { login } = useAuth();
 
@@ -86,7 +81,7 @@ export default function LoginPage() {
       {/* Bouton Suivant (Passer) - Positionné à gauche en Absolute */}
       <div className="absolute top-6 right-6 flex items-center gap-3">
         <ThemeToggle />
-        <Link href="/pages/events">
+        <Link href="/frontend/page/event">
           <span className="flex items-center gap-2 text-title font-title font-medium hover:opacity-80 transition-opacity">
             <ChevronLeft className="w-5 h-5" />
             <Button variant="outline">Suivant</Button>

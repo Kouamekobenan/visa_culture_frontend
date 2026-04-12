@@ -81,7 +81,7 @@ function HeaderInner({ pathname }: { pathname: string }) {
             VISA
           </span>
           <span className="text-xl font-black tracking-tighter text-foreground/70 transition-opacity duration-200 group-hover:opacity-90">
-            CULTURE
+            FOR CULTURE
           </span>
         </Link>
 

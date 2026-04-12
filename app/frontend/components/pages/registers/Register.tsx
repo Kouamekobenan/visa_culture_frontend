@@ -265,14 +265,13 @@ export default function RegisterForm() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4 font-sans relative">
       <div className="absolute top-6 right-2 flex items-center gap-3">
         <ThemeToggle />
-        <Link href="/pages/events">
+        <Link href="/frontend/page/event">
           <span className="flex items-center gap-2 text-title font-title font-medium hover:opacity-80 transition-opacity">
             <ChevronLeft className="w-5 h-5" />
             <Button variant="outline">Suivant</Button>
           </span>
         </Link>
       </div>
-
       <div className="w-full max-w-md py-8 mt-8">
         <div className="bg-surface rounded-3xl p-8 border border-muted/20 shadow-xl">
           <div className="mb-8 text-center">
