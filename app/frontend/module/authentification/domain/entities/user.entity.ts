@@ -17,7 +17,7 @@ export class User {
 
 // USE INTERFACE 
 export interface LoginDto {
-  phone: string;
+  email: string;
   password: string;
 }
 export interface RegisterDto {
@@ -26,7 +26,6 @@ export interface RegisterDto {
   password: string;
   phone: string | null;
   role: UserRole;
-  cityId: string | null;
 }
 export interface RegisterResponse {
   message: string;

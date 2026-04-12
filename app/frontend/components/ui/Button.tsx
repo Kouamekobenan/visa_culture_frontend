@@ -17,7 +17,7 @@ export const Button = ({
 }: ButtonProps) => {
   // 1. Styles de base (communs à tous les boutons)
   const baseStyles =
-    "inline-flex items-center justify-center font-bold rounded-lg transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none";
+    "inline-flex cursor-pointer items-center justify-center font-bold rounded-lg transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none";
   // 2. Variantes de couleurs (utilisant tes variables de globals.css)
   const variants = {
     primary: "bg-btn text-white hover:opacity-90 shadow-md",
@@ -40,7 +40,7 @@ export const Button = ({
       {...props}
     >
       {isLoading ? (
-        <span className="flex items-center gap-2">
+        <span className="flex items-center  gap-2">
           <svg
             className="animate-spin h-5 w-5 text-current"
             viewBox="0 0 24 24"
@@ -68,7 +68,6 @@ export const Button = ({
     </button>
   );
 };
-
 
 // Utilisation dans les composants
 /**import { Button } from "@/components/ui/Button";

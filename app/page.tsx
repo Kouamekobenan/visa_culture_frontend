@@ -1,3 +1,5 @@
+
+import Link from "next/link";
 import { Button } from "./frontend/components/ui/Button";
 
 export default function Home() {
@@ -5,6 +7,9 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background font-sans">
       <main className="flex flex-col items-center justify-center flex-1 px-4 py-12 text-center">
         {/* TITRE EN SPACE GROTESK (via font-title) */}
+        <Link href="/frontend/page/login">
+          <Button>Page Login</Button>
+        </Link>
         <h1 className="text-6xl md:text-7xl font-title font-bold text-title tracking-tighter">
           Visa For Culture
         </h1>

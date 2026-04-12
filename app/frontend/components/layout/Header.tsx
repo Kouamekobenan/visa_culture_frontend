@@ -163,7 +163,6 @@ function HeaderInner({ pathname }: { pathname: string }) {
           </button>
         </div>
       </div>
-
       {/* ── MENU MOBILE ── */}
       <div
         id="mobile-menu"
@@ -203,7 +202,6 @@ function HeaderInner({ pathname }: { pathname: string }) {
               </Link>
             );
           })}
-
           <div className="mt-3 flex flex-col gap-3 border-t border-muted/10 pt-4">
             <div className="flex items-center justify-between px-3">
               <span className="text-sm font-medium text-foreground/60">

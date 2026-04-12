@@ -1,6 +1,6 @@
 // **** CONSTANTES ****
 
-export const NAME = "API FOR CULTURE";
+export const NAME = "VISA FOR CULTURE";
 export const SOUS_NAME = "GESTION DE LA BILLETERIE";
 
 // *** INTERFACE FOR TYPES GENERIQUE ***
@@ -10,6 +10,11 @@ export interface PaginatedResponseRepository<T> {
   totalPages: number;
   page: number;
   limit: number;
+}
+
+export interface ApiErrorResponse {
+  message: string;
+  statusCode: number;
 }
 
 // *** TYPES ENUMS ***
