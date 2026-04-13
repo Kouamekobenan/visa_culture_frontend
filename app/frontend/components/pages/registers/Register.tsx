@@ -13,8 +13,7 @@ import { RegisterDto } from "@/app/frontend/module/authentification/domain/entit
 import { UserRepository } from "@/app/frontend/module/authentification/infrastructure/user.repository";
 import { UserService } from "@/app/frontend/module/authentification/application/user.service";
 import axios from "axios";
-
-// ✅ Liste des pays avec drapeaux (images SVG via flagcdn.com)
+//  Liste des pays avec drapeaux (images SVG via flagcdn.com)
 const COUNTRY_CODES = [
   { code: "+225", iso: "ci", label: "Côte d'Ivoire" },
   { code: "+33",  iso: "fr", label: "France" },
@@ -61,7 +60,6 @@ function FlagImg({ iso, size = 20 }: { iso: string; size?: number }) {
     />
   );
 }
-
 // ✅ Composant Dropdown Pays custom
 function CountryDropdown({
   value,
@@ -247,7 +245,8 @@ export default function RegisterForm() {
 
       if (response.token) {
         localStorage.setItem("access_token", response.token.accessToken);
-        localStorage.setItem("refresh_token", response.token.refreshToken);
+        // localStorage.setItem("refresh_token", response.token.refreshToken);
+        localStorage.setItem("refreshToken", response.token.refreshToken);
       }
 
       toast.success(`Bienvenue ${formData.name} !`);

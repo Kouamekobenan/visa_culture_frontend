@@ -10,4 +10,5 @@ export interface IEventRepository {
   ): Promise<PaginatedResponseRepository<Event>>;
   updateEvent(id: string, data: UpdateEventDto): Promise<Event>;
   deleteEvent(id: string): Promise<void>;
+  searchEventsByTitle(title: string): Promise<Event[]> 
 }

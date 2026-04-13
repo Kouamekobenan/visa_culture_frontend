@@ -10,6 +10,7 @@ import axios from "axios";
 import { User } from "../module/authentification/domain/entities/user.entity";
 import { api } from "@/app/backend/database/api";
 import { ApiErrorResponse } from "../utils/types/manager.type";
+import toast from "react-hot-toast";
 
 // ─────────────────────────────────────────────
 // TYPES
@@ -122,6 +123,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Erreur Axios (réponse du serveur reçue avec un code d'erreur HTTP)
       if (axios.isAxiosError<ApiErrorResponse>(error)) {
         console.error("❌ Erreur Axios login:", error.response?.data);
+        const message= error.response?.data?.message || "Erreur de connexion"
+        toast.error(message)
         throw new Error(error.response?.data?.message || "Erreur de connexion");
       }
       // Erreur JS standard (réseau coupé, timeout, etc.)

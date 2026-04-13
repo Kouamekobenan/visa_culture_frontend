@@ -25,4 +25,8 @@ export class EventService {
   async deleteEvent(id: string): Promise<void> {
     await this.eventRepository.deleteEvent(id);
   }
+  
+  async searchByTitle(title: string): Promise<Event[]> {
+    return await this.eventRepository.searchEventsByTitle(title);
+  }
 }

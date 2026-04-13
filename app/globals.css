@@ -24,7 +24,8 @@
 :root {
   --background: #ffffff;
   --foreground: #111827;
-  --brand-color: #60a5fa;
+  /* --brand-color: #4f46e5; */
+  --brand-color: #0d9488;
   --surface: #f9fafb;
   --text-muted: #6b7280;
 
@@ -37,7 +38,8 @@
 .dark {
   --background: #030712;
   --foreground: #f9fafb;
-  --brand-color: #60a5fa;
+  /* --brand-color: #4f46e5; */
+  --brand-color: #0d9488;
   --surface: #111827;
   --text-muted: #9ca3af;
 

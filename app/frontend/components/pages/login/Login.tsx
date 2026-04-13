@@ -59,7 +59,7 @@ export default function LoginPage() {
     setErrors({ email: "", password: "", general: "" });
     try {
       await login(formData.email, formData.password);
-      router.push("/page/events");
+      router.push("/frontend/page/event");
     } catch (err: unknown) {
       if (axios.isAxiosError<ApiErrorResponse>(err)) {
         setErrors((prev) => ({ ...prev, general: "Identifiants incorrects" }));
@@ -75,7 +75,6 @@ export default function LoginPage() {
       setErrors((prev) => ({ ...prev, [name]: "", general: "" }));
     }
   };
-
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 font-sans relative">
       {/* Bouton Suivant (Passer) - Positionné à gauche en Absolute */}

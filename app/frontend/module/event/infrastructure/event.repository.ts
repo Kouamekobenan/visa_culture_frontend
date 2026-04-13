@@ -29,16 +29,21 @@ export class EventRepository implements IEventRepository {
     limit: number,
     page: number,
   ): Promise<PaginatedResponseRepository<Event>> {
-    const response = await api.get<PaginatedResponseRepository<Event>>(
-      this.baseUrl,
-      {
-        params: { limit, page },
-      },
+    const res = await api.get(
+      `/events/?page=${page}&limit=${limit}`,
     );
-    return response.data;
+    return {
+      data: res.data.data,
+      total: res.data.total,
+      totalPages: res.data.totalPages,
+      limit: res.data.limit,
+      page: res.data.page,
+    };
   }
-
-  
+  async searchEventsByTitle(title: string): Promise<Event[]> {
+    const res = await api.get(`/events/search?title=${encodeURIComponent(title)}`);
+    return res.data;
+  }
 }
 
 

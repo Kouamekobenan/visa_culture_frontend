@@ -1,3 +1,7 @@
+interface IOrganizer {
+  id: string;
+  name: string;
+}
 export class Event {
   constructor(
     public readonly id: string,
@@ -5,11 +9,12 @@ export class Event {
     public description: string,
     public imageUrl: string,
     public location: string,
-    public date: Date,
+    public date: string,
     public isActive: boolean,
     public organizerId: string,
     public createdAt: Date,
     public updatedAt: Date,
+    public organizer?: IOrganizer,
   ) {}
 }
 // INTERFACE

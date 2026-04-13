@@ -89,6 +89,10 @@ export default function ProfessionalAdBanner() {
                           src={slide.image}
                           alt={slide.title}
                           fill
+                          sizes="(max-width: 640px) 192px,
+                        (max-width: 768px) 224px,
+                        (max-width: 1024px) 256px,
+                        320px"
                           className="object-cover"
                           priority={index === 0}
                         />
