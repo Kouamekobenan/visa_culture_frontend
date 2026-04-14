@@ -77,7 +77,6 @@ export default function EventPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 font-sans bg-background text-foreground transition-colors">
-
       {/* Header section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
         <div>
@@ -95,7 +94,7 @@ export default function EventPage() {
             type="text"
             placeholder="Rechercher un événement..."
             value={searchQuery} // ← AJOUT
-            onChange={e => setSearchQuery(e.target.value)} // ← AJOUT
+            onChange={(e) => setSearchQuery(e.target.value)} // ← AJOUT
             className="w-full pl-11 pr-5 py-3 rounded-full bg-surface border border-muted/20 focus:outline-none focus:ring-2 focus:ring-brand transition-all text-foreground"
           />
         </div>
@@ -103,7 +102,9 @@ export default function EventPage() {
       {/* Compteur de résultats */}
       {!loading && (
         <p className="text-muted text-sm mb-6">
-          Plus de  {filteredEvents.length} événement{filteredEvents.length > 1 ? "s" : ""} à votre disposition  {/* ← MODIFIÉ */}
+          Plus de {filteredEvents.length} événement
+          {filteredEvents.length > 1 ? "s" : ""} à votre disposition{" "}
+          {/* ← MODIFIÉ */}
         </p>
       )}
 
@@ -114,71 +115,73 @@ export default function EventPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredEvents.map((e) => ( // ← MODIFIÉ : filteredEvents au lieu de events
-            <div
-              key={e.id}
-              className="group bg-surface rounded-2xl overflow-hidden border border-muted/10 hover:shadow-xl hover:shadow-brand/5 transition-all duration-300 flex flex-col"
-            >
-              {/* Image cliquable → page détail */}
-              <Link
-                href={`/frontend/page/details/${e.id}`}
-                className="relative h-56 w-full overflow-hidden block"
+          {filteredEvents.map(
+            (
+              e, // ← MODIFIÉ : filteredEvents au lieu de events
+            ) => (
+              <div
+                key={e.id}
+                className="group bg-surface rounded-2xl overflow-hidden border border-muted/10 hover:shadow-xl hover:shadow-brand/5 transition-all duration-300 flex flex-col"
               >
-                <Image
-                  src={e.imageUrl ?? "/placeholder.jpg"}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  alt={e.title}
-                />
-                {/* Overlay au hover */}
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-background/80 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold text-title">
-                  <CalendarDays className="h-3.5 w-3.5 text-brand" />
-                  {formatShortDate(e.date)}
-                </div>
-              </Link>
-              {/* Contenu de la carte */}
-              <div className="p-6 flex flex-col flex-grow">
-                <h3 className="text-2xl font-bold mb-2 leading-tight">
-                  {e.title}
-                </h3>
+                {/* Image cliquable → page détail */}
+                <Link
+                  href={`/frontend/page/details/${e.id}`}
+                  className="relative h-56 w-full overflow-hidden block"
+                >
+                  <Image
+                    src={e.imageUrl ?? "/placeholder.jpg"}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    alt={e.title}
+                  />
+                  {/* Overlay au hover */}
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-background/80 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold text-title">
+                    <CalendarDays className="h-3.5 w-3.5 text-brand" />
+                    {formatShortDate(e.date)}
+                  </div>
+                </Link>
+                {/* Contenu de la carte */}
+                <div className="p-6 flex flex-col flex-grow">
+                  <h3 className="text-2xl font-bold mb-2 leading-tight">
+                    {e.title}
+                  </h3>
 
-                <div className="flex items-center gap-1.5 text-muted text-sm mb-4">
-                  <MapPin className="h-4 w-4 text-brand shrink-0" />
-                  <span className="truncate">{e.location}</span>
-                </div>
+                  <div className="flex items-center gap-1.5 text-muted text-sm mb-4">
+                    <MapPin className="h-4 w-4 text-brand shrink-0" />
+                    <span className="truncate">{e.location}</span>
+                  </div>
 
-                {/* Description masquée sur mobile */}
-                <p className="hidden md:block text-muted text-sm line-clamp-3 mb-6 flex-grow">
-                  {e.description}
-                </p>
-
-                {/* Actions */}
-                <div className="flex items-center justify-between pt-4 border-t border-muted/10 mt-auto">
-                  <Link
-                    href={`/frontend/page/details/${e.id}`}
-                    className="flex items-center gap-1 text-brand font-bold text-sm hover:underline underline-offset-4 transition-all"
-                  >
-                    Voir plus
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                  <Button
-                    className="flex items-center gap-2 bg-btn hover:opacity-90 text-white font-bold px-5 py-2 rounded-xl transition-all active:scale-95 shadow-lg shadow-btn/20"
-                  >
-                    <Ticket className="h-4 w-4" />
-                    Acheter
-                  </Button>
+                  {/* Description masquée sur mobile */}
+                  <p className="hidden md:block text-muted text-sm line-clamp-3 mb-6 flex-grow">
+                    {e.description}
+                  </p>
+                  {/* Actions */}
+                  <div className="flex items-center justify-between pt-4 border-t border-muted/10 mt-auto">
+                    <Link
+                      href={`/frontend/page/details/${e.id}`}
+                      className="flex items-center gap-1 text-brand font-bold text-sm hover:underline underline-offset-4 transition-all"
+                    >
+                      Voir plus
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                    <Link href={`/frontend/page/tickets`}>
+                      <Button className="flex items-center gap-2 bg-btn hover:opacity-90 text-white font-bold px-5 py-2 rounded-xl transition-all active:scale-95 shadow-lg shadow-btn/20">
+                        <Ticket className="h-4 w-4" />
+                        Acheter
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ),
+          )}
         </div>
       )}
       {/* Pagination */}
       {!loading && pagination.totalPages > 1 && (
         <div className="flex items-center justify-center gap-1.5 mt-12">
-
           {/* Bouton Précédent */}
           <button
             onClick={() => handlePageChange(pagination.page - 1)}
@@ -211,7 +214,7 @@ export default function EventPage() {
                 >
                   {item}
                 </button>
-              )
+              ),
             )}
           </div>
           {/* Bouton Suivant */}
@@ -226,5 +229,5 @@ export default function EventPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

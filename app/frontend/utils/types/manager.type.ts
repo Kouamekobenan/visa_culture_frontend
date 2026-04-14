@@ -17,6 +17,13 @@ export interface ApiErrorResponse {
   statusCode: number;
 }
 
+export interface PaternerData {
+  id: number;
+  name: string;
+  logo: string;
+  image: string;
+}
+
 // *** TYPES ENUMS ***
 export enum TicketStatus {
   VALID = "VALID",
@@ -30,13 +37,11 @@ export enum UserRole {
   PARTICIPANT = "PARTICIPANT",
   CONTROLLER = "CONTROLLER",
 }
-
 export enum PaymentStatus {
   PENDING = "PENDING",
   SUCCESS = "SUCCESS",
   FAILED = "FAILED",
 }
-
 export enum NotificationType {
   TICKET_PURCHASED = "TICKET_PURCHASED",
   EVENT_REMINDER = " EVENT_REMINDER ",
