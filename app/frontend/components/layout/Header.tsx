@@ -9,16 +9,14 @@ import { useAuth } from "../../context/useContext";
 import { LogOut, Ticket, User } from "lucide-react";
 
 const NAV_LINKS = [
-  { href: "/events", label: "Événements" },
+  { href: "/frontend/page/event", label: "Événements" },
   { href: "/tickets", label: "Mes Tickets" },
   { href: "/about", label: "À propos" },
 ];
-
 export default function Header() {
   const pathname = usePathname();
   return <HeaderInner key={pathname} pathname={pathname} />;
 }
-
 function HeaderInner({ pathname }: { pathname: string }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);

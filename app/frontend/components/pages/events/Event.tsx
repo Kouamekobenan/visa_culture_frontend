@@ -107,7 +107,6 @@ export default function EventPage() {
           {/* ← MODIFIÉ */}
         </p>
       )}
-
       {/* Grille des événements */}
       {loading ? (
         <div className="flex justify-center items-center min-h-[400px]">
@@ -154,9 +153,9 @@ export default function EventPage() {
                   </div>
 
                   {/* Description masquée sur mobile */}
-                  <p className="hidden md:block text-muted text-sm line-clamp-3 mb-6 flex-grow">
-                    {e.description}
-                  </p>
+               <p className="hidden md:block text-muted text-sm truncate whitespace-nowrap mb-6 flex-grow">
+                  {e.description}
+                </p>
                   {/* Actions */}
                   <div className="flex items-center justify-between pt-4 border-t border-muted/10 mt-auto">
                     <Link
@@ -166,7 +165,7 @@ export default function EventPage() {
                       Voir plus
                       <ArrowRight className="h-3.5 w-3.5" />
                     </Link>
-                    <Link href={`/frontend/page/tickets`}>
+                    <Link href={`/frontend/page/tickets/${e.id}`}>
                       <Button className="flex items-center gap-2 bg-btn hover:opacity-90 text-white font-bold px-5 py-2 rounded-xl transition-all active:scale-95 shadow-lg shadow-btn/20">
                         <Ticket className="h-4 w-4" />
                         Acheter
@@ -191,7 +190,6 @@ export default function EventPage() {
             <ChevronLeft className="h-4 w-4" />
             <span className="hidden sm:inline">Précédent</span>
           </button>
-
           {/* Numéros de pages */}
           <div className="flex items-center gap-1">
             {paginationRange.map((item, index) =>

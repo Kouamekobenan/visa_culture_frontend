@@ -1,13 +1,16 @@
-import { api } from "@/app/backend/database/api";
+import { api } from '@/app/backend/database/api';
 import {
   CreateEventDto,
   Event,
   UpdateEventDto,
-} from "../domain/entities/event.entity";
-import { IEventRepository } from "../domain/interface/event.repository";
-import { PaginatedResponseRepository } from "@/app/frontend/utils/types/manager.type";
+} from '../domain/entities/event.entity';
+import { IEventRepository } from '../domain/interface/event.repository';
+import {
+  Lottery,
+  PaginatedResponseRepository,
+} from '@/app/frontend/utils/types/manager.type';
 export class EventRepository implements IEventRepository {
-  private readonly baseUrl = "events";
+  private readonly baseUrl = 'events';
   async create(dto: CreateEventDto): Promise<Event> {
     const newEvent = await api.post(this.baseUrl, dto);
     return newEvent.data;
@@ -29,9 +32,7 @@ export class EventRepository implements IEventRepository {
     limit: number,
     page: number,
   ): Promise<PaginatedResponseRepository<Event>> {
-    const res = await api.get(
-      `/events/?page=${page}&limit=${limit}`,
-    );
+    const res = await api.get(`/events/?page=${page}&limit=${limit}`);
     return {
       data: res.data.data,
       total: res.data.total,
@@ -41,11 +42,17 @@ export class EventRepository implements IEventRepository {
     };
   }
   async searchEventsByTitle(title: string): Promise<Event[]> {
-    const res = await api.get(`/events/search?title=${encodeURIComponent(title)}`);
+    const res = await api.get(
+      `/events/search?title=${encodeURIComponent(title)}`,
+    );
+    return res.data;
+  }
+
+  async findPrizeEvent(event: string): Promise<Lottery[]> {
+    const res = await api(`/lotteries/prizes/${event}`);
     return res.data;
   }
 }
-
 
 /**  // ✅ Méthode bonus : recherche par titre / filtre
   async searchEvents(

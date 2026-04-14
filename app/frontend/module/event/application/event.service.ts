@@ -1,15 +1,19 @@
-import { PaginatedResponseRepository } from "@/app/frontend/utils/types/manager.type";
+import {
+  Lottery,
+  PaginatedResponseRepository,
+} from '@/app/frontend/utils/types/manager.type';
 import {
   CreateEventDto,
   Event,
   UpdateEventDto,
-} from "../domain/entities/event.entity";
-import { IEventRepository } from "../domain/interface/event.repository";
+} from '../domain/entities/event.entity';
+import { IEventRepository } from '../domain/interface/event.repository';
 export class EventService {
   constructor(private readonly eventRepository: IEventRepository) {}
   async create(dto: CreateEventDto): Promise<Event> {
     return await this.eventRepository.create(dto);
   }
+  
   async update(id: string, dto: UpdateEventDto): Promise<Event> {
     return await this.eventRepository.updateEvent(id, dto);
   }
@@ -25,8 +29,10 @@ export class EventService {
   async deleteEvent(id: string): Promise<void> {
     await this.eventRepository.deleteEvent(id);
   }
-  
   async searchByTitle(title: string): Promise<Event[]> {
     return await this.eventRepository.searchEventsByTitle(title);
+  }
+  async findPrizeEvent(event: string): Promise<Lottery[]> {
+    return await this.eventRepository.findPrizeEvent(event);
   }
 }

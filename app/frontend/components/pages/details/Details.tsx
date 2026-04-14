@@ -154,10 +154,12 @@ export default function EventDetail() {
                       : event.organizerId.substring(0, 8) + "..."}
                   </div>
                 </div>
-                <Button size="md" className="w-full bg-btn hover:scale-105 transition-transform md:py-6 text-lg font-bold shadow-xl shadow-btn/20 flex gap-2">
+                <Link href={`/frontend/page/tickets/${eventId}`}>
+                 <Button size="md" className="w-full bg-btn hover:scale-105 transition-transform md:py-6 text-lg font-bold shadow-xl shadow-btn/20 flex gap-2">
                   <Ticket size={20} className="hidden md:block" />
                   Réserver ma place
                 </Button>
+                </Link>
                 <button className="flex items-center p-3 justify-center gap-2 text-sm text-muted hover:text-foreground transition-colors">
                   <Share2 size={16} /> Partager l&apos;événement
                 </button>
