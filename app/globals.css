@@ -58,4 +58,12 @@
   h1, h2, h3, h4 {
     font-family: var(--font-title); /* Police uniquement pour les titres */
   }
+  @keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
 }

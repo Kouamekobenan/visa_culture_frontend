@@ -66,5 +66,5 @@ export interface Lottery {
   eventId: string;
   isActivate: string;
   createdAt: Date;
-  prizes: Prize;
+  prizes: Prize[];
 }
