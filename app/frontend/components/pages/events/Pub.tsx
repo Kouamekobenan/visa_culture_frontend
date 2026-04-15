@@ -134,7 +134,6 @@ export default function ProfessionalAdBanner() {
                     </p>
                     <Button size="lg">Participez maintenant</Button>
                   </div>
-
                   {/* Image dynamique depuis la BD */}
                   <div className="flex-shrink-0 relative">
                     <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 lg:w-80 lg:h-80">

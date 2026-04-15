@@ -1,9 +1,10 @@
 import {
+  IResetPassWordDto,
   RegisterDto,
   UpdateUserDto,
   User,
-} from "../domain/entities/user.entity";
-import { IUserRepository } from "../domain/interfaces/user.entity";
+} from '../domain/entities/user.entity';
+import { IUserRepository } from '../domain/interfaces/user.entity';
 
 export class UserService {
   constructor(private readonly userRepo: IUserRepository) {}
@@ -19,5 +20,11 @@ export class UserService {
   }
   async execute(id: string, dto: UpdateUserDto): Promise<User> {
     return await this.userRepo.update(id, dto);
+  }
+  async resetPassword(dto: IResetPassWordDto): Promise<void> {
+    return await this.userRepo.resetPassword(dto);
+  }
+  async forgotpassword(email: string): Promise<void> {
+    await this.userRepo.forgotpassword(email);
   }
 }

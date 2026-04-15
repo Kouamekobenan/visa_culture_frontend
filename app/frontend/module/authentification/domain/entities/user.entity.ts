@@ -41,3 +41,9 @@ export interface UpdateUserDto {
   phone?: string;
   password?: string;
 }
+export interface IResetPassWordDto {
+  email: string;
+  newPassword: string;
+  confirmPassword: string;
+  code:string;
+}

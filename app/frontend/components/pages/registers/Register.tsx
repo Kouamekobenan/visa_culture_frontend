@@ -250,7 +250,7 @@ export default function RegisterForm() {
       }
 
       toast.success(`Bienvenue ${formData.name} !`);
-      router.push("/frontend/page/events");
+      router.push("/frontend/page/event");
     } catch (error: unknown) {
       if (axios.isAxiosError<ApiErrorResponse>(error)) {
         toast.error(error.message || "Erreur lors de l'inscription");
