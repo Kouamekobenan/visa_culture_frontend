@@ -54,7 +54,6 @@ export default function SplashScreen() {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("spinning");
   const [dots, setDots] = useState("");
-
   // Animation des "..." pendant le checking
   useEffect(() => {
     if (phase !== "checking") return;
@@ -71,16 +70,14 @@ export default function SplashScreen() {
       // ⏱ Étape 2 : vérification du token (courte pause visuelle)
       setTimeout(() => {
         setPhase("done");
-
         const token = localStorage.getItem("access_token");
-
         if (token) {
           router.replace("/frontend/page/event");
         } else {
           router.replace("/frontend/page/login");
         }
-      }, 1200); // 1.2s pour la vérification visuelle
-    }, 10000); // 10 secondes de splash
+      }, 1000); // 1s pour la vérification visuelle
+    }, 5000); // 5 secondes de splash
     return () => clearTimeout(spinTimer);
   }, [router]);
 

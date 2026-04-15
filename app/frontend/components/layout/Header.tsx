@@ -1,188 +1,261 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { Button } from "../ui/Button";
-import ThemeToggle from "../ui/ThemeToggle";
-import { useAuth } from "../../context/useContext";
-import { LogOut, Ticket, User } from "lucide-react";
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { Button } from '../ui/Button';
+import ThemeToggle from '../ui/ThemeToggle';
+import { useAuth } from '../../context/useContext';
+import {
+  LogOut,
+  Ticket,
+  User,
+  Home,
+  Calendar,
+  Info,
+  MessageSquare,
+  LogIn,
+  LucideIcon,
+} from 'lucide-react';
 
+// Configuration de la navigation centralisée
 const NAV_LINKS = [
-  { href: "/frontend/page/event", label: "Événements" },
-  { href: "/tickets", label: "Mes Tickets" },
-  { href: "/about", label: "À propos" },
+  { href: '/frontend/page/event', label: 'Événements', icon: Calendar },
+  { href: '/frontend/page/about', label: 'À propos', icon: Info },
+  { href: '/frontend/page/contact', label: 'Contact', icon: MessageSquare },
 ];
+
 export default function Header() {
   const pathname = usePathname();
-  return <HeaderInner key={pathname} pathname={pathname} />;
-}
-function HeaderInner({ pathname }: { pathname: string }) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // État pour le dropdown user
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
-  const { user, logout } = useAuth(); // On récupère logout du contexte
+  const { user, logout } = useAuth();
   const router = useRouter();
 
-  // Gestion du scroll
+  // Gestion du scroll pour l'effet de transparence
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 8);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Fermeture des menus au clic extérieur
+  // Fermeture du menu utilisateur au clic extérieur
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setIsMenuOpen(false);
-      }
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(e.target as Node)
+      ) {
         setIsUserMenuOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleLogout = async () => {
     await logout();
     setIsUserMenuOpen(false);
-    router.push("/");
+    router.push('/');
   };
 
   return (
-    <header
-      ref={menuRef}
-      className={[
-        "sticky top-0 z-40 w-full transition-all duration-300 border-b",
-        isScrolled
-          ? "border-muted/30 bg-background/95 shadow-sm backdrop-blur-xl"
-          : "border-transparent bg-background/60 backdrop-blur-md",
-      ].join(" ")}
-    >
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
-        {/* LOGO */}
-        <Link href="/" className="group flex items-center gap-2 select-none">
-          <span className="text-xl font-black tracking-tighter text-title uppercase">VISA</span>
-          <span className="text-xl font-black tracking-tighter text-foreground/70 uppercase">FOR CULTURE</span>
-        </Link>
+    <>
+      {/* --- DESKTOP HEADER & MOBILE TOP LOGO BAR --- */}
+      <header
+        className={`sticky top-0 z-40 w-full transition-all duration-300 border-b ${
+          isScrolled
+            ? 'border-muted/20 bg-background/80 shadow-sm backdrop-blur-xl'
+            : 'border-transparent bg-background/0'
+        }`}
+      >
+        <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
+          {/* LOGO */}
+          <Link href="/" className="group flex items-center gap-2 select-none">
+            <span className="text-xl font-black tracking-tighter text-title uppercase">
+              VISA
+            </span>
+            <span className="text-xl font-black tracking-tighter text-foreground/70 uppercase">
+              FOR CULTURE
+            </span>
+          </Link>
+          {/* NAVIGATION DESKTOP (Hidden on Mobile) */}
+          <nav className="hidden md:flex items-center gap-1">
+            {NAV_LINKS.map(({ href, label }) => {
+              const isActive = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`relative px-4 py-2 text-sm font-semibold transition-colors ${
+                    isActive
+                      ? 'text-title'
+                      : 'text-foreground/70 hover:text-title'
+                  }`}
+                >
+                  {label}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-title rounded-full" />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
 
-        {/* NAVIGATION DESKTOP */}
-        <nav className="hidden md:flex items-center gap-1">
-          {NAV_LINKS.map(({ href, label }) => {
-            const isActive = pathname === href;
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={[
-                  "relative px-4 py-2 text-sm font-medium transition-colors",
-                  isActive ? "text-title" : "text-foreground/70 hover:text-title",
-                ].join(" ")}
-              >
-                {label}
-              </Link>
-            );
-          })}
-        </nav>
+          {/* ACTIONS & AUTH */}
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
 
-        {/* ACTIONS & AUTH */}
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
+            {user ? (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center gap-2 p-1 pr-3 rounded-full border border-muted/20 bg-surface hover:bg-muted/5 transition-all"
+                >
+                  <div className="h-8 w-8 rounded-full bg-brand flex items-center justify-center text-white font-bold text-xs shadow-inner">
+                    {user.name?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <span className="text-sm font-bold text-foreground/80 hidden sm:block">
+                    Mon Compte
+                  </span>
+                </button>
 
-          {user ? (
-            /* VERSION CONNECTÉE */
-            <div className="relative" ref={userMenuRef}>
-              <button
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center gap-2 pl-3 pr-1 py-1 rounded-full border border-muted/20 bg-surface hover:bg-muted/5 transition-all"
-              >
-                <span className="text-sm font-semibold text-foreground/80 hidden sm:block">
-                  {user.name || "Mon Compte"}
-                </span>
-                <div className="h-8 w-8 rounded-full bg-brand flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                  {user.name?.charAt(0).toUpperCase() || "U"}
-                </div>
-              </button>
-
-              {/* DROPDOWN MENU */}
-           {isUserMenuOpen && (
-            <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-2xl border border-muted/20 bg-background p-2 shadow-2xl animate-in fade-in zoom-in duration-200">
-              {/* Header du menu */}
-              <div className="px-4 py-3 border-b border-muted/10 mb-1">
-                <p className="text-[10px] text-muted uppercase font-bold tracking-widest">Connecté en tant que</p>
-                <p className="text-sm font-bold truncate text-foreground">{user.email}</p>
+                {/* DROPDOWN MENU (Desktop & Mobile Profile Access) */}
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-2xl border border-muted/20 bg-background p-2 shadow-2xl animate-in fade-in zoom-in duration-200">
+                    <div className="px-4 py-3 border-b border-muted/10 mb-1">
+                      <p className="text-[10px] text-muted uppercase font-bold tracking-widest leading-none mb-1">
+                        Session active
+                      </p>
+                      <p className="text-sm font-bold truncate text-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                    <MenuLink href="/profile" icon={User} label="Mon Profil" />
+                    <MenuLink
+                      href="/tickets"
+                      icon={Ticket}
+                      label="Mes Réservations"
+                    />
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-bold text-error rounded-xl hover:bg-error/10 transition-colors mt-1 group"
+                    >
+                      <LogOut
+                        size={18}
+                        className="group-hover:-translate-x-1 transition-transform"
+                      />
+                      Déconnexion
+                    </button>
+                  </div>
+                )}
               </div>
-
-              {/* Liens du menu */}
-              <Link
-                href="/profile"
-                className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl hover:bg-muted/10 transition-colors group"
-              >
-                <User size={18} className="text-muted group-hover:text-brand transition-colors" />
-                Mon Profil
+            ) : (
+              <Link href="/frontend/page/login" className="hidden md:block">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-bold border-brand text-brand"
+                >
+                  Connexion
+                </Button>
               </Link>
-
-              <Link
-                href="/tickets"
-                className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl hover:bg-muted/10 transition-colors group"
-              >
-                <Ticket size={18} className="text-muted group-hover:text-brand transition-colors" />
-                Mes Réservations
-              </Link>
-
-              {/* Bouton de déconnexion */}
-              <button
-                onClick={handleLogout}
-                className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-error rounded-xl hover:bg-error/10 transition-colors mt-1 group"
-              >
-                <LogOut size={18} className="text-error transition-transform group-hover:translate-x-1" />
-                Déconnexion
-              </button>
-            </div>
-)}
-            </div>
-          ) : (
-            /* VERSION NON CONNECTÉE */
-            <Link href="/frontend/page/login" className="hidden md:block">
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden md:flex gap-2 font-bold border-brand text-brand hover:bg-brand/5"
-              >
-                Connexion
-              </Button>
-            </Link>
-          )}
-
-          {/* Bouton hamburger mobile (inchangé mais on ajoute l'état auth dedans) */}
-          <button className="md:hidden ..." onClick={() => setIsMenuOpen((v) => !v)}>
-             {/* ... ton icone hamburger ... */}
-          </button>
+            )}
+          </div>
         </div>
-      </div>
+      </header>
+      {/* --- MOBILE BOTTOM NAVIGATION BAR (Visible only on Mobile) --- */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-muted/20 px-6 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center justify-between max-w-md mx-auto">
+          {/* Home Link */}
+          <MobileTab
+            href="/"
+            icon={Home}
+            label="Accueil"
+            isActive={pathname === '/'}
+          />
+          {/* Dynamic Nav Links */}
+          {NAV_LINKS.map((link) => (
+            <MobileTab
+              key={link.href}
+              href={link.href}
+              icon={link.icon}
+              label={link.label}
+              isActive={pathname === link.href}
+            />
+          ))}
 
-      {/* MENU MOBILE (Mise à jour pour l'auth) */}
-      <div className={["md:hidden ...", isMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"].join(" ")}>
-        <nav className="flex flex-col p-4 gap-2">
-           {/* ... tes liens mobiles ... */}
-           <div className="pt-4 border-t border-muted/10">
-             {user ? (
-               <div className="flex flex-col gap-2">
-                 <p className="px-3 text-sm font-bold text-title">{user.name}</p>
-                 <Button onClick={handleLogout} variant="outline" className="text-error border-error/20">Déconnexion</Button>
-               </div>
-             ) : (
-               <Link href="/login" className="w-full">
-                 <Button className="w-full bg-btn font-bold">Connexion</Button>
-               </Link>
-             )}
-           </div>
-        </nav>
+          {/* Auth/Profile Link */}
+          {user ? (
+            <MobileTab
+              href="/profile"
+              icon={User}
+              label="Profil"
+              isActive={pathname === '/profile'}
+            />
+          ) : (
+            <MobileTab
+              href="/frontend/page/login"
+              icon={LogIn}
+              label="Login"
+              isActive={pathname === '/frontend/page/login'}
+            />
+          )}
+        </div>
+      </nav>
+    </>
+  );
+}
+
+// --- SOUS-COMPOSANTS POUR LA PROPRETÉ DU CODE ---
+
+function MobileTab({
+  href,
+  icon: Icon,
+  label,
+  isActive,
+}: {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  isActive: boolean;
+}) {
+  return (
+    <Link href={href} className="flex flex-col items-center gap-1 group">
+      <div
+        className={`p-2 rounded-xl transition-all ${isActive ? 'bg-title text-white shadow-lg shadow-title/30 scale-110' : 'text-muted hover:text-title'}`}
+      >
+        <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
       </div>
-    </header>
+      <span
+        className={`text-[10px] font-bold tracking-wide transition-colors ${isActive ? 'text-title' : 'text-muted'}`}
+      >
+        {label}
+      </span>
+    </Link>
+  );
+}
+
+function MenuLink({
+  href,
+  icon: Icon,
+  label,
+}: {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl hover:bg-muted/10 transition-colors group"
+    >
+      <Icon
+        size={18}
+        className="text-muted group-hover:text-brand transition-colors"
+      />
+      {label}
+    </Link>
   );
 }

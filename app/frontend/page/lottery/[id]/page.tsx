@@ -1,5 +1,6 @@
 'use client';
 
+import Footer from '@/app/frontend/components/layout/Footer';
 import Header from '@/app/frontend/components/layout/Header';
 import LotterySection from '@/app/frontend/components/pages/lottery/Prize';
 import { useParams } from 'next/navigation';
@@ -16,11 +17,10 @@ export default function LotteryPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-
-     
       <main className="container mx-auto px-4 py-8 md:py-16">
         <LotterySection eventId={eventId} />
       </main>
+      <Footer/>
     </div>
   );
 }

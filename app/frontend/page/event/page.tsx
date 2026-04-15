@@ -1,4 +1,5 @@
 
+import Footer from "../../components/layout/Footer";
 import Header from "../../components/layout/Header";
 import EventPage from "../../components/pages/events/Event";
 import ProfessionalAdBanner from "../../components/pages/events/Pub";
@@ -9,8 +10,9 @@ export default function PageEvent() {
       <Header />
       <ProfessionalAdBanner />
       <main className="flex flex-col items-center justify-center flex-1 px-4 py-12 text-center">
-        <EventPage/>
+        <EventPage />
       </main>
+      <Footer/>
     </div>
   );
 }
