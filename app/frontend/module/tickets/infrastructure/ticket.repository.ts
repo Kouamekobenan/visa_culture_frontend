@@ -1,6 +1,7 @@
 import { api } from '@/app/backend/database/api';
 import {
   CreateTicket,
+  HistoriqueTicketDto,
   Ticket,
   TicketResponse,
   UpdateTicketDto,
@@ -46,5 +47,22 @@ export class TicketRepository implements ITicketRepository {
   }
   async delete(id: string): Promise<void> {
     await api.delete(`/tickets/${id}`);
+  }
+  async ticketHistory(
+    userId: string,
+    limit: number,
+    page: number,
+  ): Promise<PaginatedResponseRepository<Ticket>> {
+   // ✅ Correction de l'inversion limit/page
+  const res = await api.get(
+    `/tickets/history/${userId}/?limit=${limit}&page=${page}`,
+  );
+    return {
+      data: res.data.data ,
+      total: res.data.total,
+      totalPages: res.data.totalPages,
+      limit: res.data.limit,
+      page: res.data.page,
+    };
   }
 }

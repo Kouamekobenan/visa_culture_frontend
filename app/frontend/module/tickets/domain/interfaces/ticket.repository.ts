@@ -6,7 +6,7 @@ import {
   UpdateTicketDto,
 } from '../entities/ticket.entity';
 export interface ITicketRepository {
-  create(dto: CreateTicket, quantity:number): Promise<TicketResponse>;
+  create(dto: CreateTicket, quantity: number): Promise<TicketResponse>;
   findById(id: string): Promise<Ticket | null>;
   findAllByEventId(
     eventId: string,
@@ -15,4 +15,9 @@ export interface ITicketRepository {
   ): Promise<PaginatedResponseRepository<Ticket>>;
   delete(id: string): Promise<void>;
   update(id: string, data: UpdateTicketDto): Promise<Ticket>;
+  ticketHistory(
+    userId: string,
+    limit: number,
+    page: number,
+  ): Promise<PaginatedResponseRepository<Ticket>>;
 }

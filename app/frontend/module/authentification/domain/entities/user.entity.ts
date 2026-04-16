@@ -1,4 +1,4 @@
-import { UserRole } from "@/app/frontend/utils/types/manager.type";
+import { UserRole } from '@/app/frontend/utils/types/manager.type';
 
 export class User {
   constructor(
@@ -15,7 +15,7 @@ export class User {
   ) {}
 }
 
-// USE INTERFACE 
+// USE INTERFACE
 export interface LoginDto {
   email: string;
   password: string;
@@ -45,5 +45,5 @@ export interface IResetPassWordDto {
   email: string;
   newPassword: string;
   confirmPassword: string;
-  code:string;
+  code: string;
 }

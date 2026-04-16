@@ -25,3 +25,28 @@ export interface UpdateTicketDto {
   status?: TicketStatus;
   scannedAt?: string;
 }
+export interface HistoriqueTicketDto {
+  id: string;
+  code: string;
+  status: TicketStatus;
+  createdAt: Date;
+  event: {
+    id: string;
+    title: string;
+    description: string;
+    imageUrl: string;
+    location: string;
+    date: Date;
+  };
+  ticketType: { name: string; price: string };
+  paymen: { amount: number; status: string; provider: string };
+}
+
+export interface EventDto {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  location: string;
+  date: Date;
+}

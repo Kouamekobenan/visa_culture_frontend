@@ -15,7 +15,7 @@
 
   --color-muted: var(--text-muted); /* Texte secondaire */
   --color-error: #ef4444; /* Erreur (fixe) */
-
+  
   /* Déclaration des polices dans le thème Tailwind */
   --font-sans: "Inter", ui-sans-serif, system-ui;
   --font-title: "Space Grotesk", sans-serif;

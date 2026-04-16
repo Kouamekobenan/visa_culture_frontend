@@ -21,4 +21,7 @@ export class TicketService {
   async update(id: string, dto: UpdateTicketDto) {
     return await this.ticketService.update(id, dto);
   }
+  async historyTicket(userId: string, limit: number, page: number) {
+    return await this.ticketService.ticketHistory(userId, limit, page);
+  }
 }

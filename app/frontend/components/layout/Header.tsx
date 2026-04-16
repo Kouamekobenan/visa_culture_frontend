@@ -102,7 +102,6 @@ export default function Header() {
               );
             })}
           </nav>
-
           {/* ACTIONS & AUTH */}
           <div className="flex items-center gap-3">
             <ThemeToggle />
@@ -132,9 +131,13 @@ export default function Header() {
                         {user.email}
                       </p>
                     </div>
-                    <MenuLink href="/profile" icon={User} label="Mon Profil" />
                     <MenuLink
-                      href="/tickets"
+                      href="/frontend/page/profile"
+                      icon={User}
+                      label="Mon Profil"
+                    />
+                    <MenuLink
+                      href="/frontend/page/profile/history"
                       icon={Ticket}
                       label="Mes Réservations"
                     />
@@ -236,7 +239,6 @@ function MobileTab({
     </Link>
   );
 }
-
 function MenuLink({
   href,
   icon: Icon,

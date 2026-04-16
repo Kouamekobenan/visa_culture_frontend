@@ -18,7 +18,6 @@ export interface ApiErrorResponse {
   message: string;
   statusCode: number;
 }
-
 export interface PaternerData {
   id: number;
   name: string;

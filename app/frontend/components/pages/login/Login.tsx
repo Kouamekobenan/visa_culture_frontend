@@ -22,15 +22,10 @@ import { useRouter } from 'next/navigation';
 import { useState, useRef } from 'react';
 import { Button } from '../../ui/Button';
 import ThemeToggle from '../../ui/ThemeToggle';
-import { UserRepository } from '@/app/frontend/module/authentification/infrastructure/user.repository';
-import { UserService } from '@/app/frontend/module/authentification/application/user.service';
 import toast from 'react-hot-toast';
-
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
-  const userRepo = new UserRepository();
-  const userService = new UserService(userRepo);
   // --- ÉTATS ---
   const [formData, setFormData] = useState<LoginDto>({
     email: '',
@@ -50,7 +45,6 @@ export default function LoginPage() {
   });
   // --- RÉFÉRENCES POUR L'AUTO-FOCUS OTP ---
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
-
   // --- VALIDATIONS ---
   const validateForm = (): boolean => {
     const newErrors = { email: '', password: '', general: '' };
@@ -127,7 +121,9 @@ export default function LoginPage() {
           'http://localhost:3001/api/v1/auth/reset-password',
           payload,
         );
-        toast.success('Succès ! Connectez-vous avec votre nouveau mot de passe.');
+        toast.success(
+          'Succès ! Connectez-vous avec votre nouveau mot de passe.',
+        );
         setIsForgotPassword(false);
         setStep(1);
       }
@@ -156,7 +152,6 @@ export default function LoginPage() {
           </Button>
         </Link>
       </div>
-
       <div className="w-full max-w-md">
         <div className="bg-surface rounded-[2.5rem] p-8 md:p-10 border border-muted/10 shadow-2xl">
           {/* HEADER CARD */}
@@ -179,7 +174,6 @@ export default function LoginPage() {
                   : 'Saisissez le code reçu et votre nouveau secret.'}
             </p>
           </div>
-
           {errors.general && (
             <div className="mb-6 p-4 bg-error/10 border-l-4 border-error rounded-r-xl animate-in fade-in zoom-in">
               <p className="text-xs text-error font-bold leading-tight">
@@ -187,7 +181,6 @@ export default function LoginPage() {
               </p>
             </div>
           )}
-
           <div className="space-y-5">
             {/* INPUT EMAIL (Visible en Login et Step 1) */}
             {(!isForgotPassword || (isForgotPassword && step === 1)) && (
@@ -223,7 +216,7 @@ export default function LoginPage() {
                   </label>
                   <button
                     onClick={() => setIsForgotPassword(true)}
-                    className="text-[10px] font-bold text-title hover:underline"
+                    className="text-[10px] font-bold cursor-pointer text-title hover:underline"
                   >
                     Oublié ?
                   </button>
@@ -259,7 +252,9 @@ export default function LoginPage() {
                     {otp.map((digit, index) => (
                       <input
                         key={index}
-                        ref={(el) => (otpRefs.current[index] = el)}
+                        ref={(el) => {
+                          otpRefs.current[index] = el;
+                        }}
                         type="text"
                         maxLength={1}
                         value={digit}
@@ -315,7 +310,6 @@ export default function LoginPage() {
                 </>
               )}
             </Button>
-
             {/* BACK BUTTON */}
             {isForgotPassword && (
               <button
@@ -323,7 +317,7 @@ export default function LoginPage() {
                   setIsForgotPassword(false);
                   setStep(1);
                 }}
-                className="w-full text-xs font-bold text-muted hover:text-foreground transition-colors"
+                className="w-full text-xs cursor-pointer font-bold text-muted hover:text-foreground transition-colors"
               >
                 Retour à la connexion
               </button>
