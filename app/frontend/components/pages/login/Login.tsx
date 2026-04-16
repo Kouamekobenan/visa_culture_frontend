@@ -15,19 +15,22 @@ import {
   Mail,
   UserPlus,
   ChevronLeft,
-  KeyRound,
   CheckCircle2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '../../ui/Button';
 import ThemeToggle from '../../ui/ThemeToggle';
+import { UserRepository } from '@/app/frontend/module/authentification/infrastructure/user.repository';
+import { UserService } from '@/app/frontend/module/authentification/application/user.service';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
-
+  const userRepo = new UserRepository();
+  const userService = new UserService(userRepo);
   // --- ÉTATS ---
   const [formData, setFormData] = useState<LoginDto>({
     email: '',
@@ -36,7 +39,6 @@ export default function LoginPage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']); // 6 chiffres pour ton JSON
-
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [step, setStep] = useState(1); // 1: Email, 2: OTP + New Pass
   const [showPassword, setShowPassword] = useState(false);
@@ -46,7 +48,6 @@ export default function LoginPage() {
     password: '',
     general: '',
   });
-
   // --- RÉFÉRENCES POUR L'AUTO-FOCUS OTP ---
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -54,7 +55,6 @@ export default function LoginPage() {
   const validateForm = (): boolean => {
     const newErrors = { email: '', password: '', general: '' };
     let isValid = true;
-
     if (!formData.email.trim()) {
       newErrors.email = "L'adresse email est requise";
       isValid = false;
@@ -71,7 +71,6 @@ export default function LoginPage() {
     setErrors(newErrors);
     return isValid;
   };
-
   // --- GESTIONNAIRES D'ACTIONS ---
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -103,7 +102,11 @@ export default function LoginPage() {
         router.push('/frontend/page/event');
       } else if (isForgotPassword && step === 1) {
         // --- DEMANDE D'OTP (STEP 1) ---
-        // await axios.post('/api/auth/forgot-password', { email: formData.email });
+        // const otp = await userService.forgotpassword({ email: formData.email });
+        await axios.post('http://localhost:3001/api/v1/otp/forgot-password', {
+          email: formData.email,
+        });
+        console.log('data otp', otp);
         setStep(2);
       } else {
         // --- RESET FINAL (STEP 2) - TON JSON ---
@@ -113,7 +116,6 @@ export default function LoginPage() {
           confirmPassword: confirmPassword,
           code: otp.join(''),
         };
-
         if (newPassword !== confirmPassword) {
           setErrors((prev) => ({
             ...prev,
@@ -121,9 +123,11 @@ export default function LoginPage() {
           }));
           return;
         }
-
-        await axios.post('/api/auth/reset-password', payload);
-        alert('Succès ! Connectez-vous avec votre nouveau mot de passe.');
+        await axios.post(
+          'http://localhost:3001/api/v1/auth/reset-password',
+          payload,
+        );
+        toast.success('Succès ! Connectez-vous avec votre nouveau mot de passe.');
         setIsForgotPassword(false);
         setStep(1);
       }
@@ -138,7 +142,6 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 font-sans relative">
       {/* HEADER ACTIONS */}
@@ -244,7 +247,6 @@ export default function LoginPage() {
                 </div>
               </div>
             )}
-
             {/* STEP 2 : OTP + NEW PASSWORD (JSON Requirements) */}
             {isForgotPassword && step === 2 && (
               <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
@@ -267,7 +269,6 @@ export default function LoginPage() {
                     ))}
                   </div>
                 </div>
-
                 {/* NEW PASSWORD FIELDS */}
                 <div className="space-y-4">
                   <div className="relative">
@@ -293,7 +294,6 @@ export default function LoginPage() {
                 </div>
               </div>
             )}
-
             {/* SUBMIT BUTTON */}
             <Button
               onClick={handleSubmit}
@@ -329,7 +329,6 @@ export default function LoginPage() {
               </button>
             )}
           </div>
-
           {/* FOOTER CARD */}
           <div className="relative my-10 text-center">
             <div className="absolute inset-0 flex items-center">

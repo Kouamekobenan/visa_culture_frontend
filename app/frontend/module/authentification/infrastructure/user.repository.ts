@@ -6,7 +6,11 @@ import {
   UpdateUserDto,
   User,
 } from '../domain/entities/user.entity';
-import { IUserRepository } from '../domain/interfaces/user.entity';
+import {
+  ForgotPasswordDto,
+  IOtp,
+  IUserRepository,
+} from '../domain/interfaces/user.entity';
 export class UserRepository implements IUserRepository {
   async create(dto: RegisterDto): Promise<RegisterResponse> {
     const users = await api.post(`/auth/register`, dto);
@@ -35,7 +39,8 @@ export class UserRepository implements IUserRepository {
   async resetPassword(dto: IResetPassWordDto): Promise<void> {
     await api.post('/auth/reset-password', dto);
   }
-  async forgotpassword(email: string): Promise<void> {
-    await api.post('/otp/forgot-password', email);
+  async forgotpassword(email: ForgotPasswordDto): Promise<IOtp> {
+    const opt = await api.post('/otp/forgot-password', { email });
+    return opt.data;
   }
 }
