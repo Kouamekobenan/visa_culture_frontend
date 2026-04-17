@@ -1,20 +1,20 @@
-
-import Footer from "../../components/layout/Footer";
-import Header from "../../components/layout/Header";
-import EventPage from "../../components/pages/events/Event";
-import ProfessionalAdBanner from "../../components/pages/events/Pub";
+import Footer from '../../components/layout/Footer';
+import Header from '../../components/layout/Header';
+import EventPage from '../../components/pages/events/Event';
+import ProfessionalAdBanner from '../../components/pages/events/Pub';
 
 export default function PageEvent() {
   return (
-    <div className="flex flex-col min-h-screen bg-background font-sans">
+    <div
+      className="flex flex-col min-h-screen bg-background font-sans"
+      id="event"
+    >
       <Header />
       <ProfessionalAdBanner />
       <main className="flex flex-col items-center justify-center flex-1 px-4 py-12 text-center">
         <EventPage />
       </main>
-      <Footer/>
+      <Footer />
     </div>
   );
 }
-
- 

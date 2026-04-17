@@ -30,7 +30,6 @@ export default function LotterySection({ eventId }: { eventId: string }) {
   const allPrizes = prizes.flatMap((lottery) =>
     lottery.prizes.map((prize) => ({ ...prize })),
   );
-
   return (
     <section className="py-12 px-4 space-y-10">
       {/* HEADER AMÉLIORÉ */}

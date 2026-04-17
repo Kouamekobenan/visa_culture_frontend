@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/app/frontend/context/useContext';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Ticket,
   Trophy,
@@ -17,9 +17,19 @@ import {
   Gift,
   Clock,
   CreditCard,
+  X,
 } from 'lucide-react';
 import { Button } from '../../ui/Button';
-import { formatDate, formatFullDateTime } from '@/app/frontend/utils/types/conversion.data';
+import {
+  formatDate,
+  formatShortDate,
+} from '@/app/frontend/utils/types/conversion.data';
+import { UserStatisticsDto } from '@/app/frontend/module/statistics/domain/entities/statistic.entity';
+import { StatisticUserRepository } from '@/app/frontend/module/statistics/infratructurs/statistic.repository';
+import { StatisticService } from '@/app/frontend/module/statistics/application/statistics.service';
+// API
+const userStatsRepo = new StatisticUserRepository();
+const statsService = new StatisticService(userStatsRepo);
 
 /* --- Types & Data inchangés --- */
 type NavItem = {
@@ -55,7 +65,7 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Loterie',
     description: 'Participez aux tirages en cours',
     icon: <Sparkles size={18} />,
-    href: '/lottery',
+    href: '/frontend/page/lottery',
     accent: 'bg-title/10',
     accentText: 'text-title',
   },
@@ -210,12 +220,43 @@ export default function ProfileUser() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+  const userId = user?.id;
+  const [stat, setStat] = useState<UserStatisticsDto>();
+  const ticketsPursh = stat?.totalTicketsPurchased;
+  const totalLotteryParticipations = stat?.totalLotteryParticipations;
+  const [showPaymentHistory, setShowPaymentHistory] = useState(false);
 
+  useEffect(() => {
+    const fetchStatData = async () => {
+      try {
+        if (!user || !userId) {
+          return;
+        }
+        const result = await statsService.findAllStatUser(userId);
+        console.log('Resutts stasts user', result);
+        setStat(result);
+      } catch (error) {
+        console.log(
+          "Erreur lors de la récupération des stats de l'utilisateur",
+          error,
+        );
+      }
+    };
+    fetchStatData();
+  }, [user, userId]);
   if (!user) return null;
-  const date = formatDate(user?.createdAt ?? new Date());
+  const date = formatDate(user?.createdAt ?? new Date().toISOString());
   const stats: QuickStat[] = [
-    { label: 'Tickets achetés', value: '12', icon: <Ticket size={14} /> },
-    { label: 'Tombolas jouées', value: '5', icon: <Trophy size={14} /> },
+    {
+      label: 'Tickets achetés',
+      value: (ticketsPursh ?? 0).toString(),
+      icon: <Ticket size={14} />,
+    },
+    {
+      label: 'Tombolas jouées',
+      value: (totalLotteryParticipations ?? 0).toString(),
+      icon: <Trophy size={14} />,
+    },
     { label: 'Membre depuis', value: date, icon: <Clock size={14} /> },
   ];
 
@@ -228,6 +269,132 @@ export default function ProfileUser() {
     }
   };
 
+  const HistoryPayments = () => {
+    const payments = stat?.paymentHistory ?? [];
+    const total = stat?.totalAmountSpent ?? 0;
+
+    return (
+      <>
+        {/* Overlay */}
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 animate-in fade-in duration-200"
+          onClick={() => setShowPaymentHistory(false)}
+        />
+
+        {/* Panel */}
+        <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-surface shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <CreditCard size={18} className="text-emerald-500" />
+              </div>
+              <div>
+                <h2 className="font-title font-bold text-foreground text-base">
+                  Historique des paiements
+                </h2>
+                <p className="text-[11px] text-muted">
+                  {payments.length} transaction{payments.length > 1 ? 's' : ''}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowPaymentHistory(false)}
+              className="w-8 h-8 rounded-lg bg-muted/10 hover:bg-muted/20 flex items-center justify-center transition-colors"
+            >
+              <X size={16} className="text-muted" />
+            </button>
+          </div>
+
+          {/* Total */}
+          <div className="mx-6 mt-5 p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-between">
+            <span className="text-sm text-muted font-medium">
+              Total dépensé
+            </span>
+            <span className="font-title font-bold text-lg text-title">
+              {total.toLocaleString('fr-FR')} FCFA
+            </span>
+          </div>
+
+          {/* Liste */}
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+            {payments.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-48 gap-3 text-muted">
+                <CreditCard size={32} className="opacity-20" />
+                <p className="text-sm">
+                  Aucune transaction pour l&apos;instant
+                </p>
+              </div>
+            ) : (
+              payments.map((h) => {
+                const isSuccess =
+                  h.status === 'SUCCESS' || h.status === 'success';
+                return (
+                  <div
+                    key={h.id}
+                    className="flex items-center gap-4 p-4 rounded-2xl bg-surface border border-gray-100 dark:border-gray-800 hover:border-emerald-500/20 transition-colors"
+                  >
+                    {/* Icône statut */}
+                    <div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                        isSuccess ? 'bg-emerald-500/10' : 'bg-red-500/10'
+                      }`}
+                    >
+                      <CreditCard
+                        size={16}
+                        className={
+                          isSuccess ? 'text-emerald-500' : 'text-red-400'
+                        }
+                      />
+                    </div>
+
+                    {/* Infos */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span
+                          className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${
+                            isSuccess
+                              ? 'bg-emerald-500/10 text-emerald-500'
+                              : 'bg-red-500/10 text-red-400'
+                          }`}
+                        >
+                          {h.status}
+                        </span>
+                        <span className="text-[10px] text-muted">
+                          {h.ticketCount} ticket{h.ticketCount > 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted truncate">
+                        {formatShortDate(
+                          typeof h?.createdAt === 'string'
+                            ? h.createdAt
+                            : (h?.createdAt?.toISOString() ??
+                                new Date().toISOString()),
+                        )}
+                      </p>
+                    </div>
+                    {/* Montant */}
+                    <span className="font-title font-bold text-sm text-foreground flex-shrink-0">
+                      {h.amount.toLocaleString('fr-FR')} F
+                    </span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800">
+            <button
+              onClick={() => setShowPaymentHistory(false)}
+              className="w-full py-3 rounded-xl bg-muted/10 hover:bg-muted/20 text-muted font-bold text-sm transition-colors"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  };
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 md:py-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Container Principal en Grid sur Desktop */}
@@ -235,12 +402,10 @@ export default function ProfileUser() {
         {/* --- COLONNE GAUCHE (Profil & Stats) --- */}
         <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-8">
           {/* HERO CARD */}
-          <div className="relative overflow-hidden rounded-3xl border border-gray-100 dark:border-gray-800 bg-surface p-6 md:p-8 shadow-sm">
+          <div className="relative overflow-hidden rounded-3xl  border-brand dark:border-gray-800 bg-surface p-6 md:p-8 shadow-sm">
             <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-brand/5 blur-2xl" />
-
             <div className="relative flex flex-col items-center text-center gap-4">
               <Avatar name={user.name} />
-
               <div className="space-y-1">
                 <RoleBadge role={user.role} />
                 <h1 className="font-title text-2xl font-bold text-foreground mt-2">
@@ -268,7 +433,6 @@ export default function ProfileUser() {
               ))}
             </div>
           </div>
-
           {/* DÉCONNEXION (Visible sous le profil sur desktop) */}
           <Button
             variant="outline"
@@ -298,13 +462,21 @@ export default function ProfileUser() {
                 <NavRow
                   key={item.id}
                   item={item}
-                  onClick={() => router.push(item.href)}
+                  onClick={() => {
+                    if (item.id === 'history') {
+                      setShowPaymentHistory(true);
+                    } else {
+                      router.push(item.href);
+                    }
+                  }}
                 />
               ))}
             </div>
           </div>
         </div>
       </div>
+      {/* Panel Historique Paiements */}
+      {showPaymentHistory && <HistoryPayments />}
     </div>
   );
 }

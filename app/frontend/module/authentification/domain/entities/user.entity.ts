@@ -10,7 +10,7 @@ export class User {
     public role: UserRole,
     public refreshToken: string | null,
     public cityId: string | null,
-    public createdAt: Date,
+    public createdAt: string,
     public updatedAt: Date,
   ) {}
 }

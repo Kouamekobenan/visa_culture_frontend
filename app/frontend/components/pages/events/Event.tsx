@@ -1,41 +1,76 @@
-"use client"
-import { EventService } from "@/app/frontend/module/event/application/event.service";
-import { Event } from "@/app/frontend/module/event/domain/entities/event.entity"
-import { EventRepository } from "@/app/frontend/module/event/infrastructure/event.repository";
-import { formatShortDate } from "@/app/frontend/utils/types/conversion.data";
-import Image from "next/image";
-import { useCallback, useEffect, useState } from "react"
-import { Button } from "../../ui/Button";
-import { NAME } from "@/app/frontend/utils/types/manager.type";
-import { MapPin, Search, CalendarDays, Ticket, ArrowRight, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import Link from "next/link";
+'use client';
+import { EventService } from '@/app/frontend/module/event/application/event.service';
+import { Event } from '@/app/frontend/module/event/domain/entities/event.entity';
+import { EventRepository } from '@/app/frontend/module/event/infrastructure/event.repository';
+import {
+  daysUntil,
+  formatFullDateTime,
+  isFutureDate,
+  isToday,
+} from '@/app/frontend/utils/types/conversion.data';
+import Image from 'next/image';
+import { useCallback, useEffect, useState } from 'react';
+import { Button } from '../../ui/Button';
+import { NAME } from '@/app/frontend/utils/types/manager.type';
+import {
+  MapPin,
+  Search,
+  CalendarDays,
+  Ticket,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
+import Link from 'next/link';
 
-const eventRepo = new EventRepository()
-const serviceEvent = new EventService(eventRepo)
-
+const eventRepo = new EventRepository();
+const serviceEvent = new EventService(eventRepo);
 const LIMIT = 20;
 
-function getPaginationRange(currentPage: number, totalPages: number): (number | "...")[] {
+function getPaginationRange(
+  currentPage: number,
+  totalPages: number,
+): (number | '...')[] {
   if (totalPages <= 7) {
     return Array.from({ length: totalPages }, (_, i) => i + 1);
   }
   if (currentPage <= 4) {
-    return [1, 2, 3, 4, 5, "...", totalPages];
+    return [1, 2, 3, 4, 5, '...', totalPages];
   }
 
   if (currentPage >= totalPages - 3) {
-    return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    return [
+      1,
+      '...',
+      totalPages - 4,
+      totalPages - 3,
+      totalPages - 2,
+      totalPages - 1,
+      totalPages,
+    ];
   }
 
-  return [1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages];
+  return [
+    1,
+    '...',
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+    '...',
+    totalPages,
+  ];
 }
 
 export default function EventPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
-  const [searchQuery, setSearchQuery] = useState<string>(""); // ← AJOUT
+  const [pagination, setPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    total: 0,
+  });
+  const [searchQuery, setSearchQuery] = useState<string>(''); // ← AJOUT
 
   const fetchData = useCallback(async (page: number) => {
     try {
@@ -47,33 +82,39 @@ export default function EventPage() {
         totalPages: res.totalPages,
         total: res.total,
       });
-    } catch (err:unknown) {
-      setError("Erreur lors de la récupération des événements");
+    } catch (err: unknown) {
+      setError('Erreur lors de la récupération des événements');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetchData(1); }, [fetchData]);
+  useEffect(() => {
+    fetchData(1);
+  }, [fetchData]);
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > pagination.totalPages) return;
     fetchData(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const paginationRange = getPaginationRange(pagination.page, pagination.totalPages);
+  const paginationRange = getPaginationRange(
+    pagination.page,
+    pagination.totalPages,
+  );
 
   // ← AJOUT : filtre côté client par titre
-  const filteredEvents = events.filter(e =>
-    e.title.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredEvents = events.filter((e) =>
+    e.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  if (error) return (
-    <div className="p-4 text-error bg-error/10 rounded-lg text-center font-sans font-medium">
-      {error}
-    </div>
-  );
+  if (error)
+    return (
+      <div className="p-4 text-error bg-error/10 rounded-lg text-center font-sans font-medium">
+        {error}
+      </div>
+    );
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 font-sans bg-background text-foreground transition-colors">
@@ -103,7 +144,7 @@ export default function EventPage() {
       {!loading && (
         <p className="text-muted text-sm mb-6">
           Plus de {filteredEvents.length} événement
-          {filteredEvents.length > 1 ? "s" : ""} à votre disposition{" "}
+          {filteredEvents.length > 1 ? 's' : ''} à votre disposition{' '}
           {/* ← MODIFIÉ */}
         </p>
       )}
@@ -128,7 +169,7 @@ export default function EventPage() {
                   className="relative h-56 w-full overflow-hidden block"
                 >
                   <Image
-                    src={e.imageUrl ?? "/placeholder.jpg"}
+                    src={e.imageUrl ?? '/placeholder.jpg'}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -138,7 +179,12 @@ export default function EventPage() {
                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-background/80 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold text-title">
                     <CalendarDays className="h-3.5 w-3.5 text-brand" />
-                    {formatShortDate(e.date)}
+
+                    {isToday(e.date)
+                      ? "Aujourd'hui"
+                      : isFutureDate(e.date)
+                        ? `J-${daysUntil(e.date)}`
+                        : 'Terminé'}
                   </div>
                 </Link>
                 {/* Contenu de la carte */}
@@ -147,15 +193,18 @@ export default function EventPage() {
                     {e.title}
                   </h3>
 
-                  <div className="flex items-center gap-1.5 text-muted text-sm mb-4">
+                  <div className="flex items-center gap-1.5 text-muted text-sm mb-2">
                     <MapPin className="h-4 w-4 text-brand shrink-0" />
                     <span className="truncate">{e.location}</span>
                   </div>
-
+                  <div className="flex items-center mb-2 gap-1.5  backdrop-blur-md  py-1.5 rounded-lg text-xs font-bold text-muted">
+                    <CalendarDays className="h-3.5 w-3.5 text-brand" />
+                    {formatFullDateTime(e.date)}
+                  </div>
                   {/* Description masquée sur mobile */}
-               <p className="hidden md:block text-muted text-sm truncate whitespace-nowrap mb-6 flex-grow">
-                  {e.description}
-                </p>
+                  <p className="hidden md:block text-muted text-sm truncate whitespace-nowrap mb-6 flex-grow">
+                    {e.description}
+                  </p>
                   {/* Actions */}
                   <div className="flex items-center justify-between pt-4 border-t border-muted/10 mt-auto">
                     <Link
@@ -163,14 +212,21 @@ export default function EventPage() {
                       className="flex items-center gap-1 text-brand font-bold text-sm hover:underline underline-offset-4 transition-all"
                     >
                       Voir plus
-                      <ArrowRight className="h-3.5 w-3.5" />
+                      {/* <ArrowRight className="h-3.5 w-3.5" /> */}
                     </Link>
-                    <Link href={`/frontend/page/tickets/${e.id}`}>
-                      <Button className="flex items-center gap-2 bg-btn hover:opacity-90 text-white font-bold px-5 py-2 rounded-xl transition-all active:scale-95 shadow-lg shadow-btn/20">
-                        <Ticket className="h-4 w-4" />
-                        Acheter
-                      </Button>
-                    </Link>
+
+                    {isFutureDate(e.date) || isToday(e.date) ? (
+                      <Link href={`/frontend/page/tickets/${e.id}`}>
+                        <Button className="...">
+                          <Ticket className="h-4 w-4" />
+                          Acheter
+                        </Button>
+                      </Link>
+                    ) : (
+                      <span className="text-xs text-muted font-semibold px-5 py-2">
+                        Événement passé
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -193,7 +249,7 @@ export default function EventPage() {
           {/* Numéros de pages */}
           <div className="flex items-center gap-1">
             {paginationRange.map((item, index) =>
-              item === "..." ? (
+              item === '...' ? (
                 <span
                   key={`ellipsis-${index}`}
                   className="w-9 h-9 flex items-center justify-center text-muted text-sm select-none"
@@ -206,8 +262,8 @@ export default function EventPage() {
                   onClick={() => handlePageChange(item as number)}
                   className={`w-9 h-9 rounded-xl text-sm font-bold transition-all ${
                     pagination.page === item
-                      ? "bg-brand text-white shadow-lg shadow-brand/30"
-                      : "bg-surface border border-muted/20 text-muted hover:border-brand hover:text-brand"
+                      ? 'bg-brand text-white shadow-lg shadow-brand/30'
+                      : 'bg-surface border border-muted/20 text-muted hover:border-brand hover:text-brand'
                   }`}
                 >
                   {item}

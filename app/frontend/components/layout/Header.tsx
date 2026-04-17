@@ -192,7 +192,7 @@ export default function Header() {
           {/* Auth/Profile Link */}
           {user ? (
             <MobileTab
-              href="/profile"
+              href="/frontend/page/profile"
               icon={User}
               label="Profil"
               isActive={pathname === '/profile'}

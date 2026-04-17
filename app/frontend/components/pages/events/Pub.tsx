@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../../ui/Button';
 import { PrizeRepository } from '@/app/frontend/module/prizes/infrastructure/prize.repositrory';
+import Link from 'next/link';
 
 // Données statiques : title + description fixes
 const STATIC_SLIDES = [
@@ -68,7 +69,6 @@ export default function ProfessionalAdBanner() {
     fetchPrizes();
   }, []);
 
-  // ✅ Auto-play
   useEffect(() => {
     if (!slides.length || !isAutoPlaying || isHovered) return;
     autoPlayRef.current = setInterval(() => {
@@ -132,7 +132,9 @@ export default function ProfessionalAdBanner() {
                     <p className="text-muted sm:text-base md:text-lg leading-relaxed max-w-md mx-auto md:mx-0">
                       {slide.description}
                     </p>
-                    <Button size="lg">Participez maintenant</Button>
+                    <Link href={`/#event`}>
+                      <Button size="lg">Je prend mon ticket</Button>
+                    </Link>
                   </div>
                   {/* Image dynamique depuis la BD */}
                   <div className="flex-shrink-0 relative">
