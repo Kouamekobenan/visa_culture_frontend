@@ -110,7 +110,7 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Sécurité',
     description: 'Mot de passe et authentification',
     icon: <Shield size={18} />,
-    href: '/security',
+    href: '/frontend/page/profile/edith',
     accent: 'bg-violet-500/10',
     accentText: 'text-violet-500',
   },

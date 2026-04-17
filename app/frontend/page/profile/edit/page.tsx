@@ -1,3 +1,4 @@
+'use client';
 import { useAuth } from '@/app/frontend/context/useContext';
 import { useState, useEffect } from 'react';
 
