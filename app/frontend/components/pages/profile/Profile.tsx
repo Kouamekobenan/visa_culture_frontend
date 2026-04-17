@@ -19,6 +19,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 import { Button } from '../../ui/Button';
+import { formatDate, formatFullDateTime } from '@/app/frontend/utils/types/conversion.data';
 
 /* --- Types & Data inchangés --- */
 type NavItem = {
@@ -211,11 +212,11 @@ export default function ProfileUser() {
   const [loggingOut, setLoggingOut] = useState(false);
 
   if (!user) return null;
-
+  const date = formatDate(user?.createdAt ?? new Date());
   const stats: QuickStat[] = [
     { label: 'Tickets achetés', value: '12', icon: <Ticket size={14} /> },
     { label: 'Tombolas jouées', value: '5', icon: <Trophy size={14} /> },
-    { label: 'Membre depuis', value: '2024', icon: <Clock size={14} /> },
+    { label: 'Membre depuis', value: date, icon: <Clock size={14} /> },
   ];
 
   const handleLogout = async () => {
@@ -270,7 +271,7 @@ export default function ProfileUser() {
 
           {/* DÉCONNEXION (Visible sous le profil sur desktop) */}
           <Button
-          variant='outline'
+            variant="outline"
             onClick={handleLogout}
             disabled={loggingOut}
             className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 text-red-500 dark:text-red-400 font-title text-sm font-bold hover:bg-red-100 dark:hover:bg-red-950/40 transition-all disabled:opacity-50"
