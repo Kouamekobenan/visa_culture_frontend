@@ -1,126 +1,113 @@
 'use client';
-import { useAuth } from '@/app/frontend/context/useContext';
-import { useState, useEffect } from 'react';
+import { Button } from '@/app/frontend/components/ui/Button';
+import { UserService } from '@/app/frontend/module/authentification/application/user.service';
+import {
+  UpdateUserDto,
+  User as users,
+} from '@/app/frontend/module/authentification/domain/entities/user.entity';
+import { UserRepository } from '@/app/frontend/module/authentification/infrastructure/user.repository';
+import { User, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
-export default function PageEditUser() {
-  const { user } = useAuth();
+export const EditProfilePanel = ({
+  user,
+  onClose,
+}: {
+  user: users;
+  onClose: () => void;
+}) => {
+  const userService = useMemo(() => new UserService(new UserRepository()), []);
 
-  // État local initialisé avec les données du DTO (sans le password)
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    role: '',
+  // Initialisation directe pour éviter l'erreur de cascade de rendu
+  const [formData, setFormData] = useState<UpdateUserDto>({
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
   });
 
-  // On remplit le formulaire quand l'utilisateur est chargé
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || '',
-        email: user.email || '',
-        phone: user.phone || '',
-        role: user.role || 'USER',
-      });
-    }
-  }, [user]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Données envoyées au backend :', formData);
-    // Ici, tu appelles ton API de refactoring/update
+    if (!user?.id) return;
+    const result = await userService.execute(user.id, formData);
+    console.log('Update success:', result);
+    onClose(); // Ferme le panneau après succès
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <div className="w-full max-w-md p-8 rounded-2xl shadow-lg bg-surface border border-muted/20">
-        {/* Titre avec la police Space Grotesk et ta couleur --title-color */}
-        <h2 className="text-3xl font-bold mb-6 text-title font-title">
-          Modifier mon profil
-        </h2>
+    <>
+      <div
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 animate-in fade-in duration-200"
+        onClick={onClose}
+      />
+      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-surface shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-brand/10 flex items-center justify-center">
+              <User size={18} className="text-brand" />
+            </div>
+            <h2 className="font-title font-bold text-foreground text-base">
+              Modifier mon profil
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-lg bg-muted/10 flex items-center justify-center"
+          >
+            <X size={16} />
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Nom */}
+        <form
+          onSubmit={handleSubmit}
+          className="flex-1 p-6 space-y-5 overflow-y-auto"
+        >
           <div>
-            <label className="block text-sm font-medium text-muted mb-1">
+            <label className="block text-xs font-bold text-muted uppercase mb-2">
               Nom complet
             </label>
             <input
-              type="text"
-              name="name"
+              className="w-full px-4 py-3 rounded-xl border border-muted/20 bg-background outline-none focus:ring-2 focus:ring-brand/50 transition-all"
               value={formData.name}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border border-muted/30 bg-background text-foreground focus:ring-2 focus:ring-brand outline-none transition-all"
-              placeholder="Ex: Jean Dupont"
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
             />
           </div>
-
-          {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-muted mb-1">
+            <label className="block text-xs font-bold text-muted uppercase mb-2">
               Email
             </label>
             <input
-              type="email"
-              name="email"
+              className="w-full px-4 py-3 rounded-xl border border-muted/20 bg-background outline-none focus:ring-2 focus:ring-brand/50 transition-all"
               value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border border-muted/30 bg-background text-foreground focus:ring-2 focus:ring-brand outline-none transition-all"
-              placeholder="user@example.com"
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
             />
           </div>
-
-          {/* Téléphone */}
           <div>
-            <label className="block text-sm font-medium text-muted mb-1">
+            <label className="block text-xs font-bold text-muted uppercase mb-2">
               Téléphone
             </label>
             <input
-              type="text"
-              name="phone"
+              className="w-full px-4 py-3 rounded-xl border border-muted/20 bg-background outline-none focus:ring-2 focus:ring-brand/50 transition-all"
               value={formData.phone}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border border-muted/30 bg-background text-foreground focus:ring-2 focus:ring-brand outline-none transition-all"
-              placeholder="+225..."
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
             />
           </div>
 
-          {/* Rôle (Lecture seule ou sélection selon tes droits) */}
-          <div>
-            <label className="block text-sm font-medium text-muted mb-1">
-              Rôle
-            </label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border border-muted/30 bg-background text-foreground focus:ring-2 focus:ring-brand outline-none transition-all"
+          <div className="pt-4">
+            <Button
+              type="submit"
+              className="w-full py-4 rounded-2xl bg-brand text-white font-bold shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-95 transition-all"
             >
-              <option value="USER">Utilisateur</option>
-              <option value="ADMIN">Administrateur</option>
-            </select>
+              Sauvegarder les changements
+            </Button>
           </div>
-
-          {/* Bouton de validation avec ta couleur --btn-color */}
-          <button
-            type="submit"
-            className="w-full py-3 mt-4 rounded-xl font-bold text-white bg-btn hover:opacity-90 transform active:scale-95 transition-all shadow-md"
-          >
-            Enregistrer les modifications
-          </button>
         </form>
-
-        <p className="mt-6 text-center text-xs text-muted">
-          Les modifications de sécurité se font dans l&apos;onglet paramètres.
-        </p>
       </div>
-    </div>
+    </>
   );
-}
+};

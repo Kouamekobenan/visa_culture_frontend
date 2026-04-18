@@ -1,8 +1,6 @@
-import Link from 'next/link';
 import Footer from '../../components/layout/Footer';
 import Header from '../../components/layout/Header';
 import ProfileUser from '../../components/pages/profile/Profile';
-import { Button } from '../../components/ui/Button';
 
 export default function Profile() {
   return (

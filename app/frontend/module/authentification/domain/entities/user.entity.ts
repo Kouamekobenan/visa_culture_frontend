@@ -40,6 +40,7 @@ export interface UpdateUserDto {
   email?: string;
   phone?: string;
   password?: string;
+  
 }
 export interface IResetPassWordDto {
   email: string;
