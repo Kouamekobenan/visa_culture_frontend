@@ -1,4 +1,13 @@
-import { Bell, CreditCard, Gift, Settings, Shield, Sparkles, Ticket, Trophy } from "lucide-react";
+import {
+  Bell,
+  CreditCard,
+  Gift,
+  Settings,
+  Shield,
+  Sparkles,
+  Ticket,
+  Trophy,
+} from 'lucide-react';
 
 /* --- Types & Data inchangés --- */
 type NavItem = {
@@ -37,7 +46,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Résultats Tombola',
     description: 'Consultez les gagnants des tirages',
     icon: <Trophy size={18} />,
-    href: '/lottery/results',
+    href: '/frontend/page/draws',
     accent: 'bg-yellow-400/10',
     accentText: 'text-yellow-500',
   },
@@ -46,7 +55,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Mes Récompenses',
     description: 'Vos gains et cadeaux remportés',
     icon: <Gift size={18} />,
-    href: '/rewards',
+    href: '/frontend/page/rewards',
     accent: 'bg-pink-500/10',
     accentText: 'text-pink-500',
   },
@@ -68,15 +77,15 @@ export const NAV_ITEMS: NavItem[] = [
     accent: 'bg-blue-500/10',
     accentText: 'text-blue-500',
   },
-  {
-    id: 'security',
-    label: 'Sécurité',
-    description: 'Mot de passe et authentification',
-    icon: <Shield size={18} />,
-    href: '/frontend/page/profile/edit',
-    accent: 'bg-violet-500/10',
-    accentText: 'text-violet-500',
-  },
+  // {
+  //   id: 'security',
+  //   label: 'Sécurité',
+  //   description: 'Mot de passe et authentification',
+  //   icon: <Shield size={18} />,
+  //   href: '/frontend/page/profile/edit',
+  //   accent: 'bg-violet-500/10',
+  //   accentText: 'text-violet-500',
+  // },
   {
     id: 'settings',
     label: 'Paramètres',

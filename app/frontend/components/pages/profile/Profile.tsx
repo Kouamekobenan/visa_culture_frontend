@@ -158,7 +158,7 @@ export default function ProfileUser() {
           return;
         }
         const result = await statsService.findAllStatUser(userId);
-        console.log('Resutts stasts user', result);
+        // console.log('Resutts stasts user', result);
         setStat(result);
       } catch (error) {
         console.log(
@@ -339,16 +339,16 @@ export default function ProfileUser() {
                 )}
               </div>
 
-              <button
+              <Button
+              variant="outline"
                 onClick={() => setShowEditProfile(true)}
                 // onClick={() => router.push('/profile/edit')}
                 className="mt-2 flex items-center gap-2 px-4 py-2 rounded-xl bg-brand/10 text-brand hover:bg-brand/20 transition-colors text-sm font-bold"
               >
                 <User size={16} />
                 Modifier le profil
-              </button>
+              </Button>
             </div>
-
             {/* Stats en ligne */}
             <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 grid grid-cols-3 gap-3">
               {stats.map((s) => (
