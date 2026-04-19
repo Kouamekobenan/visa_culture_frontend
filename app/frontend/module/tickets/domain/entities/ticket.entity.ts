@@ -39,14 +39,22 @@ export interface HistoriqueTicketDto {
     date: Date;
   };
   ticketType: { name: string; price: string };
-  paymen: { amount: number; status: string; provider: string };
+  payment: { amount: number; status: string; provider: string };
 }
 
 export interface EventDto {
   id: string;
+  // userId:string;
   title: string;
   description: string;
   imageUrl: string;
   location: string;
   date: Date;
+}
+
+export interface PrintTicketsResultDto {
+  buffer: Buffer;
+  filename: string;
+  mimeType: string;
+  ticketCount: number;
 }

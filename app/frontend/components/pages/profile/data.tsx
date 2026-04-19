@@ -1,9 +1,9 @@
+'use client';
 import {
   Bell,
   CreditCard,
   Gift,
   Settings,
-  Shield,
   Sparkles,
   Ticket,
   Trophy,

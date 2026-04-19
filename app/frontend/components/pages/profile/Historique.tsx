@@ -55,11 +55,28 @@ const TicketRow = ({ t }: { t: HistoriqueTicketDto }) => (
 const EventCard = ({
   event,
   tickets,
+  userId,
 }: {
+  userId: string;
   event: EventDto;
   tickets: HistoriqueTicketDto[];
 }) => {
   const [expanded, setExpanded] = useState(false);
+  // AJOUT : État de chargement
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  const handlePrint = async () => {
+    try {
+      setIsPrinting(true);
+      await service.printTickets(userId, event.id);
+      // Optionnel : Notification de succès (toast)
+    } catch (error) {
+      console.error('Erreur impression:', error);
+      alert('Impossible de générer les tickets pour le moment.');
+    } finally {
+      setIsPrinting(false);
+    }
+  };
   const visible = expanded ? tickets : tickets.slice(0, PREVIEW_COUNT);
   const hiddenCount = tickets.length - PREVIEW_COUNT;
   return (
@@ -134,9 +151,22 @@ const EventCard = ({
             <p className="text-[10px] text-muted italic">
               Veuillez présenter votre code numérique à l&apos;entrée.
             </p>
-            <button className="flex items-center gap-2 bg-emerald-600 text-white font-title text-xs font-bold px-4 py-2 rounded-xl hover:bg-emerald-700 active:scale-95 transition-all shadow-lg shadow-emerald-900/10">
-              <Printer size={14} />
-              Imprimer tout
+            <button
+              onClick={handlePrint}
+              disabled={isPrinting} // Empêche le double clic
+              className={`flex items-center gap-2 font-title text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-lg 
+        ${
+          isPrinting
+            ? 'bg-gray-400 cursor-not-allowed'
+            : 'bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 shadow-emerald-900/10'
+        }`}
+            >
+              {isPrinting ? (
+                <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full" />
+              ) : (
+                <Printer size={14} />
+              )}
+              {isPrinting ? 'Génération...' : 'Imprimer tout'}
             </button>
           </div>
         </div>
@@ -148,6 +178,7 @@ export const TicketHistoryPage = () => {
   const [tickets, setTickets] = useState<HistoriqueTicketDto[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const userId = user?.id;
   useEffect(() => {
     if (!user) return;
     const fetchTickets = async () => {
@@ -204,7 +235,12 @@ export const TicketHistoryPage = () => {
       <div className="flex flex-col gap-6">
         {Object.values(groupedByEvent).map(
           ({ event, tickets: eventTickets }) => (
-            <EventCard key={event.id} event={event} tickets={eventTickets} />
+            <EventCard
+              key={event.id}
+              event={event}
+              tickets={eventTickets}
+              userId={userId ?? ''}
+            />
           ),
         )}
         {tickets.length === 0 && !loading && (

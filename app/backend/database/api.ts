@@ -2,7 +2,7 @@ import axios from "axios";
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   //   baseURL: "https://belidjo-production.up.railway.app",
-  timeout: 300000,
+  timeout: 3000000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

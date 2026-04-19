@@ -2,6 +2,7 @@ import { api } from '@/app/backend/database/api';
 import {
   CreateTicket,
   HistoriqueTicketDto,
+  PrintTicketsResultDto,
   Ticket,
   TicketResponse,
   UpdateTicketDto,
@@ -53,16 +54,37 @@ export class TicketRepository implements ITicketRepository {
     limit: number,
     page: number,
   ): Promise<PaginatedResponseRepository<Ticket>> {
-   // ✅ Correction de l'inversion limit/page
-  const res = await api.get(
-    `/tickets/history/${userId}/?limit=${limit}&page=${page}`,
-  );
+    // ✅ Correction de l'inversion limit/page
+    const res = await api.get(
+      `/tickets/history/${userId}/?limit=${limit}&page=${page}`,
+    );
     return {
-      data: res.data.data ,
+      data: res.data.data,
       total: res.data.total,
       totalPages: res.data.totalPages,
       limit: res.data.limit,
       page: res.data.page,
     };
+  }
+  async printTickets(userId: string, eventId: string): Promise<void> {
+    // 1. On spécifie le responseType 'blob' pour recevoir le PDF correctement
+    const res = await api.post(
+      `/tickets/print/${userId}/pdf`,
+      { eventId },
+      { responseType: 'blob' },
+    );
+
+    // 2. Création d'un lien temporaire pour déclencher le téléchargement
+    const blob = new Blob([res.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    // Optionnel : Récupérer le nom du fichier depuis les headers si tu veux être précis
+    link.setAttribute('download', `tickets-${eventId}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    // Nettoyage
+    link.remove();
+    window.URL.revokeObjectURL(url);
   }
 }

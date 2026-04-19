@@ -24,4 +24,7 @@ export class TicketService {
   async historyTicket(userId: string, limit: number, page: number) {
     return await this.ticketService.ticketHistory(userId, limit, page);
   }
+  async printTickets(userId: string, eventId: string): Promise<void> {
+    await this.ticketService.printTickets(userId, eventId);
+  }
 }

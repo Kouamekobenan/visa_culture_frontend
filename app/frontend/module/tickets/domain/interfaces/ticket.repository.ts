@@ -1,6 +1,7 @@
 import { PaginatedResponseRepository } from '@/app/frontend/utils/types/manager.type';
 import {
   CreateTicket,
+  PrintTicketsResultDto,
   Ticket,
   TicketResponse,
   UpdateTicketDto,
@@ -20,4 +21,5 @@ export interface ITicketRepository {
     limit: number,
     page: number,
   ): Promise<PaginatedResponseRepository<Ticket>>;
+  printTickets(userId:string, eventId: string): Promise<void>;
 }

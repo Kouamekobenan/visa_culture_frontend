@@ -2,10 +2,8 @@
 
 import { useAuth } from '@/app/frontend/context/useContext';
 import { LoginDto } from '@/app/frontend/module/authentification/domain/entities/user.entity';
-import {
-  ApiErrorResponse,
-  NAME,
-} from '@/app/frontend/utils/types/manager.type';
+import { NAME } from '@/app/frontend/utils/types/manager.type';
+import type { ApiErrorResponse } from '@/app/frontend/utils/types/manager.type';
 import axios from 'axios';
 import {
   ArrowRight,
