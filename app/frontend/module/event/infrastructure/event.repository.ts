@@ -41,11 +41,14 @@ export class EventRepository implements IEventRepository {
       page: res.data.page,
     };
   }
+  // event.service.ts
   async searchEventsByTitle(title: string): Promise<Event[]> {
     const res = await api.get(
       `/events/search?title=${encodeURIComponent(title)}`,
     );
-    return res.data;
+
+    // ✅ On renvoie res.data.results car c'est là qu'est le tableau
+    return res.data?.results || res.data?.data || res.data || [];
   }
 
   async findPrizeEvent(event: string): Promise<Lottery[]> {
