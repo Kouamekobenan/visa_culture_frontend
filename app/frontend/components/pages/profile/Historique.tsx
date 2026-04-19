@@ -20,6 +20,7 @@ import {
   Loader2,
   Tag,
 } from 'lucide-react';
+import { Button } from '../../ui/Button';
 const ticketService = new TicketRepository();
 const service = new TicketService(ticketService);
 const PREVIEW_COUNT = 3;
@@ -151,7 +152,7 @@ const EventCard = ({
             <p className="text-[10px] text-muted italic">
               Veuillez présenter votre code numérique à l&apos;entrée.
             </p>
-            <button
+            <Button
               onClick={handlePrint}
               disabled={isPrinting} // Empêche le double clic
               className={`flex items-center gap-2 font-title text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-lg 
@@ -167,7 +168,7 @@ const EventCard = ({
                 <Printer size={14} />
               )}
               {isPrinting ? 'Génération...' : 'Imprimer tout'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

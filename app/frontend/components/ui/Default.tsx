@@ -76,8 +76,8 @@ export default function SplashScreen() {
         } else {
           router.replace("/frontend/page/login");
         }
-      }, 1000); // 1s pour la vérification visuelle
-    }, 5000); // 5 secondes de splash
+      }, 200); //2 ms pour la vérification visuelle
+    }, 500); // 5 ms secondes de splash
     return () => clearTimeout(spinTimer);
   }, [router]);
 

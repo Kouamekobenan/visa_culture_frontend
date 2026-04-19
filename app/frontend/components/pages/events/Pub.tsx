@@ -6,7 +6,6 @@ import { Button } from '../../ui/Button';
 import { PrizeRepository } from '@/app/frontend/module/prizes/infrastructure/prize.repositrory';
 import Link from 'next/link';
 
-// Données statiques : title + description fixes
 const STATIC_SLIDES = [
   {
     title: 'Je paye mon ticket en CASH',
@@ -21,11 +20,11 @@ const STATIC_SLIDES = [
     description: 'Réservez votre ticket et tentez de remporter de grands prix',
   },
 ] as const;
-//  Type fusionné : statique + image dynamique
+
 interface Slide {
   title: string;
   description: string;
-  imageUrl: string; // vient de la BD
+  imageUrl: string;
 }
 
 const prizeRepository = new PrizeRepository();
@@ -37,24 +36,18 @@ export default function ProfessionalAdBanner() {
   const [isLoading, setIsLoading] = useState(true);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
-  //  Fusion données statiques + images dynamiques
   useEffect(() => {
     const fetchPrizes = async () => {
       try {
         const prizes = await prizeRepository.findPrizeRecent();
-
         const merged: Slide[] = prizes.map((prize, index) => ({
-          // Données statiques (fallback sur le dernier si plus de slides que de prizes)
           title: STATIC_SLIDES[index % STATIC_SLIDES.length].title,
           description: STATIC_SLIDES[index % STATIC_SLIDES.length].description,
-          // Image dynamique depuis la BD
           imageUrl: prize.imageUrl ?? '/images/default-prize.jpg',
         }));
-
         setSlides(merged);
       } catch (error) {
         console.error('Erreur lors de la récupération des prix :', error);
-        // Fallback : slides statiques avec image par défaut si la BD échoue
         setSlides(
           STATIC_SLIDES.map((slide) => ({
             ...slide,
@@ -65,7 +58,6 @@ export default function ProfessionalAdBanner() {
         setIsLoading(false);
       }
     };
-
     fetchPrizes();
   }, []);
 
@@ -78,12 +70,13 @@ export default function ProfessionalAdBanner() {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
   }, [slides.length, isAutoPlaying, isHovered]);
+
   const goToNextSlide = () =>
     setCurrentSlide((prev) => (prev + 1) % slides.length);
   const goToPreviousSlide = () =>
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   const goToSlide = (index: number) => setCurrentSlide(index);
-  // Skeleton loader pendant le fetch
+
   if (isLoading) {
     return (
       <div className="w-full bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-2 sm:py-4 md:py-6 lg:py-8">
@@ -102,6 +95,7 @@ export default function ProfessionalAdBanner() {
       </div>
     );
   }
+
   return (
     <div className="w-full bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-2 sm:py-4 md:py-6 lg:py-8">
       <div className="max-w-7xl mx-auto px-2 sm:px-3 lg:px-6">
@@ -123,42 +117,39 @@ export default function ProfessionalAdBanner() {
                       : 'opacity-0 translate-x-full z-0'
                 }`}
               >
-                <div className="flex flex-col md:flex-row items-center justify-center h-full gap-6 md:gap-8 lg:gap-12 px-6 sm:px-8 md:px-12 lg:px-16 py-6 sm:py-8">
-                  {/* Contenu statique */}
-                  <div className="flex-1 text-center md:text-left space-y-3 sm:space-y-4 md:space-y-6">
-                    <h3 className="text-2xl text-title sm:text-3xl md:text-4xl lg:text-5xl font-black leading-tight">
-                      {slide.title}
-                    </h3>
-                    <p className="text-muted sm:text-base md:text-lg leading-relaxed max-w-md mx-auto md:mx-0">
-                      {slide.description}
-                    </p>
-                    <Link href={`/#event`}>
-                      <Button size="lg">Je prend mon ticket</Button>
-                    </Link>
-                  </div>
-                  {/* Image dynamique depuis la BD */}
-                  <div className="flex-shrink-0 relative">
-                    <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 lg:w-80 lg:h-80">
-                      <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 rounded-3xl blur-2xl opacity-30 animate-pulse" />
-                      <div className="relative w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500 border-4 border-white">
-                        <Image
-                          src={slide.imageUrl}
-                          alt={slide.title}
-                          fill
-                          sizes="(max-width: 640px) 192px,
-                                 (max-width: 768px) 224px,
-                                 (max-width: 1024px) 256px,
-                                 320px"
-                          className="object-cover"
-                          priority={index === 0}
-                        />
-                      </div>
+                {/* ✅ BLOC MODIFIÉ — 50/50 texte + image */}
+                <div className="flex flex-col md:flex-row items-center h-full">
+                  {/* Contenu statique — 50% */}
+                  <div className="w-full md:w-1/2 h-1/2 md:h-full flex items-center justify-center px-6 sm:px-8 md:px-10 lg:px-14 py-4 md:py-8">
+                    <div className="text-center md:text-left space-y-3 sm:space-y-4 md:space-y-6 w-full">
+                      <h3 className="text-2xl text-title sm:text-3xl md:text-4xl lg:text-5xl font-black leading-tight">
+                        {slide.title}
+                      </h3>
+                      <p className="text-muted sm:text-base md:text-lg leading-relaxed max-w-md mx-auto md:mx-0">
+                        {slide.description}
+                      </p>
+                      <Link href={`/#event`}>
+                        <Button size="lg">Je prend mon ticket</Button>
+                      </Link>
                     </div>
+                  </div>
+
+                  {/* Image dynamique — 50% */}
+                  <div className="w-full md:w-1/2 h-1/2 md:h-full relative">
+                    <Image
+                      src={slide.imageUrl}
+                      alt={slide.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover hover:scale-105 transition-transform duration-500"
+                      priority={index === 0}
+                    />
                   </div>
                 </div>
               </div>
             ))}
           </div>
+
           {/* Boutons navigation */}
           <button
             onClick={goToPreviousSlide}
@@ -187,6 +178,7 @@ export default function ProfessionalAdBanner() {
               />
             ))}
           </div>
+
           {/* Compteur */}
           <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 bg-black/50 backdrop-blur-sm text-white text-xs sm:text-sm font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
             {currentSlide + 1} / {slides.length}

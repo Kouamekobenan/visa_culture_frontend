@@ -94,16 +94,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email,
         password,
       });
-
-      console.log("📦 Réponse complète du backend:", res.data);
-
+      // console.log("📦 Réponse complète du backend:", res.data);
       const userData: User = res.data.user;
       const accessToken: string = res.data.token?.accessToken;
       const refreshToken: string = res.data.token?.refreshToken;
-
-      console.log("👤 User extrait:", userData);
-      console.log("🔑 Access Token extrait:", accessToken);
-      console.log("🔑 Refresh Token extrait:", refreshToken);
 
       // Vérification de sécurité : si l'API ne retourne pas ce qu'on attend
       if (!accessToken || !refreshToken || !userData) {
