@@ -28,8 +28,10 @@ export interface UpdateTicketDto {
 export interface HistoriqueTicketDto {
   id: string;
   code: string;
-  status: TicketStatus;
-  createdAt: Date;
+  status: 'VALID' | 'USED' | 'CANCELLED';
+  createdAt: string;
+  buyerName: string;
+  buyerPhone:string;
   event: {
     id: string;
     title: string;

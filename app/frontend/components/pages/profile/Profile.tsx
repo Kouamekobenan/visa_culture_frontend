@@ -340,7 +340,7 @@ export default function ProfileUser() {
               </div>
 
               <Button
-              variant="outline"
+                variant="outline"
                 onClick={() => setShowEditProfile(true)}
                 // onClick={() => router.push('/profile/edit')}
                 className="mt-2 flex items-center gap-2 px-4 py-2 rounded-xl bg-brand/10 text-brand hover:bg-brand/20 transition-colors text-sm font-bold"
@@ -348,6 +348,18 @@ export default function ProfileUser() {
                 <User size={16} />
                 Modifier le profil
               </Button>
+              {user.role === 'ADMIN' || user.role === 'CONTROLLER' ? (
+                <Button
+                  variant="title"
+                  onClick={() =>
+                    router.push('/frontend/page/tickets/controller')
+                  }
+                  className="mt-2 flex items-center gap-2 px-4 py-2 rounded-xl  transition-colors text-sm font-bold"
+                >
+                  <User size={16} />
+                  Espace contrôleur
+                </Button>
+              ) : null}
             </div>
             {/* Stats en ligne */}
             <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 grid grid-cols-3 gap-3">

@@ -87,4 +87,8 @@ export class TicketRepository implements ITicketRepository {
     link.remove();
     window.URL.revokeObjectURL(url);
   }
+async scanTicket(code: string): Promise<HistoriqueTicketDto | null> {
+  const res = await api.post('/tickets/scan', { code }); // Axios sérialise automatiquement
+  return res.data;
+}
 }

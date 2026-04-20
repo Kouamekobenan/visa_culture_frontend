@@ -27,4 +27,7 @@ export class TicketService {
   async printTickets(userId: string, eventId: string): Promise<void> {
     await this.ticketService.printTickets(userId, eventId);
   }
+  async scanTicket(code: string) {
+    return await this.ticketService.scanTicket(code);
+  } 
 }

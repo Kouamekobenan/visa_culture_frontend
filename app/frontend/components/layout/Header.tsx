@@ -25,7 +25,6 @@ import {
 import { Event } from '../../module/event/domain/entities/event.entity';
 import { EventRepository } from '../../module/event/infrastructure/event.repository';
 import { EventService } from '../../module/event/application/event.service';
-
 // Configuration de la navigation
 const NAV_LINKS = [
   { href: '/frontend/page/event', label: 'Événements', icon: Calendar },
@@ -51,7 +50,6 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
-
   // 1. Logique de recherche API
   useEffect(() => {
     const performSearch = async () => {
@@ -103,7 +101,6 @@ export default function Header() {
     setIsUserMenuOpen(false);
     router.push('/');
   };
-
   const onSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -114,7 +111,6 @@ export default function Header() {
       setIsMobileSearchOpen(false);
     }
   };
-
   return (
     <>
       <header
@@ -128,7 +124,7 @@ export default function Header() {
           {/* LOGO */}
           {/* 1. LOGO : "shrink-0" pour qu'il ne soit jamais écrasé */}
           <Link
-            href="/"
+            href="/frontend/page/event"
             className="group flex items-center gap-2 select-none shrink-0"
           >
             <span className="text-xl font-black tracking-tighter text-title uppercase">
