@@ -2,7 +2,6 @@ import { PaginatedResponseRepository } from '@/app/frontend/utils/types/manager.
 import {
   CreateTicket,
   HistoriqueTicketDto,
-  PrintTicketsResultDto,
   Ticket,
   TicketResponse,
   UpdateTicketDto,

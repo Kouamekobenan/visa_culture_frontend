@@ -19,7 +19,6 @@ import {
   ShoppingCart,
   Loader2,
   X,
-  Wallet,
   Smartphone,
   Banknote,
   CheckCircle2,
@@ -47,9 +46,7 @@ export default function TicketSelection({ eventId }: { eventId: string }) {
     'WAVE' | 'MTN' | 'ORANGE' | 'CASH' | null
   >(null);
   const [isProcessing, setIsProcessing] = useState(false);
-
   const router = useRouter();
-
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -73,11 +70,9 @@ export default function TicketSelection({ eventId }: { eventId: string }) {
     };
     loadData();
   }, [eventId]);
-
   const handleQtyChange = (id: string, val: number) => {
     setQuantities((prev) => ({ ...prev, [id]: Math.max(0, val) }));
   };
-
   const openPaymentModal = (type: TicketType) => {
     if ((quantities[type.id] || 0) <= 0) {
       return toast.error('Veuillez choisir au moins 1 ticket');
@@ -85,7 +80,6 @@ export default function TicketSelection({ eventId }: { eventId: string }) {
     setSelectedTicketType(type);
     setIsPaymentStep(true);
   };
-
   const handleFinalConfirm = async () => {
     if (!paymentMethod || !selectedTicketType || !user) return;
 
@@ -95,20 +89,22 @@ export default function TicketSelection({ eventId }: { eventId: string }) {
     try {
       // Simulation du délai de transaction
       await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const res = await serviceTicket.create(
+      if (!user.name || !user.phone) {
+        throw new Error('Informations utilisateur incomplètes');
+      }
+      await serviceTicket.create(
         {
           userId: user.id,
           eventId: eventId,
           ticketTypeId: selectedTicketType.id,
+          buyerName: user.name,
+          buyerPhone: user.phone,
         },
         qty,
       );
-
       toast.success('Félicitations !', {
         description: `Paiement ${paymentMethod} validé pour ${qty} ticket(s).`,
       });
-
       router.push(`/frontend/page/lottery/${eventId}`);
     } catch (err) {
       toast.error('Échec de la transaction. Veuillez réessayer.');
@@ -116,10 +112,8 @@ export default function TicketSelection({ eventId }: { eventId: string }) {
       setIsProcessing(false);
     }
   };
-
   if (!user) return <AuthPrompt />;
   if (loading) return <LoadingSpinner />;
-
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-8">
       {/* HEADER ÉVÉNEMENT */}
@@ -147,7 +141,6 @@ export default function TicketSelection({ eventId }: { eventId: string }) {
         </div>
         <div className="absolute top-0 right-0 w-64 h-64 bg-brand/20 blur-[100px] rounded-full -mr-32 -mt-32"></div>
       </div>
-
       {/* LISTE DES BILLETS */}
       <div className="grid gap-4">
         <h2 className="text-2xl font-bold flex items-center gap-2 px-2 font-title italic">
@@ -206,7 +199,6 @@ export default function TicketSelection({ eventId }: { eventId: string }) {
                 <X size={20} />
               </button>
             </div>
-
             {/* Contenu Scrollable */}
             <div className="p-5 overflow-y-auto space-y-5 custom-scrollbar">
               {/* Résumé du Panier */}
@@ -305,9 +297,20 @@ export default function TicketSelection({ eventId }: { eventId: string }) {
     </div>
   );
 }
-
+// 1. Définition du type des props
+interface PaymentOptionProps {
+  active: boolean;
+  onClick: () => void;
+  color: string;
+  label: string;
+}
 // Composant pour les tuiles d'opérateurs
-function PaymentOptionSmall({ active, onClick, color, label }: any) {
+function PaymentOptionSmall({
+  active,
+  onClick,
+  color,
+  label,
+}: PaymentOptionProps) {
   return (
     <div
       onClick={onClick}

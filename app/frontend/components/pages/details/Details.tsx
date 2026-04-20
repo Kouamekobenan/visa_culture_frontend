@@ -1,12 +1,16 @@
-"use client";
+'use client';
 
-import { useParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
-import { Event } from "@/app/frontend/module/event/domain/entities/event.entity";
-import { EventRepository } from "@/app/frontend/module/event/infrastructure/event.repository";
-import { EventService } from "@/app/frontend/module/event/application/event.service";
-import { formatFullDateTime } from "@/app/frontend/utils/types/conversion.data";
-import Image from "next/image";
+import { useParams } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
+import { Event } from '@/app/frontend/module/event/domain/entities/event.entity';
+import { EventRepository } from '@/app/frontend/module/event/infrastructure/event.repository';
+import { EventService } from '@/app/frontend/module/event/application/event.service';
+import {
+  formatFullDateTime,
+  isFutureDate,
+  isToday,
+} from '@/app/frontend/utils/types/conversion.data';
+import Image from 'next/image';
 import {
   Calendar,
   MapPin,
@@ -14,9 +18,9 @@ import {
   ArrowLeft,
   Ticket,
   Share2,
-} from "lucide-react";
-import { Button } from "../../ui/Button";
-import Link from "next/link";
+} from 'lucide-react';
+import { Button } from '../../ui/Button';
+import Link from 'next/link';
 
 const eventRepo = new EventRepository();
 const eventService = new EventService(eventRepo);
@@ -37,7 +41,7 @@ export default function EventDetail() {
       setError(null);
       const res = await eventService.findOne(eventId);
       if (res) setEvent(res);
-      else setError("Événement introuvable");
+      else setError('Événement introuvable');
     } catch (err) {
       setError("Erreur lors du chargement de l'événement.");
     } finally {
@@ -63,7 +67,7 @@ export default function EventDetail() {
     return (
       <div className="max-w-md mx-auto my-20 p-6 bg-error/5 border border-error/20 rounded-2xl text-center">
         <p className="text-error font-bold mb-4">
-          {error || "Événement introuvable"}
+          {error || 'Événement introuvable'}
         </p>
         <Link href="/frontend/page/event">
           <Button variant="outline">Retour aux événements</Button>
@@ -128,7 +132,7 @@ export default function EventDetail() {
                   À propos de l&apos;événement
                 </h2>
                 <p
-                  className={`text-muted text-justify leading-relaxed transition-all duration-300 ${!isExpanded ? "line-clamp-4" : ""}`}
+                  className={`text-muted text-justify leading-relaxed transition-all duration-300 ${!isExpanded ? 'line-clamp-4' : ''}`}
                 >
                   {event.description}
                 </p>
@@ -137,7 +141,7 @@ export default function EventDetail() {
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="mt-2 text-brand font-bold text-sm hover:underline underline-offset-4"
                   >
-                    {isExpanded ? "Réduire" : "Lire la suite..."}
+                    {isExpanded ? 'Réduire' : 'Lire la suite...'}
                   </button>
                 )}
               </div>
@@ -151,15 +155,21 @@ export default function EventDetail() {
                     <User size={14} className="text-brand" />
                     {event.organizer
                       ? event.organizer.name
-                      : event.organizerId.substring(0, 8) + "..."}
+                      : event.organizerId.substring(0, 8) + '...'}
                   </div>
                 </div>
-                <Link href={`/frontend/page/tickets/${eventId}`}>
-                 <Button size="md" className="w-full bg-btn hover:scale-105 transition-transform md:py-6 text-lg font-bold shadow-xl shadow-btn/20 flex gap-2">
-                  <Ticket size={20} className="hidden md:block" />
-                  Réserver ma place
-                </Button>
-                </Link>
+                {isFutureDate(event.date) || isToday(event.date) ? (
+                  <Link href={`/frontend/page/tickets/${event.id}`}>
+                    <Button size="lg" className="...">
+                      <Ticket className="h-4 w-4" />
+                      Acheter
+                    </Button>
+                  </Link>
+                ) : (
+                  <span className="text-xs text-muted font-semibold px-5 py-2">
+                    Événement passé
+                  </span>
+                )}
                 <button className="flex items-center p-3 justify-center gap-2 text-sm text-muted hover:text-foreground transition-colors">
                   <Share2 size={16} /> Partager l&apos;événement
                 </button>

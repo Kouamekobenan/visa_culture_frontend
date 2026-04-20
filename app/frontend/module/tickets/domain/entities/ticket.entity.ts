@@ -10,12 +10,16 @@ export class Ticket {
     public status: TicketStatus,
     public scannedAt: string,
     public createdAt: Date,
+    private buyerName: string,
+    private buyerPhone: string,
   ) {}
 }
 export interface CreateTicket {
   userId: string;
   eventId: string;
   ticketTypeId: string;
+  buyerName: string;
+  buyerPhone: string;
 }
 export interface TicketResponse {
   paymentId: string;
@@ -31,7 +35,7 @@ export interface HistoriqueTicketDto {
   status: 'VALID' | 'USED' | 'CANCELLED';
   createdAt: string;
   buyerName: string;
-  buyerPhone:string;
+  buyerPhone: string;
   event: {
     id: string;
     title: string;
@@ -43,7 +47,6 @@ export interface HistoriqueTicketDto {
   ticketType: { name: string; price: string };
   payment: { amount: number; status: string; provider: string };
 }
-
 export interface EventDto {
   id: string;
   // userId:string;
@@ -53,7 +56,6 @@ export interface EventDto {
   location: string;
   date: Date;
 }
-
 export interface PrintTicketsResultDto {
   buffer: Buffer;
   filename: string;
