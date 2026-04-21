@@ -2,7 +2,6 @@ import { PaginatedResponseRepository } from '@/app/frontend/utils/types/manager.
 import { Lottery } from '../domain/entities/lottery.entity';
 import { ILotteryRepository } from '../domain/interfaces/lottery.repository';
 import { api } from '@/app/backend/database/api';
-
 export class LotteryRepository implements ILotteryRepository {
   async findAll(
     limit: number,
@@ -16,5 +15,9 @@ export class LotteryRepository implements ILotteryRepository {
       limit: res.data.limit,
       page: res.data.page,
     };
+  }
+  async toggleActivation(eventId: string): Promise<Lottery> {
+    const res = await api.patch(`/lotteries/event/${eventId}/toggle`);
+    return res.data;
   }
 }

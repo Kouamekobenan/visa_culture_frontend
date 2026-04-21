@@ -59,7 +59,6 @@ export default function LoginPage() {
       newErrors.password = 'Le mot de passe est requis';
       isValid = false;
     }
-
     setErrors(newErrors);
     return isValid;
   };
@@ -70,7 +69,6 @@ export default function LoginPage() {
     if (errors[name as keyof typeof errors])
       setErrors((prev) => ({ ...prev, [name]: '', general: '' }));
   };
-
   const handleOtpChange = (value: string, index: number) => {
     if (isNaN(Number(value))) return;
     const newOtp = [...otp];
@@ -81,15 +79,14 @@ export default function LoginPage() {
       otpRefs.current[index + 1]?.focus();
     }
   };
-
   const handleSubmit = async () => {
     if (!validateForm()) return;
     setIsLoading(true);
     setErrors({ email: '', password: '', general: '' });
-
     try {
       if (!isForgotPassword) {
         // --- LOGIN CLASSIQUE ---
+        
         await login(formData.email, formData.password);
         router.push('/frontend/page/event');
       } else if (isForgotPassword && step === 1) {

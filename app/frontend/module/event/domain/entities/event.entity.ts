@@ -15,18 +15,25 @@ export class Event {
     public createdAt: Date,
     public updatedAt: Date,
     public organizer?: IOrganizer,
+    public lottery?: ILottery,
   ) {}
 }
 // INTERFACE
+
+export interface ILottery {
+  id: string;
+  isActive: boolean;
+}
 
 export interface CreateEventDto {
   title: string;
   description: string;
   imageUrl: string;
   location: string;
-  date: Date;
+  date: string;
   isActivate: boolean;
   organizerId: string;
+  time?: string;
 }
 
 export interface UpdateEventDto {

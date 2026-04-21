@@ -9,7 +9,7 @@ import {
 } from '../entities/event.entity';
 
 export interface IEventRepository {
-  create(dto: CreateEventDto): Promise<Event>;
+  create(dto: CreateEventDto, file?: File | null): Promise<Event>;
   getEventById(id: string): Promise<Event | null>;
   getAllEvents(
     limit: number,

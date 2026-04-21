@@ -21,6 +21,7 @@ import {
   X,
   ArrowRight,
   Loader2,
+  LayoutDashboard,
 } from 'lucide-react';
 import { Event } from '../../module/event/domain/entities/event.entity';
 import { EventRepository } from '../../module/event/infrastructure/event.repository';
@@ -50,6 +51,7 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const isAdmin = user?.role === 'ADMIN';
   // 1. Logique de recherche API
   useEffect(() => {
     const performSearch = async () => {
@@ -58,7 +60,6 @@ export default function Header() {
         setShowDropdown(false);
         return;
       }
-
       setIsSearching(true);
       try {
         const response = await eventService.searchByTitle(debouncedQuery);
@@ -120,26 +121,27 @@ export default function Header() {
             : 'border-transparent bg-background/0'
         }`}
       >
-        <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 gap-4">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4 gap-2 md:gap-4">
+          {' '}
           {/* LOGO */}
           {/* 1. LOGO : "shrink-0" pour qu'il ne soit jamais écrasé */}
           <Link
             href="/frontend/page/event"
-            className="group flex items-center gap-2 select-none shrink-0"
+            className="flex items-center gap-2 shrink-0"
           >
             <span className="text-xl font-black tracking-tighter text-title uppercase">
               VISA
             </span>
-            <span className="text-xl font-black tracking-tighter text-foreground/70 uppercase hidden lg:inline">
+            <span className="text-xl font-black tracking-tighter text-foreground/70 uppercase hidden xl:inline">
               FOR CULTURE
             </span>
           </Link>
-
           {/* --- ZONE RECHERCHE DESKTOP --- */}
           <div
-            className="hidden md:block flex-1 max-w-md relative"
+            className="hidden md:block flex-1 max-w-xs lg:max-w-md relative"
             ref={searchRef}
           >
+            {/* ... (Contenu du formulaire inchangé) */}
             <form onSubmit={onSearchSubmit} className="relative group">
               {isSearching ? (
                 <Loader2
@@ -217,33 +219,29 @@ export default function Header() {
             )}
           </div>
           {/* 3. NAVIGATION (Interdiction de rétrécir) */}
-          <nav className="hidden lg:flex items-center gap-1 shrink-0">
-            {NAV_LINKS.map(({ href, label }) => {
-              const isActive = pathname === href;
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`px-4 py-2 text-sm font-semibold transition-colors ${
-                    isActive
-                      ? 'text-title'
-                      : 'text-foreground/70 hover:text-title'
-                  }`}
-                >
-                  {label}
-                </Link>
-              );
-            })}
+          <nav className="hidden md:flex items-center gap-1 xl:gap-2 shrink-0">
+            {NAV_LINKS.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className={`px-2 lg:px-4 py-2 text-sm font-semibold transition-colors ${
+                  pathname === href
+                    ? 'text-title'
+                    : 'text-foreground/70 hover:text-title'
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
           </nav>
           {/* ACTIONS & AUTH */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setIsMobileSearchOpen(true)}
-              className="md:hidden p-2 text-foreground/70 hover:text-brand"
+              className="md:hidden p-2 text-foreground/70"
             >
               <Search size={22} />
             </button>
-
             <ThemeToggle />
 
             {user ? (
@@ -252,13 +250,14 @@ export default function Header() {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center gap-2 p-1 rounded-full border border-muted/20 bg-surface hover:bg-muted/5 transition-all"
                 >
-                  <div className="h-8 w-8 rounded-full bg-brand flex items-center justify-center text-white font-bold text-xs shadow-inner">
-                    {user.name?.charAt(0).toUpperCase() || 'U'}
+                  <div className="h-8 w-8 rounded-full bg-brand flex items-center justify-center text-white font-bold text-xs uppercase">
+                    {user.name?.charAt(0) || 'U'}
                   </div>
-                  <span className="text-sm font-bold text-foreground/80 hidden sm:block pr-2">
+                  <span className="text-sm font-bold text-foreground/80 hidden lg:block pr-2">
                     Mon Compte
                   </span>
                 </button>
+
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-2xl border border-muted/20 bg-background p-2 shadow-2xl animate-in fade-in zoom-in duration-200">
                     <div className="px-4 py-3 border-b border-muted/10 mb-1">
@@ -269,6 +268,17 @@ export default function Header() {
                         {user.email}
                       </p>
                     </div>
+
+                    {/* --- BOUTON ADMIN CONDITIONNEL --- */}
+                    {isAdmin && (
+                      <MenuLink
+                        href="/frontend/admin/page"
+                        icon={LayoutDashboard}
+                        label="Tableau de Bord"
+                        className="text-brand bg-brand/5 mb-1"
+                      />
+                    )}
+
                     <MenuLink
                       href="/frontend/page/profile"
                       icon={User}
@@ -279,6 +289,7 @@ export default function Header() {
                       icon={Ticket}
                       label="Mes Réservations"
                     />
+
                     <button
                       onClick={handleLogout}
                       className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-bold text-error rounded-xl hover:bg-error/10 transition-colors mt-1 group"
@@ -399,15 +410,26 @@ export default function Header() {
             label="Accueil"
             isActive={pathname === '/'}
           />
-          {NAV_LINKS.map((link) => (
+
+          {/* Si Admin, on peut aussi ajouter un raccourci dashboard en bas pour le mobile */}
+          {isAdmin ? (
             <MobileTab
-              key={link.href}
-              href={link.href}
-              icon={link.icon}
-              label={link.label}
-              isActive={pathname === link.href}
+              href="/frontend/admin/page"
+              icon={LayoutDashboard}
+              label="Admin"
+              isActive={pathname.includes('/admin')}
             />
-          ))}
+          ) : (
+            NAV_LINKS.map((link) => (
+              <MobileTab
+                key={link.href}
+                href={link.href}
+                icon={link.icon}
+                label={link.label}
+                isActive={pathname === link.href}
+              />
+            ))
+          )}
           <MobileTab
             href={user ? '/frontend/page/profile' : '/frontend/page/login'}
             icon={user ? User : LogIn}
@@ -421,7 +443,6 @@ export default function Header() {
     </>
   );
 }
-
 // Sous-composants
 function MobileTab({
   href,
@@ -449,22 +470,23 @@ function MobileTab({
     </Link>
   );
 }
-
 function MenuLink({
   href,
   icon: Icon,
   label,
+  className = '',
 }: {
   href: string;
   icon: LucideIcon;
   label: string;
+  className?: string;
 }) {
   return (
     <Link
       href={href}
-      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl hover:bg-muted/10 transition-colors"
+      className={`flex w-full items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl hover:bg-muted/10 transition-colors ${className}`}
     >
-      <Icon size={18} className="text-muted group-hover:text-brand" />
+      <Icon size={18} className="shrink-0" />
       {label}
     </Link>
   );

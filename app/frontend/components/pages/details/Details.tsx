@@ -48,11 +48,9 @@ export default function EventDetail() {
       setLoading(false);
     }
   }, [eventId]);
-
   useEffect(() => {
     fetchEventData();
   }, [fetchEventData]);
-
   if (loading)
     return (
       <div className="flex flex-col justify-center items-center min-h-[60vh] gap-4">

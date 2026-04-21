@@ -11,7 +11,24 @@ import {
 } from '@/app/frontend/utils/types/manager.type';
 export class EventRepository implements IEventRepository {
   private readonly baseUrl = 'events';
-  async create(dto: CreateEventDto): Promise<Event> {
+  async create(dto: CreateEventDto , file?: File | null): Promise<Event> {
+    let resonse;
+    if (file) {
+      const formData = new FormData();  
+      formData.append('imageUrl', file);
+      formData.append('title', dto.title);
+      formData.append('description', dto.description);
+      formData.append('location', dto.location);
+      formData.append('date', dto.date);
+      formData.append('isActivate', String(dto.isActivate));
+      formData.append('organizerId', dto.organizerId);
+      resonse = await api.post(this.baseUrl, formData, {
+        headers: { 'Content-Type': 'multipart/form-data'},
+      });
+    }
+      else {
+        resonse = await api.post(this.baseUrl, dto);
+      }
     const newEvent = await api.post(this.baseUrl, dto);
     return newEvent.data;
   }

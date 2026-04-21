@@ -10,10 +10,9 @@ import {
 import { IEventRepository } from '../domain/interface/event.repository';
 export class EventService {
   constructor(private readonly eventRepository: IEventRepository) {}
-  async create(dto: CreateEventDto): Promise<Event> {
-    return await this.eventRepository.create(dto);
+  async create(dto: CreateEventDto, file?: File | null): Promise<Event> {
+    return await this.eventRepository.create(dto, file);
   }
-  
   async update(id: string, dto: UpdateEventDto): Promise<Event> {
     return await this.eventRepository.updateEvent(id, dto);
   }
