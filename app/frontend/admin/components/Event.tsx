@@ -58,7 +58,7 @@ const eventRepo = new EventRepository();
 const serviceEvent = new EventService(eventRepo);
 const lotteryRepo = new LotteryRepository();
 const serviceLottery = new LotteryService(lotteryRepo);
-const LIMIT = 20;
+const LIMIT = 3;
 
 export default function AdminEventPage() {
   const isDark = useSyncExternalStore(
@@ -392,7 +392,6 @@ export default function AdminEventPage() {
             )}
           </div>
         )}
-
         {/* ── Pagination ── */}
         {!loading && pagination.totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 mt-12">
