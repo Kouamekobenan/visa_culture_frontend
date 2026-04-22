@@ -58,7 +58,7 @@ const eventRepo = new EventRepository();
 const serviceEvent = new EventService(eventRepo);
 const lotteryRepo = new LotteryRepository();
 const serviceLottery = new LotteryService(lotteryRepo);
-const LIMIT = 3;
+const LIMIT = 4;
 
 export default function AdminEventPage() {
   const isDark = useSyncExternalStore(
@@ -82,7 +82,6 @@ export default function AdminEventPage() {
     try {
       // Appel à ton service (le code que tu as posté dans la question)
       await serviceEvent.create(dto, file);
-
       // Rafraîchir la liste après création
       fetchData(1);
       toast.success('Événement créé avec succès !');

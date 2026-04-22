@@ -5,8 +5,8 @@ export class TicketType {
     public price: number,
     public quantity: number | null,
     public maxPerUser: number | null,
-    public saleStart: Date | null,
-    public saleEnd: Date | null,
+    public saleStart: string ,
+    public saleEnd: string,
     public eventId: string,
     public createdAt: Date,
   ) {}

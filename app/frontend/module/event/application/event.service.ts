@@ -13,8 +13,8 @@ export class EventService {
   async create(dto: CreateEventDto, file?: File | null): Promise<Event> {
     return await this.eventRepository.create(dto, file);
   }
-  async update(id: string, dto: UpdateEventDto): Promise<Event> {
-    return await this.eventRepository.updateEvent(id, dto);
+  async update(id: string, dto: UpdateEventDto, file?: File | null): Promise<Event> {
+    return await this.eventRepository.updateEvent(id, dto, file);
   }
   async findOne(id: string): Promise<Event | null> {
     return await this.eventRepository.getEventById(id);
@@ -33,5 +33,8 @@ export class EventService {
   }
   async findPrizeEvent(event: string): Promise<Lottery[]> {
     return await this.eventRepository.findPrizeEvent(event);
+  }
+  async toggleEventStatus(id: string): Promise<Event> { 
+    return await this.eventRepository.toggleEventStatus(id);
   }
 }

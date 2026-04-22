@@ -16,7 +16,7 @@ export class TicketTypeRepository implements ITicketTypeRepository {
     return res.data;
   }
   async findAllByEventId(eventId: string): Promise<TicketType[]> {
-    const res = await api.get(`/ticket-types/${eventId}`);
+    const res = await api.get(`/ticket-types/event/${eventId}`);
     return res.data;
   }
   async delete(id: string): Promise<void> {

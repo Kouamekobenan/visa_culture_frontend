@@ -659,14 +659,20 @@ export default function AdminDashboard() {
         {/* ── Header ── */}
         <div className="adm-header adm-fade">
           <div className="adm-header-left">
-            <h1 className="adm-header-title font-title text-3xl">
-              Analyse des données événementielles
+            <h1 className="adm-header-title uppercase  font-title text-3xl font-bold text-title tracking-tight mb-1">
+              Pilotage des événements
             </h1>
-            <p>
-              {lastSync
-                ? `Mis à jour à ${lastSync.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`
-                : 'Chargement…'}
-            </p>
+            <div className="flex items-center gap-2 text-muted text-sm italic">
+              {/* Petit indicateur visuel de synchro */}
+              <span
+                className={`w-2 h-2 rounded-full ${lastSync ? 'bg-btn' : 'bg-slate-300 animate-pulse'}`}
+              />
+              <p>
+                {lastSync
+                  ? `Dernière mise à jour : ${lastSync.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`
+                  : 'Synchronisation en cours…'}
+              </p>
+            </div>
           </div>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <div className="adm-badge">

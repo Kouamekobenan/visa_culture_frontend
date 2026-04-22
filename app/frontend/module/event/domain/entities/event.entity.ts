@@ -37,10 +37,11 @@ export interface CreateEventDto {
 }
 
 export interface UpdateEventDto {
-  title?: string;
-  description?: string;
-  imageUrl?: string;
-  location?: string;
-  date?: Date;
-  isActivate?: boolean;
+  title: string;
+  description: string;
+  imageUrl: string;
+  location: string;
+  date: string;
+  time?: string;
+  isActivate: boolean;
 }

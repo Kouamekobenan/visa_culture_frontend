@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "./frontend/context/useContext";
 // import { Toaster } from "react-hot-toast";
 import { Toaster } from 'sonner';
+import { Bounce, ToastContainer } from "react-toastify";
 
 
 const geistSans = Geist({
@@ -36,6 +37,7 @@ export default function RootLayout({
           <main className="flex-1">
             {children} <Toaster richColors position="top-right" />
             <Toaster richColors position="top-right" />;
+          
           </main>
         </AuthProvider>
       </body>

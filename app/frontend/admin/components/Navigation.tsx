@@ -326,15 +326,17 @@ export default function AdminSidebar() {
     `}
     >
       {/* ── Logo ── */}
-      <div
-        className={`
+
+      <Link href="/frontend/page/event">
+        <div
+          className={`
         flex items-center gap-3 px-5 py-5
         border-b overflow-hidden
         ${isDark ? 'border-white/[0.07]' : 'border-black/[0.07]'}
       `}
-      >
-        <div
-          className={`
+        >
+          <div
+            className={`
           w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
           border
           ${
@@ -343,21 +345,22 @@ export default function AdminSidebar() {
               : 'bg-[#0d9488]/10 border-[#0d9488]/20'
           }
         `}
-        >
-          <div className="w-3 h-3 rounded-sm bg-[#0d9488]" />
-        </div>
+          >
+            <div className="w-3 h-3 rounded-sm bg-[#0d9488]" />
+          </div>
 
-        <span
-          className={`
+          <span
+            className={`
           font-['Space_Grotesk',sans-serif] text-[15px] font-bold tracking-tight
           whitespace-nowrap transition-[opacity,transform] duration-200
           ${isDark ? 'text-[#f9fafb]' : 'text-[#111827]'}
           ${collapsed ? 'opacity-0 -translate-x-2 pointer-events-none' : 'opacity-100 translate-x-0'}
         `}
-        >
-          Admin<span className="text-[#f97316]">.</span>
-        </span>
-      </div>
+          >
+            Admin<span className="text-[#f97316]">.</span>
+          </span>
+        </div>
+      </Link>
 
       {/* ── Nav ── */}
       <nav className="flex flex-col gap-4 px-3 py-4 flex-1 overflow-y-auto overflow-x-hidden">

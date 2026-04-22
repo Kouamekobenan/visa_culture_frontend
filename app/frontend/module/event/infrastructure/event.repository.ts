@@ -11,10 +11,10 @@ import {
 } from '@/app/frontend/utils/types/manager.type';
 export class EventRepository implements IEventRepository {
   private readonly baseUrl = 'events';
-  async create(dto: CreateEventDto , file?: File | null): Promise<Event> {
+  async create(dto: CreateEventDto, file?: File | null): Promise<Event> {
     let resonse;
     if (file) {
-      const formData = new FormData();  
+      const formData = new FormData();
       formData.append('imageUrl', file);
       formData.append('title', dto.title);
       formData.append('description', dto.description);
@@ -23,20 +23,39 @@ export class EventRepository implements IEventRepository {
       formData.append('isActivate', String(dto.isActivate));
       formData.append('organizerId', dto.organizerId);
       resonse = await api.post(this.baseUrl, formData, {
-        headers: { 'Content-Type': 'multipart/form-data'},
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
+    } else {
+      resonse = await api.post(this.baseUrl, dto);
     }
-      else {
-        resonse = await api.post(this.baseUrl, dto);
-      }
     const newEvent = await api.post(this.baseUrl, dto);
     return newEvent.data;
   }
-  async updateEvent(id: string, data: UpdateEventDto): Promise<Event> {
-    const url = `events/${id}`;
-    const updateEvent = await api.put(url, data);
-    return updateEvent.data;
+  // ...existing code...
+  async updateEvent(
+    id: string,
+    data: UpdateEventDto,
+    file?: File | null,
+  ): Promise<Event> {
+    let resonse;
+    if (file) {
+      const formData = new FormData();
+      formData.append('imageUrl', file);
+      formData.append('title', data.title);
+      formData.append('description', data.description);
+      formData.append('location', data.location);
+      formData.append('date', data.date);
+      formData.append('isActivate', String(data.isActivate));
+      // Removed organizerId append due to type error; add to UpdateEventDto if needed
+      resonse = await api.put(this.baseUrl + `/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    } else {
+      resonse = await api.put(this.baseUrl + `/${id}`, data);
+    }
+    return resonse.data;
   }
+  // ...existing code...
   async getEventById(id: string): Promise<Event | null> {
     const url = `events/${id}`;
     const event = await api.get(url);
@@ -63,13 +82,16 @@ export class EventRepository implements IEventRepository {
     const res = await api.get(
       `/events/search?title=${encodeURIComponent(title)}`,
     );
-
     // ✅ On renvoie res.data.results car c'est là qu'est le tableau
     return res.data?.results || res.data?.data || res.data || [];
   }
 
   async findPrizeEvent(event: string): Promise<Lottery[]> {
     const res = await api(`/lotteries/prizes/${event}`);
+    return res.data;
+  }
+  async toggleEventStatus(id: string): Promise<Event> {
+    const res = await api.patch(`/events/${id}/toggle-status`);
     return res.data;
   }
 }
