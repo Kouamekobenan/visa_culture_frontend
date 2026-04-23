@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { WinnersUserDto } from '@/app/frontend/module/draws/domains/entities/draws.entity';
 import { DrawRepository } from '@/app/frontend/module/draws/infrastructure/draws.repository';
 import Image from 'next/image';
-import { Trophy, Ticket, Calendar, MapPin, Lock } from 'lucide-react';
+import { Trophy, Ticket, Calendar, Lock } from 'lucide-react';
 
 const drawRepository = new DrawRepository();
 

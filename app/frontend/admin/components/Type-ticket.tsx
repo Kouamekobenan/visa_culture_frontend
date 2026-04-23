@@ -74,7 +74,6 @@ export default function TypeTicket({ eventId }: Props) {
       console.error('Update failed:', error);
     }
   };
-
   return (
     <section className="w-full bg-surface dark:bg-surface border border-slate-200 dark:border-slate-800 rounded-2xl p-6 mb-6 shadow-sm transition-colors">
       <div className="flex justify-between items-center mb-6">

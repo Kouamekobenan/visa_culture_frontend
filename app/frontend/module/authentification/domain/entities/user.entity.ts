@@ -15,6 +15,16 @@ export class User {
   ) {}
 }
 
+export interface IUserController {
+  id:string,
+  email:string,
+  password:string,
+  name: string;
+  phone: string;
+  role: UserRole;
+  totalScans: number;
+}
+
 // USE INTERFACE
 export interface LoginDto {
   email: string;
@@ -40,7 +50,6 @@ export interface UpdateUserDto {
   email?: string;
   phone?: string;
   password?: string;
-  
 }
 export interface IResetPassWordDto {
   email: string;

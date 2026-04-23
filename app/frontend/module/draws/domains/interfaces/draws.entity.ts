@@ -4,6 +4,10 @@ import {
   DrawWinnerDto,
   WinnersUserDto,
 } from '../entities/draws.entity';
+// ✅ Corrigé
+export interface lotteryDto {
+  lotteryId: string;
+}
 
 export interface IDrawRepository {
   findAll(
@@ -12,4 +16,5 @@ export interface IDrawRepository {
   ): Promise<PaginatedResponseRepository<DrawsDto>>;
   findWinner(lotteryId: string): Promise<DrawWinnerDto>;
   findAllUserWinner(userId: string): Promise<WinnersUserDto[]>;
+  save(lottery: lotteryDto): Promise<void>;
 }

@@ -174,8 +174,8 @@ const navGroups = [
     label: 'Gestion',
     items: [
       {
-        href: '/frontend/admin/page/tickets',
-        label: 'Tickets',
+        href: '/frontend/admin/page/controller',
+        label: 'Controleurs',
         icon: icons.tickets,
       },
       {

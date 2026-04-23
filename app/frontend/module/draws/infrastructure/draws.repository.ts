@@ -4,7 +4,7 @@ import {
   DrawWinnerDto,
   WinnersUserDto,
 } from '../domains/entities/draws.entity';
-import { IDrawRepository } from '../domains/interfaces/draws.entity';
+import { IDrawRepository, lotteryDto } from '../domains/interfaces/draws.entity';
 import { api } from '@/app/backend/database/api';
 export class DrawRepository implements IDrawRepository {
   async findAll(
@@ -27,5 +27,8 @@ export class DrawRepository implements IDrawRepository {
   async findAllUserWinner(userId: string): Promise<WinnersUserDto[]> {
     const res = await api.get(`/prizes/${userId}/user`);
     return res.data;
+  }
+  async save(lottry: lotteryDto): Promise<void> {
+    await api.post(`/draws/execute`, lottry);
   }
 }

@@ -1,5 +1,16 @@
-
-import { IResetPassWordDto, RegisterDto, RegisterResponse, UpdateUserDto, User } from "../entities/user.entity";
+import {
+  PaginatedResponseRepository,
+  UserRole,
+} from '@/app/frontend/utils/types/manager.type';
+import {
+  IResetPassWordDto,
+  IUserController,
+  RegisterDto,
+  RegisterResponse,
+  UpdateUserDto,
+  User,
+} from '../entities/user.entity';
+import { FiltreUserDto } from '../../application/user.service';
 export interface ForgotPasswordDto {
   email: string;
 }
@@ -24,4 +35,14 @@ export interface IUserRepository {
   update(id: string, dto: UpdateUserDto): Promise<User>;
   resetPassword(dto: IResetPassWordDto): Promise<void>;
   forgotpassword(email: ForgotPasswordDto): Promise<IOtp>;
+  paginateSearch(
+    page: number,
+    limit: number,
+    search?: FiltreUserDto,
+    role?: UserRole | 'ALL',
+  ): Promise<PaginatedResponseRepository<User>>;
+  stats(
+    page: number,
+    limit: number,
+  ): Promise<PaginatedResponseRepository<IUserController>>;
 }

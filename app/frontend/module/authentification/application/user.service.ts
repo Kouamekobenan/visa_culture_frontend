@@ -1,3 +1,4 @@
+import { UserRole } from '@/app/frontend/utils/types/manager.type';
 import {
   IResetPassWordDto,
   RegisterDto,
@@ -9,6 +10,11 @@ import {
   IOtp,
   IUserRepository,
 } from '../domain/interfaces/user.entity';
+export interface FiltreUserDto {
+  email?: string;
+  name?: string;
+  phone?: string;
+}
 
 export class UserService {
   constructor(private readonly userRepo: IUserRepository) {}
@@ -30,5 +36,5 @@ export class UserService {
   }
   async forgotpassword(email: ForgotPasswordDto): Promise<IOtp> {
     return await this.userRepo.forgotpassword(email);
-  }
+  } 
 }

@@ -10,7 +10,6 @@ import {
   MapPin,
   CheckCircle,
   XCircle,
-  Clock,
   BarChart3,
   PieChart,
   Activity,
@@ -601,39 +600,62 @@ export default function EventDashboard({ eventId }: { eventId: string }) {
 
             {/* Gagnants */}
             {data.lottery.winners.length > 0 && (
-              <div>
-                <h3
-                  className={`text-sm font-semibold mb-3 ${t.lotterySubtitle}`}
-                >
-                  Derniers Gagnants
-                </h3>
-                <div className="space-y-2">
-                  {data.lottery.winners.slice(0, 5).map((winner, index) => (
-                    <div
-                      key={index}
-                      className={`flex items-center justify-between p-3 rounded-xl transition-colors duration-200 ${t.winnerCard}`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center text-white font-black text-sm">
-                          {winner.luckyNumber}
-                        </div>
-                        <div>
-                          <p
-                            className={`font-semibold text-sm ${t.winnerName}`}
-                          >
-                            {winner.userName}
-                          </p>
-                          <p className={`text-xs ${t.winnerMeta}`}>
-                            {winner.prizeTitle}
-                          </p>
+              <div className="space-y-3">
+                {data.lottery.winners.slice(0, 5).map((winner, index) => (
+                  <div
+                    key={index}
+                    className={`group flex items-center justify-between p-4 rounded-2xl border border-muted/5 transition-all duration-300 hover:shadow-md hover:scale-[1.01] ${t.winnerCard} bg-surface/50 backdrop-blur-sm`}
+                  >
+                    <div className="flex items-center gap-4 min-w-0">
+                      {/* Numéro de chance stylisé en badge "Ticket" */}
+                      <div className="relative flex-shrink-0">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-300" />
+                        <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-gray-900 to-black border border-white/10 flex flex-col items-center justify-center shadow-lg">
+                          <span className="text-[10px] text-yellow-500/80 font-bold uppercase leading-none">
+                            N°
+                          </span>
+                          <span className="text-sm text-white font-black leading-none">
+                            {winner.luckyNumber}
+                          </span>
                         </div>
                       </div>
-                      <div className={`text-right text-xs ${t.winnerMeta}`}>
+
+                      {/* Infos Gagnant avec gestion du débordement */}
+                      <div className="min-w-0">
+                        <p
+                          className={`font-bold text-sm truncate flex items-center gap-2 ${t.winnerName}`}
+                        >
+                          {winner.userName}
+                          {index === 0 && (
+                            <span className="bg-yellow-500/10 text-yellow-600 text-[9px] px-1.5 py-0.5 rounded-md border border-yellow-500/20 uppercase tracking-tighter">
+                              Grand Gagnant
+                            </span>
+                          )}
+                        </p>
+                        <p
+                          className={`text-xs opacity-70 truncate font-medium flex items-center gap-1 ${t.winnerMeta}`}
+                        >
+                          <span className="inline-block w-1 h-1 rounded-full bg-brand" />
+                          {winner.prizeTitle}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Date et Statut à droite */}
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0 ml-4">
+                      <div
+                        className={`text-[10px] font-bold uppercase tracking-tighter opacity-40 text-title ${t.winnerMeta}`}
+                      >
+                        Remporté le
+                      </div>
+                      <div
+                        className={`text-xs font-semibold  ${t.winnerMeta}`}
+                      >
                         {formatShortDate(winner.wonAt)}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
