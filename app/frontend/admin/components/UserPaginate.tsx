@@ -116,13 +116,12 @@ export default function Users() {
     [limit],
   );
 
-  // Debounced search trigger
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setPage(1);
       fetchUsers(1, role, {
-        email: searchEmail || "",
+        email: searchEmail || '',
         name: searchName || '',
         phone: searchPhone,
       });
@@ -131,11 +130,12 @@ export default function Users() {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, [searchEmail, searchName, searchPhone, role, fetchUsers]);
-  // Page change
+
   useEffect(() => {
     fetchUsers(page, role, { email: searchEmail, name: searchName });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
+
   const handleRoleChange = (r: UserRole | 'ALL') => {
     setRole(r);
     setPage(1);
@@ -157,10 +157,10 @@ export default function Users() {
             : `${total} membre${total > 1 ? 's' : ''} au total`}
         </p>
       </div>
+
       {/* ── Filters ── */}
-      <div className="bg-surface rounded-2xl border border-gray-100 dark:border-gray-800 p-4 mb-6 shadow-sm">
+      <div className="bg-surface rounded-2xl border border-gray-200/60 dark:border-gray-700/60 p-4 mb-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-3">
-          {/* Search inputs */}
           <div className="flex flex-col sm:flex-row gap-3 flex-1">
             {/* Email */}
             <div className="relative flex-1">
@@ -184,9 +184,10 @@ export default function Users() {
                 placeholder="Rechercher par email…"
                 value={searchEmail ?? ''}
                 onChange={(e) => setSearchEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-background text-foreground text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand/40 transition"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200/80 dark:border-gray-700/80 bg-background text-foreground text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-transparent transition"
               />
             </div>
+
             {/* Name */}
             <div className="relative flex-1">
               <span className="absolute inset-y-0 left-3 flex items-center text-muted pointer-events-none">
@@ -209,10 +210,11 @@ export default function Users() {
                 placeholder="Rechercher par nom…"
                 value={searchName ?? ''}
                 onChange={(e) => setSearchName(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-background text-foreground text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand/40 transition"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200/80 dark:border-gray-700/80 bg-background text-foreground text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-transparent transition"
               />
             </div>
           </div>
+
           {/* Role tabs */}
           <div className="flex gap-1.5 flex-wrap">
             {ROLES.map((r) => (
@@ -222,7 +224,7 @@ export default function Users() {
                 className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
                   role === r
                     ? 'bg-brand text-white shadow-md shadow-brand/20 scale-105'
-                    : 'bg-background border border-gray-200 dark:border-gray-700 text-muted hover:border-brand hover:text-brand'
+                    : 'bg-background border border-gray-200/80 dark:border-gray-700/80 text-muted hover:border-brand hover:text-brand'
                 }`}
               >
                 {r === 'ALL' ? 'Tous' : r}
@@ -232,34 +234,33 @@ export default function Users() {
         </div>
       </div>
 
-      {/* ── Table (desktop) / Cards (mobile) ── */}
-      {/* Desktop Table */}
-      <div className="hidden sm:block bg-surface rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+      {/* ── Table desktop ── */}
+      <div className="hidden sm:block bg-surface rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 dark:border-gray-800">
-                <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+              <tr className="bg-gray-50/80 dark:bg-gray-800/40 border-b border-gray-200/60 dark:border-gray-700/60">
+                <th className="px-5 py-4 text-left text-[11px] font-semibold text-muted uppercase tracking-wider">
                   Utilisateur
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                <th className="px-5 py-4 text-left text-[11px] font-semibold text-muted uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                  Tel
+                <th className="px-5 py-4 text-left text-[11px] font-semibold text-muted uppercase tracking-wider">
+                  Téléphone
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                <th className="px-5 py-4 text-left text-[11px] font-semibold text-muted uppercase tracking-wider">
                   Rôle
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                <th className="px-5 py-4 text-left text-[11px] font-semibold text-muted uppercase tracking-wider">
                   Statut
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                <th className="px-5 py-4 text-left text-[11px] font-semibold text-muted uppercase tracking-wider">
                   Inscrit le
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-100/80 dark:divide-gray-700/40">
               {loading ? (
                 [...Array(limit)].map((_, i) => <SkeletonRow key={i} />)
               ) : users.length === 0 ? (
@@ -268,14 +269,14 @@ export default function Users() {
                 users.map((user) => (
                   <tr
                     key={user.id}
-                    className="border-b border-gray-50 dark:border-gray-800/60 hover:bg-gray-50/60 dark:hover:bg-gray-800/30 transition-colors group"
+                    className="hover:bg-gray-50/70 dark:hover:bg-gray-800/20 transition-colors"
                   >
-                    <td className="px-4 py-3.5">
+                    <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div
                           className={`w-9 h-9 rounded-xl bg-gradient-to-br ${getAvatarColor(
                             user.name ?? 'U',
-                          )} flex items-center justify-center text-white text-xs font-bold shadow-sm flex-shrink-0`}
+                          )} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}
                         >
                           {getInitials(user.name ?? '?')}
                         </div>
@@ -284,13 +285,13 @@ export default function Users() {
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 text-muted truncate max-w-[180px]">
+                    <td className="px-5 py-4 text-muted text-sm truncate max-w-[180px]">
                       {user.email}
                     </td>
-                    <td className="px-4 py-3.5 text-muted truncate max-w-[180px]">
-                      {user.phone}
+                    <td className="px-5 py-4 text-muted text-sm truncate max-w-[160px]">
+                      {user.phone ?? '—'}
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-5 py-4">
                       <span
                         className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold ${getRoleBadge(
                           user.role,
@@ -299,13 +300,13 @@ export default function Users() {
                         {user.role}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-5 py-4">
                       <span className="inline-flex items-center gap-1.5 text-xs">
-                        <span className="w-2 h-2 rounded-full bg-green-400 shadow-sm shadow-green-300" />
+                        <span className="w-2 h-2 rounded-full bg-emerald-400" />
                         <span className="text-muted">Actif</span>
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-muted text-xs">
+                    <td className="px-5 py-4 text-muted text-xs">
                       {user.createdAt
                         ? new Date(user.createdAt).toLocaleDateString('fr-FR', {
                             day: '2-digit',
@@ -322,19 +323,19 @@ export default function Users() {
         </div>
       </div>
 
-      {/* Mobile Cards */}
+      {/* ── Cards mobile ── */}
       <div className="sm:hidden flex flex-col gap-3">
         {loading ? (
           [...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="bg-surface rounded-2xl border border-gray-100 dark:border-gray-800 p-4 animate-pulse"
+              className="bg-surface rounded-2xl border border-gray-200/60 dark:border-gray-700/60 p-4 animate-pulse"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700" />
+                <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-full w-2/3" />
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full w-1/2" />
+                  <div className="h-3.5 bg-gray-100 dark:bg-gray-700 rounded-full w-2/3" />
+                  <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded-full w-1/2" />
                 </div>
               </div>
             </div>
@@ -360,13 +361,13 @@ export default function Users() {
           users.map((user) => (
             <div
               key={user.id}
-              className="bg-surface rounded-2xl border border-gray-100 dark:border-gray-800 p-4 shadow-sm"
+              className="bg-surface rounded-2xl border border-gray-200/60 dark:border-gray-700/60 p-4 shadow-sm"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div
                   className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getAvatarColor(
                     user.name ?? 'U',
-                  )} flex items-center justify-center text-white text-xs font-bold shadow-sm flex-shrink-0`}
+                  )} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}
                 >
                   {getInitials(user.name ?? '?')}
                 </div>
@@ -384,9 +385,9 @@ export default function Users() {
                   {user.role}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs text-muted pt-2 border-t border-gray-100 dark:border-gray-800">
+              <div className="flex items-center justify-between text-xs text-muted pt-2.5 border-t border-gray-100/80 dark:border-gray-700/40">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                   Actif
                 </span>
                 <span>
@@ -416,7 +417,7 @@ export default function Users() {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 text-muted hover:border-brand hover:text-brand disabled:opacity-30 disabled:cursor-not-allowed transition"
+              className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200/80 dark:border-gray-700/80 text-muted hover:border-brand hover:text-brand disabled:opacity-30 disabled:cursor-not-allowed transition"
             >
               <svg
                 className="w-4 h-4"
@@ -433,7 +434,7 @@ export default function Users() {
               </svg>
             </button>
 
-            {/* Page numbers */}
+            {/* Numéros de pages */}
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .filter(
                 (p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1,
@@ -458,7 +459,7 @@ export default function Users() {
                     className={`w-9 h-9 flex items-center justify-center rounded-xl text-sm font-semibold transition-all duration-150 ${
                       page === p
                         ? 'bg-brand text-white shadow-md shadow-brand/20 scale-105'
-                        : 'border border-gray-200 dark:border-gray-700 text-muted hover:border-brand hover:text-brand'
+                        : 'border border-gray-200/80 dark:border-gray-700/80 text-muted hover:border-brand hover:text-brand'
                     }`}
                   >
                     {p}
@@ -470,7 +471,7 @@ export default function Users() {
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 text-muted hover:border-brand hover:text-brand disabled:opacity-30 disabled:cursor-not-allowed transition"
+              className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200/80 dark:border-gray-700/80 text-muted hover:border-brand hover:text-brand disabled:opacity-30 disabled:cursor-not-allowed transition"
             >
               <svg
                 className="w-4 h-4"

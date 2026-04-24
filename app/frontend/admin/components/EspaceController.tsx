@@ -32,6 +32,8 @@ export default function EspaceController() {
     password: '',
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+
   async function saveController() {
     // 1. Validation de base (Sécurité et UX)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -76,6 +78,7 @@ export default function EspaceController() {
       } else {
         // --- MODE CRÉATION ---
         // --- MODE CRÉATION ---
+
         const response = await userRepository.create({
           ...form,
           role: UserRole.CONTROLLER,
@@ -83,7 +86,7 @@ export default function EspaceController() {
 
         // On transforme la réponse en IUserController pour satisfaire TypeScript
         const newController: IUserController = {
-        //   id: response.id || Date.now().toString(), // Sécurité si l'ID est manquant
+          //   id: response.id || Date.now().toString(), // Sécurité si l'ID est manquant
           name: form.name,
           email: form.email,
           phone: form.phone,
@@ -94,13 +97,12 @@ export default function EspaceController() {
 
         setControllers((prev) => [newController, ...prev]);
       }
-
-    //   closeModal(); // Fermer et réinitialiser le formulaire
-    } catch (err: any) {
+      //   closeModal(); // Fermer et réinitialiser le formulaire
+    } catch (err: unknown) {
       console.error('Erreur lors de la sauvegarde:', err);
       // Gestion des erreurs spécifiques (ex: Email déjà pris)
       const errorMsg =
-        err.response?.data?.message ||
+        err?.response?.data?.message ||
         "Une erreur est survenue lors de l'enregistrement.";
       alert(errorMsg);
     } finally {
@@ -278,7 +280,6 @@ export default function EspaceController() {
                     <Eye size={18} className="cursor-pointer" />
                   </button>
                 </div>
-
                 <div className="flex flex-col items-center text-center space-y-4">
                   {/* Avatar avec effet "Inner Shadow" */}
                   <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-brand/20 to-brand/5 flex items-center justify-center text-2xl font-black text-brand shadow-inner rotate-3 group-hover:rotate-0 transition-transform duration-500">
@@ -288,7 +289,6 @@ export default function EspaceController() {
                       .join('')
                       .toUpperCase()}
                   </div>
-
                   <div>
                     <h3 className="text-lg font-bold text-foreground leading-tight">
                       {c.name}
@@ -311,7 +311,6 @@ export default function EspaceController() {
                       </span>
                     </div>
                   </div>
-
                   <button
                     onClick={() => {
                       setEditTarget(c);
@@ -333,7 +332,6 @@ export default function EspaceController() {
           </div>
         )}
       </div>
-
       {/* --- MODAL (MODERNE) --- */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -342,15 +340,14 @@ export default function EspaceController() {
             className="absolute inset-0 bg-background/80 backdrop-blur-xl transition-all"
             onClick={() => setShowModal(false)}
           />
-
-          <div className="relative bg-surface border border-foreground/10 rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-300">
+          <div className="relative bg-surface border border-foreground/10 rounded-[2.5rem] p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
+            {' '}
             <h2 className="text-3xl font-bold text-foreground mb-6 tracking-tighter">
               {editTarget ? 'Éditer' : 'Nouveau'}
               <span className="text-brand text-xl block uppercase tracking-widest font-black">
                 Profil Agent
               </span>
             </h2>
-
             <div className="space-y-4">
               {/* Champ Nom */}
               <div className="space-y-1">
@@ -365,7 +362,6 @@ export default function EspaceController() {
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
               </div>
-
               {/* Champ Téléphone */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black uppercase text-muted ml-2">
@@ -379,7 +375,6 @@ export default function EspaceController() {
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 />
               </div>
-
               {/* Champ Email (NOUVEAU) */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black uppercase text-muted ml-2">
@@ -413,7 +408,6 @@ export default function EspaceController() {
                 </p>
               </div>
             </div>
-
             {/* Actions */}
             <div className="flex gap-3 mt-8">
               <button
@@ -422,11 +416,38 @@ export default function EspaceController() {
               >
                 Annuler
               </button>
+              {/* Bouton remplacé */}
               <button
-                // onClick={saveController}
-                className="flex-[2] py-4 bg-btn text-white rounded-2xl font-black shadow-lg shadow-btn/20 hover:scale-[1.02] active:scale-95 transition-all"
+                onClick={saveController}
+                disabled={isLoading}
+                className="flex-[2] py-4 bg-btn text-white rounded-2xl font-black shadow-lg shadow-btn/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:scale-100 hover:scale-[1.02] active:scale-95"
               >
-                {editTarget ? 'Enregistrer' : 'Créer le compte'}
+                {isLoading && (
+                  <svg
+                    className="animate-spin h-4 w-4 text-white"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8z"
+                    />
+                  </svg>
+                )}
+                {isLoading
+                  ? 'Création en cours...'
+                  : editTarget
+                    ? 'Enregistrer'
+                    : 'Créer le compte'}
               </button>
             </div>
           </div>
