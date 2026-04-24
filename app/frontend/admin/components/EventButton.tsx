@@ -1,54 +1,81 @@
-import { PlusCircle, Edit3, Gift } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
+'use client';
 
+import { PlusCircle, Edit3, Gift, History, FileText } from 'lucide-react'; // Ajout de FileText
+import { Button } from '../../components/ui/Button';
 interface SectionButtonProps {
   onAddTicket: () => void;
   onEditEvent: () => void;
-  //   onDeleteEvent: () => void;
   onAddLotteryPrize: () => void;
+  onViewHistory: () => void;
+  onPrintSummary: () => void; // Nouvelle Prop pour l'impression
   hasLottery: boolean;
 }
-
 export default function SectionButton({
   onAddTicket,
   onEditEvent,
-  //   onDeleteEvent,
   onAddLotteryPrize,
+  onViewHistory,
+  onPrintSummary, // On récupère la fonction ici
   hasLottery,
 }: SectionButtonProps) {
+  const baseBtnClass =
+    'flex items-center gap-2 py-2.5 px-4 rounded-xl font-title text-xs font-bold transition-all active:scale-95 border shadow-sm';
+
   return (
-    <div className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 mb-6 transition-colors shadow-sm">
+    <div className="w-full bg-surface border border-muted/20 rounded-2xl p-4 mb-6 shadow-sm transition-colors duration-300">
       <div className="flex flex-wrap items-center gap-3">
-        {/* Groupe Actions Principales */}
+        {/* BOUTON PRINCIPAL : Ajouter ticket */}
         <Button
           onClick={onAddTicket}
-          className="bg-teal-600 hover:bg-teal-700 text-white flex items-center gap-2 py-2 px-4 rounded-lg font-bold text-sm transition-all active:scale-95"
+          className={`${baseBtnClass} bg-brand border-brand/20 text-white hover:opacity-90`}
         >
           <PlusCircle size={18} />
           <span>Ajouter ticket</span>
         </Button>
+
+        {/* NOUVEAU BOUTON : IMPRIMER BILAN */}
+        <Button
+          onClick={onPrintSummary}
+          className={`${baseBtnClass} bg-teal-500/10 border-teal-500/20 text-teal-600 hover:bg-teal-500/20`}
+        >
+          <FileText size={18} className="text-teal-600" />
+          <span className='text-foreground'>Bilan PDF</span>
+        </Button>
+        {/* BOUTON HISTORIQUE */}
+        <Button
+          onClick={onViewHistory}
+          className={`${baseBtnClass} bg-surface border-muted/20 text-foreground hover:border-brand/50 hover:bg-brand/5`}
+        >
+          <History size={18} className="text-brand" />
+          <span className="text-foreground">Historique</span>
+        </Button>
+        {/* BOUTON TOMBOLA */}
         <Button
           onClick={onAddLotteryPrize}
-          disabled={!hasLottery} // Désactive le clic
-          className={`${
+          disabled={!hasLottery}
+          className={`${baseBtnClass} ${
             !hasLottery
-              ? 'opacity-50 cursor-not-allowed grayscale' // Style visuel "désactivé"
-              : 'bg-purple-600 hover:bg-purple-700'
-          } text-white flex items-center gap-2`}
+              ? 'bg-muted/5 border-muted/10 text-muted opacity-60 cursor-not-allowed'
+              : 'bg-surface border-muted/20 text-foreground hover:border-brand/50 hover:bg-brand/5'
+          }`}
         >
-          <Gift size={18} />
-          <span>{hasLottery ? 'Prix Tombola' : 'Pas de Tombola'}</span>
+          <Gift
+            size={18}
+            className={hasLottery ? 'text-brand' : 'text-muted'}
+          />
+          <span className={hasLottery ? 'text-foreground' : 'text-muted'}>
+            {hasLottery ? 'Prix Tombola' : 'Pas de Tombola'}
+          </span>
         </Button>
-        {/* Séparateur vertical (visible uniquement sur desktop) */}
-        <div className="hidden md:block h-8 w-[1px] bg-slate-200 dark:bg-slate-800 mx-2" />
 
-        {/* Groupe Gestion Événement */}
+        <div className="hidden md:block h-6 w-[1px] bg-muted/20 mx-1" />
+
+        {/* BOUTON MODIFIER */}
         <Button
           onClick={onEditEvent}
-          variant="outline" // Ou ta classe de bouton secondaire
-          className="border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 py-2 px-4 rounded-lg font-bold text-sm transition-all"
+          className={`${baseBtnClass} bg-transparent border-muted/10 !text-muted hover:!text-foreground hover:bg-muted/10 shadow-none transition-colors`}
         >
-          <Edit3 size={18} />
+          <Edit3 size={16} className="text-muted group-hover:text-foreground" />
           <span>Modifier</span>
         </Button>
       </div>

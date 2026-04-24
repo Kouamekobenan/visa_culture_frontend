@@ -12,8 +12,9 @@ import {
   Activity,
   Eye,
 } from 'lucide-react'; // Installe lucide-react pour le côté pro
-import { UserRole } from '../../utils/types/manager.type';
-
+import { ApiErrorResponse, UserRole } from '../../utils/types/manager.type';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 const userRepository = new UserRepository();
 const PER_PAGE = 8;
 
@@ -31,7 +32,6 @@ export default function EspaceController() {
     email: '',
     password: '',
   });
-
   const [isLoading, setIsLoading] = useState(false);
 
   async function saveController() {
@@ -74,42 +74,40 @@ export default function EspaceController() {
             c.id === editTarget.id ? { ...c, ...updateData } : c,
           ),
         );
-        // Optionnel : toast.success("Contrôleur mis à jour !");
       } else {
         // --- MODE CRÉATION ---
         // --- MODE CRÉATION ---
-
         const response = await userRepository.create({
           ...form,
           role: UserRole.CONTROLLER,
         });
-
-        // On transforme la réponse en IUserController pour satisfaire TypeScript
         const newController: IUserController = {
-          //   id: response.id || Date.now().toString(), // Sécurité si l'ID est manquant
           name: form.name,
           email: form.email,
           phone: form.phone,
           role: 'CONTROLLER',
           totalScans: 0,
-          // Ajoute les autres champs requis par IUserController ici
         } as IUserController;
 
         setControllers((prev) => [newController, ...prev]);
       }
       //   closeModal(); // Fermer et réinitialiser le formulaire
-    } catch (err: unknown) {
-      console.error('Erreur lors de la sauvegarde:', err);
-      // Gestion des erreurs spécifiques (ex: Email déjà pris)
-      const errorMsg =
-        err?.response?.data?.message ||
-        "Une erreur est survenue lors de l'enregistrement.";
-      alert(errorMsg);
+    } catch (error: unknown) {
+      if (axios.isAxiosError<ApiErrorResponse>(error)) {
+        console.error('❌ Erreur Axios login:', error.response?.data);
+        const message = error.response?.data?.message || 'Erreur de connexion';
+        toast.error(message);
+        throw new Error(error.response?.data?.message || 'Erreur de connexion');
+      }
+      // Erreur JS standard (réseau coupé, timeout, etc.)
+      if (error instanceof Error) {
+        console.error('❌ Erreur login:', error.message);
+        throw new Error(error.message);
+      }
     } finally {
       setLoading(false);
     }
   }
-
   useEffect(() => {
     const fetchControllers = async () => {
       try {
@@ -124,7 +122,6 @@ export default function EspaceController() {
     };
     fetchControllers();
   }, []);
-
   // Calculs mémorisés pour la performance
   const filteredAndSorted = useMemo(() => {
     return [...controllers]
@@ -152,7 +149,6 @@ export default function EspaceController() {
   const avgScans = controllers.length
     ? Math.round(totalScans / controllers.length)
     : 0;
-
   return (
     <div className="min-h-screen bg-background p-4 md:p-8 transition-colors duration-300">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -256,7 +252,6 @@ export default function EspaceController() {
             </div>
           </div>
         </div>
-
         {/* --- CONTROLLERS GRID --- */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
@@ -398,7 +393,7 @@ export default function EspaceController() {
                   type="password"
                   className="w-full px-5 py-4 bg-background rounded-2xl border-none focus:ring-2 focus:ring-brand outline-none font-medium transition-shadow"
                   placeholder="••••••••"
-                  value={form.password}
+                  value={form.password || ''}
                   onChange={(e) =>
                     setForm({ ...form, password: e.target.value })
                   }

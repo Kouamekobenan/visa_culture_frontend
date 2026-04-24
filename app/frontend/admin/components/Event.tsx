@@ -35,6 +35,7 @@ import { LotteryRepository } from '../../module/lotteries/infrastructure/lottery
 import { LotteryService } from '../../module/lotteries/application/lottery.service';
 import toast from 'react-hot-toast';
 import EventFormModal from './FormEvent';
+import AdminSearchBar from './search/Search';
 
 // ─── Theme store ──────────────────────────────────────────────────────────────
 function subscribeToTheme(cb: () => void) {
@@ -228,25 +229,10 @@ export default function AdminEventPage() {
             onSubmit={handleCreateEvent}
           />
         </div>
-
         {/* ── Recherche ── */}
         <div className="relative mb-8 group">
-          <Search
-            className={`absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors group-focus-within:text-[#0d9488] ${t.inputIcon}`}
-          />
-          <input
-            type="text"
-            placeholder="Rechercher par titre..."
-            className={`
-              w-full pl-12 pr-4 py-4 rounded-2xl border outline-none
-              transition-all duration-200 font-['Inter',sans-serif] text-sm
-              focus:ring-4 focus:ring-[#0d9488]/10
-              ${t.input}
-            `}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+          <AdminSearchBar></AdminSearchBar>
         </div>
-
         {/* ── Chargement ── */}
         {loading ? (
           <div className="flex flex-col justify-center items-center h-80 gap-4">

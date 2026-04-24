@@ -1,4 +1,7 @@
 import { TicketStatus } from '@/app/frontend/utils/types/manager.type';
+import { Event } from '../../../event/domain/entities/event.entity';
+import { TicketType } from '../../typesTicket/domain/entities/ticketType.entity';
+import { User } from '../../../authentification/domain/entities/user.entity';
 
 export class Ticket {
   constructor(
@@ -10,9 +13,21 @@ export class Ticket {
     public status: TicketStatus,
     public scannedAt: string,
     public createdAt: Date,
-    private buyerName: string,
-    private buyerPhone: string,
+    public buyerName: string,
+    public buyerPhone: string,
+    public event?: Event,
+    public ticketType?: TicketType,
+    public payment?: IPayment,
+    public user?: User,
+    public scannedBy?: User,
   ) {}
+}
+export interface IPayment {
+  id: string;
+  amount: number;
+  status: string;
+  provider: string;
+  createdAt: string;
 }
 export interface CreateTicket {
   userId: string;

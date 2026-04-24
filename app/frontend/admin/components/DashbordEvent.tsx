@@ -37,6 +37,8 @@ import { PrizeRepository } from '../../module/prizes/infrastructure/prize.reposi
 import PrizeFormModal from './PrizeForm';
 import { CreatePrizeDTO } from '../../module/prizes/domain/entities/prize.entity';
 import TypeTicket from './Type-ticket';
+import { useRouter } from 'next/navigation';
+import { generateEventSummaryPDF } from './printTicket/PrintfEvent';
 
 // ─── Theme store (même pattern qu'AdminEventPage) ─────────────────────────────
 function subscribeToTheme(cb: () => void) {
@@ -131,7 +133,10 @@ export default function EventDashboard({ eventId }: { eventId: string }) {
     getThemeSnapshot,
     getServerSnapshot,
   );
-
+  // RESUMER DU CONCERT
+const handlePrint = () => {
+  if (data) generateEventSummaryPDF(data);
+};
   // ─── Tokens dark/light ────────────────────────────────────────────────────
   const t = {
     page: isDark ? 'bg-[#030712]' : 'bg-[#f9fafb]',
@@ -182,6 +187,7 @@ export default function EventDashboard({ eventId }: { eventId: string }) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPrizeModalOpen, setIsPrizeModalOpen] = useState(false);
   const adminRepository = useMemo(() => new AdminRepository(), []);
+  const router = useRouter();
 
   const handleCreatePrize = async (
     data: CreatePrizeFormValues,
@@ -333,6 +339,10 @@ export default function EventDashboard({ eventId }: { eventId: string }) {
         onEditEvent={() => setIsEditModalOpen(true)}
         onAddLotteryPrize={() => setIsPrizeModalOpen(true)}
         hasLottery={!!data?.lottery}
+        onViewHistory={() =>
+          router.push(`/frontend/admin/page/history/${data.event.id}`)
+        }
+        onPrintSummary={handlePrint}
       />
       <EditEventModal
         isOpen={isEditModalOpen}
@@ -401,18 +411,22 @@ export default function EventDashboard({ eventId }: { eventId: string }) {
               {data.event.isActive ? (
                 <Button
                   onClick={handleDeleteEvent}
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  className="bg-teal-400 hover:bg-brand text-white"
                 >
-                  <XCircle size={18} />
-                  Clôturer l&apos;événement
+                  <span className="flex items-center gap-2">
+                    <XCircle size={18} />
+                    Clôturer l&apos;événement
+                  </span>
                 </Button>
               ) : (
                 <Button
                   onClick={handleDeleteEvent}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white"
                 >
-                  <CheckCircle size={18} />
-                  Rouvrir l&apos;événement
+                  <span className="flex items-center gap-2">
+                    <CheckCircle size={18} />
+                    Rouvrir l&apos;événement
+                  </span>
                 </Button>
               )}
             </div>
@@ -505,7 +519,6 @@ export default function EventDashboard({ eventId }: { eventId: string }) {
               ))}
             </div>
           </div>
-
           {/* États des tickets */}
           <div
             className={`border rounded-2xl p-6 transition-colors duration-200 ${t.card}`}
@@ -558,7 +571,6 @@ export default function EventDashboard({ eventId }: { eventId: string }) {
                 {data.lottery.isActive ? 'Active' : 'Inactive'}
               </span>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               {[
                 {
@@ -648,9 +660,7 @@ export default function EventDashboard({ eventId }: { eventId: string }) {
                       >
                         Remporté le
                       </div>
-                      <div
-                        className={`text-xs font-semibold  ${t.winnerMeta}`}
-                      >
+                      <div className={`text-xs font-semibold  ${t.winnerMeta}`}>
                         {formatShortDate(winner.wonAt)}
                       </div>
                     </div>
@@ -660,6 +670,7 @@ export default function EventDashboard({ eventId }: { eventId: string }) {
             )}
           </div>
         )}
+
         {/* ── Historique des ventes ── */}
         <TypeTicket eventId={eventId} />
       </div>
