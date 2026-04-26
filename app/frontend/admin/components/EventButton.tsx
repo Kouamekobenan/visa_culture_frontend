@@ -1,12 +1,13 @@
 'use client';
 
-import { PlusCircle, Edit3, Gift, History, FileText } from 'lucide-react'; // Ajout de FileText
+import { PlusCircle, Edit3, Gift, History, FileText, AlignStartHorizontal, AlignStartVertical } from 'lucide-react'; // Ajout de FileText
 import { Button } from '../../components/ui/Button';
 interface SectionButtonProps {
   onAddTicket: () => void;
   onEditEvent: () => void;
   onAddLotteryPrize: () => void;
   onViewHistory: () => void;
+  onAnalytic: () => void;
   onPrintSummary: () => void; // Nouvelle Prop pour l'impression
   hasLottery: boolean;
 }
@@ -15,6 +16,7 @@ export default function SectionButton({
   onEditEvent,
   onAddLotteryPrize,
   onViewHistory,
+  onAnalytic,
   onPrintSummary, // On récupère la fonction ici
   hasLottery,
 }: SectionButtonProps) {
@@ -32,14 +34,13 @@ export default function SectionButton({
           <PlusCircle size={18} />
           <span>Ajouter ticket</span>
         </Button>
-
         {/* NOUVEAU BOUTON : IMPRIMER BILAN */}
         <Button
           onClick={onPrintSummary}
           className={`${baseBtnClass} bg-teal-500/10 border-teal-500/20 text-teal-600 hover:bg-teal-500/20`}
         >
           <FileText size={18} className="text-teal-600" />
-          <span className='text-foreground'>Bilan PDF</span>
+          <span className="text-foreground">Bilan PDF</span>
         </Button>
         {/* BOUTON HISTORIQUE */}
         <Button
@@ -48,6 +49,13 @@ export default function SectionButton({
         >
           <History size={18} className="text-brand" />
           <span className="text-foreground">Historique</span>
+        </Button>
+        <Button
+          onClick={onAnalytic}
+          className={`${baseBtnClass} bg-surface border-muted/20 text-foreground hover:border-brand/50 hover:bg-brand/5`}
+        >
+          <AlignStartVertical size={18} className="text-brand" />
+          <span className="text-foreground">Données analytics</span>
         </Button>
         {/* BOUTON TOMBOLA */}
         <Button

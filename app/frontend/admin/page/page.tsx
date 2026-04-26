@@ -1,6 +1,7 @@
 // app/admin/layout.tsx
 
 import AdminSidebar from '../components/Navigation';
+import AdminSearchBar from '../components/search/Search';
 import AdminDashboard from './dashbord/page';
 
 export default function AdminLayout() {
@@ -8,7 +9,12 @@ export default function AdminLayout() {
     <div className="flex h-screen bg-foreground overflow-hidden">
       <AdminSidebar />
       <main className="flex-1 overflow-y-auto">
-        <AdminDashboard></AdminDashboard>
+        <div className="bg-background px-2 pt-3">
+          <AdminSearchBar />
+        </div>
+        <div className="">
+          <AdminDashboard></AdminDashboard>
+        </div>
       </main>
     </div>
   );

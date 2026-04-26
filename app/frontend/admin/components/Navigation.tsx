@@ -1,10 +1,24 @@
-// app/frontend/components/layout/AdminSidebar.tsx
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
+import { useState, useSyncExternalStore, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../../context/useContext';
+import Image from 'next/image';
+import {
+  Home,
+  LayoutDashboard,
+  Calendar,
+  Users,
+  Ticket,
+  Trophy,
+  BarChart3,
+  Settings,
+  LogOut,
+  ChevronRight,
+  Menu,
+  X,
+} from 'lucide-react';
 
 // ─── Theme store ──────────────────────────────────────────────────────────────
 function subscribeToTheme(cb: () => void) {
@@ -16,157 +30,45 @@ function subscribeToTheme(cb: () => void) {
     window.removeEventListener('themechange', cb);
   };
 }
+
 const getThemeSnapshot = () => {
   const saved = localStorage.getItem('theme');
   if (saved) return saved === 'dark';
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
-const getServerSnapshot = () => false;
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
-const icons = {
-  dashboard: (
-    <svg
-      width="16"
-      height="16"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.5}
-    >
-      <rect x="3" y="3" width="7" height="7" rx="1.5" />
-      <rect x="14" y="3" width="7" height="7" rx="1.5" />
-      <rect x="3" y="14" width="7" height="7" rx="1.5" />
-      <rect x="14" y="14" width="7" height="7" rx="1.5" />
-    </svg>
-  ),
-  events: (
-    <svg
-      width="16"
-      height="16"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.5}
-    >
-      <rect x="3" y="4" width="18" height="18" rx="2" />
-      <path d="M16 2v4M8 2v4M3 10h18" />
-    </svg>
-  ),
-  users: (
-    <svg
-      width="16"
-      height="16"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.5}
-    >
-      <circle cx="9" cy="7" r="4" />
-      <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87" />
-    </svg>
-  ),
-  tickets: (
-    <svg
-      width="16"
-      height="16"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.5}
-    >
-      <path d="M2 9a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v2a2 2 0 0 0 0 4v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-2a2 2 0 0 0 0-4V9z" />
-      <line x1="9" y1="8" x2="9" y2="16" strokeDasharray="2 2" />
-    </svg>
-  ),
-  lottery: (
-    <svg
-      width="16"
-      height="16"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.5}
-    >
-      <circle cx="12" cy="12" r="9" />
-      <path d="M9 12l2 2 4-4" />
-      <path d="M12 3v2M12 19v2M3 12h2M19 12h2" />
-    </svg>
-  ),
-  analytics: (
-    <svg
-      width="16"
-      height="16"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.5}
-    >
-      <path d="M3 3v18h18" />
-      <path d="M7 16l4-6 4 4 4-7" />
-    </svg>
-  ),
-  settings: (
-    <svg
-      width="16"
-      height="16"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.5}
-    >
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-    </svg>
-  ),
-  chevron: (
-    <svg
-      width="14"
-      height="14"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <path d="M9 18l6-6-6-6" />
-    </svg>
-  ),
-  logout: (
-    <svg
-      width="15"
-      height="15"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.5}
-    >
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  ),
-};
+const getServerSnapshot = () => false;
 
 // ─── Nav groups ───────────────────────────────────────────────────────────────
 const navGroups = [
   {
-    label: 'Principal',
+    label: 'Navigation',
     items: [
+      {
+        href: '/frontend/page/event',
+        label: 'Accueil Site',
+        icon: <Home className="w-4 h-4" />,
+        isExternal: true,
+      },
       {
         href: '/frontend/admin/page',
         label: 'Dashboard',
-        icon: icons.dashboard,
+        icon: <LayoutDashboard className="w-4 h-4" />,
       },
+    ],
+  },
+  {
+    label: 'Principal',
+    items: [
       {
         href: '/frontend/admin/page/events',
         label: 'Événements',
-        icon: icons.events,
+        icon: <Calendar className="w-4 h-4" />,
       },
       {
         href: '/frontend/admin/page/users',
         label: 'Utilisateurs',
-        icon: icons.users,
+        icon: <Users className="w-4 h-4" />,
       },
     ],
   },
@@ -175,13 +77,13 @@ const navGroups = [
     items: [
       {
         href: '/frontend/admin/page/controller',
-        label: 'Controleurs',
-        icon: icons.tickets,
+        label: 'Contrôleurs',
+        icon: <Ticket className="w-4 h-4" />,
       },
       {
         href: '/frontend/admin/page/lottery',
         label: 'Tombola',
-        icon: icons.lottery,
+        icon: <Trophy className="w-4 h-4" />,
       },
     ],
   },
@@ -191,16 +93,17 @@ const navGroups = [
       {
         href: '/frontend/admin/page/analytics',
         label: 'Analytics',
-        icon: icons.analytics,
+        icon: <BarChart3 className="w-4 h-4" />,
       },
       {
-        href: '/frontend/admin/page/settings',
+        href: '/frontend/admin/page/settings/templates',
         label: 'Paramètres',
-        icon: icons.settings,
+        icon: <Settings className="w-4 h-4" />,
       },
     ],
   },
 ];
+
 // ─── NavLink ──────────────────────────────────────────────────────────────────
 function NavLink({
   href,
@@ -209,6 +112,7 @@ function NavLink({
   isActive,
   collapsed,
   isDark,
+  isMobile = false,
 }: {
   href: string;
   label: string;
@@ -216,6 +120,7 @@ function NavLink({
   isActive: boolean;
   collapsed: boolean;
   isDark: boolean;
+  isMobile?: boolean;
 }) {
   return (
     <Link
@@ -223,6 +128,7 @@ function NavLink({
       className={`
         group relative flex items-center gap-3 px-3 py-2.5 rounded-xl
         transition-all duration-150 font-['Inter',sans-serif]
+        ${isMobile ? 'flex-col gap-1 px-2 py-2' : ''}
         ${
           isActive
             ? isDark
@@ -234,14 +140,21 @@ function NavLink({
         }
       `}
     >
-      {/* Barre active */}
-      {isActive && (
+      {/* Barre active (desktop uniquement) */}
+      {isActive && !isMobile && (
         <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-[#0d9488]" />
+      )}
+
+      {/* Dot active (mobile) */}
+      {isActive && isMobile && (
+        <span className="absolute top-1 right-1/2 translate-x-1/2 w-1 h-1 rounded-full bg-[#0d9488]" />
       )}
 
       {/* Icon */}
       <span
-        className={`flex-shrink-0 transition-colors duration-150 ${isActive ? 'text-[#0d9488]' : ''}`}
+        className={`flex-shrink-0 transition-colors duration-150 ${
+          isActive ? 'text-[#0d9488]' : ''
+        }`}
       >
         {icon}
       </span>
@@ -249,29 +162,34 @@ function NavLink({
       {/* Label */}
       <span
         className={`
-        text-[13px] font-medium whitespace-nowrap
-        transition-[opacity,transform] duration-200
-        ${collapsed ? 'opacity-0 -translate-x-2 pointer-events-none w-0' : 'opacity-100 translate-x-0'}
-      `}
+          text-[13px] font-medium whitespace-nowrap
+          transition-[opacity,transform] duration-200
+          ${isMobile ? 'text-[10px]' : ''}
+          ${
+            collapsed && !isMobile
+              ? 'opacity-0 -translate-x-2 pointer-events-none w-0'
+              : 'opacity-100 translate-x-0'
+          }
+        `}
       >
         {label}
       </span>
 
-      {/* Tooltip collapsed */}
-      {collapsed && (
+      {/* Tooltip collapsed (desktop uniquement) */}
+      {collapsed && !isMobile && (
         <div
           className={`
-          absolute left-full ml-3 px-2.5 py-1.5 rounded-lg
-          text-[11px] whitespace-nowrap font-['Inter',sans-serif]
-          opacity-0 group-hover:opacity-100
-          pointer-events-none transition-opacity duration-150
-          shadow-lg z-50
-          ${
-            isDark
-              ? 'bg-[#1f2937] border border-white/[0.12] text-[#f9fafb]'
-              : 'bg-white border border-black/[0.08] text-[#111827]'
-          }
-        `}
+            absolute left-full ml-3 px-2.5 py-1.5 rounded-lg
+            text-[11px] whitespace-nowrap font-['Inter',sans-serif]
+            opacity-0 group-hover:opacity-100
+            pointer-events-none transition-opacity duration-150
+            shadow-lg z-50
+            ${
+              isDark
+                ? 'bg-[#1f2937] border border-white/[0.12] text-[#f9fafb]'
+                : 'bg-white border border-black/[0.08] text-[#111827]'
+            }
+          `}
         >
           {label}
         </div>
@@ -279,7 +197,6 @@ function NavLink({
     </Link>
   );
 }
-
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -287,6 +204,8 @@ export default function AdminSidebar() {
   const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const isDark = useSyncExternalStore(
     subscribeToTheme,
@@ -294,86 +213,306 @@ export default function AdminSidebar() {
     getServerSnapshot,
   );
 
+  // Détecter si mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const handleLogout = (): void => {
     setIsLoggingOut(true);
     logout();
     router.push('/frontend/page/login');
   };
+  // Navigation items principales pour le bottom nav mobile
+  const mobileNavItems = [
+    {
+      href: '/frontend/page/event',
+      label: 'Accueil',
+      icon: <Home className="w-5 h-5" />,
+    },
+    {
+      href: '/frontend/admin/page',
+      label: 'Dashboard',
+      icon: <LayoutDashboard className="w-5 h-5" />,
+    },
+    {
+      href: '/frontend/admin/page/events',
+      label: 'Événements',
+      icon: <Calendar className="w-5 h-5" />,
+    },
+    {
+      href: '/frontend/admin/page/lottery',
+      label: 'Tombola',
+      icon: <Trophy className="w-5 h-5" />,
+    },
+  ];
 
-  // Initiales avatar
-  const initials = user?.name
-    ? user.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase()
-    : 'AD';
+  // Rendu Mobile (Bottom Navigation)
+  if (isMobile) {
+    return (
+      <>
+        {/* Menu burger pour accès complet */}
+        <button
+          onClick={() => setIsMobileMenuOpen(true)}
+          className={`
+            fixed top-4 left-4 z-40 p-3 rounded-xl shadow-lg
+            transition-all duration-150
+            ${
+              isDark
+                ? 'bg-[#111827] border border-white/10 text-white'
+                : 'bg-white border border-black/10 text-gray-900'
+            }
+          `}
+        >
+          <Menu className="w-5 h-5" />
+        </button>
 
+        {/* Menu mobile complet (drawer) */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-50">
+            {/* Overlay */}
+            <div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+
+            {/* Drawer */}
+            <aside
+              className={`
+                absolute left-0 top-0 bottom-0 w-[280px]
+                flex flex-col shadow-2xl
+                animate-slide-in-left
+                ${isDark ? 'bg-[#030712]' : 'bg-white'}
+              `}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b ${isDark ? 'border-white/10' : 'border-black/10'}">
+                <Link
+                  href="/frontend/page/event"
+                  className="flex items-center gap-3"
+                >
+                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/50">
+                    <Image
+                      src="/images/icon_profile.jpg"
+                      width={40}
+                      height={40}
+                      alt="Logo"
+                      className="object-cover"
+                    />
+                  </div>
+                  <span
+                    className={`font-['Space_Grotesk',sans-serif] text-lg font-bold ${
+                      isDark ? 'text-white' : 'text-gray-900'
+                    }`}
+                  >
+                    Admin<span className="text-[#f97316]">.</span>
+                  </span>
+                </Link>
+
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Nav complète */}
+              <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-4">
+                {navGroups.map((group) => (
+                  <div key={group.label}>
+                    <p
+                      className={`text-[10px] uppercase tracking-wider font-semibold px-2 mb-2 ${
+                        isDark ? 'text-gray-500' : 'text-gray-400'
+                      }`}
+                    >
+                      {group.label}
+                    </p>
+                    <div className="space-y-1">
+                      {group.items.map((item) => {
+                        const isActive =
+                          pathname === item.href ||
+                          (item.href !== '/frontend/admin/page' &&
+                            pathname.startsWith(item.href));
+
+                        return (
+                          <NavLink
+                            key={item.href}
+                            {...item}
+                            isActive={isActive}
+                            collapsed={false}
+                            isDark={isDark}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </nav>
+
+              {/* Footer */}
+              <div
+                className={`px-3 py-4 border-t ${isDark ? 'border-white/10' : 'border-black/10'}`}
+              >
+                <div className="flex items-center gap-3 px-3 mb-3">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 overflow-hidden ${
+                      isDark
+                        ? 'bg-[#0d9488]/20 border-[#0d9488]/40'
+                        : 'bg-[#0d9488]/10 border-[#0d9488]/30'
+                    }`}
+                  >
+                    {/* {getAvatarContent()} */}
+                    <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
+                      <Image
+                        src="/images/icon_profile.jpg"
+                        width={40}
+                        height={40}
+                        alt="Logo Admin"
+                        className="object-cover"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={`text-sm font-semibold truncate ${isDark ? 'text-white' : 'text-gray-900'}`}
+                    >
+                      {user?.name ?? 'Administrateur'}
+                    </p>
+                    <p
+                      className={`text-xs truncate ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
+                    >
+                      {user?.email ?? 'admin@site.ci'}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className={`
+                    w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
+                    transition-all duration-150
+                    ${
+                      isDark
+                        ? 'text-gray-400 hover:text-red-400 hover:bg-red-500/10'
+                        : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
+                    }
+                  `}
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    {isLoggingOut ? 'Déconnexion...' : 'Déconnexion'}
+                  </span>
+                </button>
+              </div>
+            </aside>
+          </div>
+        )}
+
+        {/* Bottom Navigation */}
+        <nav
+          className={`
+            fixed bottom-0 left-0 right-0 z-30
+            border-t backdrop-blur-xl
+            ${
+              isDark
+                ? 'bg-[#030712]/95 border-white/10'
+                : 'bg-white/95 border-black/10'
+            }
+          `}
+        >
+          <div className="grid grid-cols-4 gap-1 px-2 py-2 safe-area-inset-bottom">
+            {mobileNavItems.map((item) => {
+              const isActive =
+                pathname === item.href || pathname.startsWith(item.href);
+              return (
+                <NavLink
+                  key={item.href}
+                  {...item}
+                  isActive={isActive}
+                  collapsed={false}
+                  isDark={isDark}
+                  isMobile={true}
+                />
+              );
+            })}
+          </div>
+        </nav>
+      </>
+    );
+  }
+
+  // Rendu Desktop (Sidebar classique)
   return (
     <aside
       className={`
-      relative flex flex-col h-screen
-      border-r transition-[width] duration-300 ease-[cubic-bezier(.16,1,.3,1)]
-      font-['Inter',sans-serif]
-      ${
-        isDark
-          ? 'bg-[#030712] border-white/[0.07]'
-          : 'bg-white border-black/[0.07] shadow-sm'
-      }
-      ${collapsed ? 'w-[68px]' : 'w-[220px]'}
-    `}
+        relative flex flex-col h-screen
+        border-r transition-[width] duration-300 ease-[cubic-bezier(.16,1,.3,1)]
+        font-['Inter',sans-serif]
+        ${
+          isDark
+            ? 'bg-[#030712] border-white/[0.07]'
+            : 'bg-white border-black/[0.07] shadow-sm'
+        }
+        ${collapsed ? 'w-[68px]' : 'w-[220px]'}
+      `}
     >
-      {/* ── Logo ── */}
-
+      {/* Logo */}
       <Link href="/frontend/page/event">
         <div
           className={`
-        flex items-center gap-3 px-5 py-5
-        border-b overflow-hidden
-        ${isDark ? 'border-white/[0.07]' : 'border-black/[0.07]'}
-      `}
+            flex items-center gap-3 px-5 py-5
+            border-b overflow-hidden cursor-pointer
+            transition-colors duration-150
+            ${isDark ? 'border-white/[0.07] hover:bg-white/[0.02]' : 'border-black/[0.07] hover:bg-gray-50'}
+          `}
         >
-          <div
-            className={`
-          w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
-          border
-          ${
-            isDark
-              ? 'bg-[#0d9488]/20 border-[#0d9488]/30'
-              : 'bg-[#0d9488]/10 border-[#0d9488]/20'
-          }
-        `}
-          >
-            <div className="w-3 h-3 rounded-sm bg-[#0d9488]" />
+          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
+            <Image
+              src="/images/icon_profile.jpg"
+              width={40}
+              height={40}
+              alt="Logo Admin"
+              className="object-cover"
+            />
           </div>
 
           <span
             className={`
-          font-['Space_Grotesk',sans-serif] text-[15px] font-bold tracking-tight
-          whitespace-nowrap transition-[opacity,transform] duration-200
-          ${isDark ? 'text-[#f9fafb]' : 'text-[#111827]'}
-          ${collapsed ? 'opacity-0 -translate-x-2 pointer-events-none' : 'opacity-100 translate-x-0'}
-        `}
+              font-['Space_Grotesk',sans-serif] text-[15px] font-bold tracking-tight
+              whitespace-nowrap transition-[opacity,transform] duration-200
+              ${isDark ? 'text-[#f9fafb]' : 'text-[#111827]'}
+              ${
+                collapsed
+                  ? 'opacity-0 -translate-x-2 pointer-events-none'
+                  : 'opacity-100 translate-x-0'
+              }
+            `}
           >
             Admin<span className="text-[#f97316]">.</span>
           </span>
         </div>
       </Link>
 
-      {/* ── Nav ── */}
+      {/* Nav */}
       <nav className="flex flex-col gap-4 px-3 py-4 flex-1 overflow-y-auto overflow-x-hidden">
         {navGroups.map((group) => (
           <div key={group.label}>
-            {/* Label groupe */}
             <p
               className={`
-              text-[10px] uppercase tracking-[0.1em] font-semibold
-              px-2 mb-1.5 whitespace-nowrap
-              transition-[opacity] duration-200
-              ${isDark ? 'text-[#6b7280]' : 'text-[#9ca3af]'}
-              ${collapsed ? 'opacity-0' : 'opacity-100'}
-            `}
+                text-[10px] uppercase tracking-[0.1em] font-semibold
+                px-2 mb-1.5 whitespace-nowrap
+                transition-[opacity] duration-200
+                ${isDark ? 'text-[#6b7280]' : 'text-[#9ca3af]'}
+                ${collapsed ? 'opacity-0' : 'opacity-100'}
+              `}
             >
               {group.label}
             </p>
@@ -400,43 +539,55 @@ export default function AdminSidebar() {
         ))}
       </nav>
 
-      {/* ── Footer ── */}
+      {/* Footer */}
       <div
         className={`
-        border-t px-3 py-4 overflow-hidden
-        ${isDark ? 'border-white/[0.07]' : 'border-black/[0.07]'}
-      `}
+          border-t px-3 py-4 overflow-hidden
+          ${isDark ? 'border-white/[0.07]' : 'border-black/[0.07]'}
+        `}
       >
         {/* User info */}
         <div
           className={`
-          flex items-center gap-2.5 px-2 mb-3
-          ${collapsed ? 'justify-center' : ''}
-        `}
+            flex items-center gap-2.5 px-2 mb-3
+            ${collapsed ? 'justify-center' : ''}
+          `}
         >
           <div
             className={`
-            w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0
-            border font-bold text-[10px]
-            ${
-              isDark
-                ? 'bg-[#0d9488]/20 border-[#0d9488]/40 text-[#0d9488]'
-                : 'bg-[#0d9488]/10 border-[#0d9488]/30 text-[#0d9488]'
-            }
-          `}
+              w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0
+              border-2 overflow-hidden
+              ${
+                isDark
+                  ? 'bg-[#0d9488]/20 border-[#0d9488]/40'
+                  : 'bg-[#0d9488]/10 border-[#0d9488]/30'
+              }
+            `}
           >
-            {initials}
+            <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
+              <Image
+                src="/images/icon_profile.jpg"
+                width={40}
+                height={40}
+                alt="Logo Admin"
+                className="object-cover"
+              />
+            </div>
           </div>
 
           {!collapsed && (
             <div className="flex-1 min-w-0">
               <p
-                className={`text-[12px] font-semibold truncate ${isDark ? 'text-[#f9fafb]' : 'text-[#111827]'}`}
+                className={`text-[12px] font-semibold truncate ${
+                  isDark ? 'text-[#f9fafb]' : 'text-[#111827]'
+                }`}
               >
                 {user?.name ?? 'Administrateur'}
               </p>
               <p
-                className={`text-[10px] truncate ${isDark ? 'text-[#6b7280]' : 'text-[#9ca3af]'}`}
+                className={`text-[10px] truncate ${
+                  isDark ? 'text-[#6b7280]' : 'text-[#9ca3af]'
+                }`}
               >
                 {user?.email ?? 'admin@site.ci'}
               </p>
@@ -460,24 +611,7 @@ export default function AdminSidebar() {
             }
           `}
         >
-          <span
-            className={`flex-shrink-0 ${isLoggingOut ? 'animate-spin' : ''}`}
-          >
-            {isLoggingOut ? (
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-              </svg>
-            ) : (
-              icons.logout
-            )}
-          </span>
+          <LogOut className={`w-4 h-4 ${isLoggingOut ? 'animate-spin' : ''}`} />
           {!collapsed && (
             <span className="text-[12px] font-medium">
               {isLoggingOut ? 'Déconnexion...' : 'Déconnexion'}
@@ -486,7 +620,7 @@ export default function AdminSidebar() {
         </button>
       </div>
 
-      {/* ── Toggle collapse ── */}
+      {/* Toggle collapse */}
       <button
         onClick={() => setCollapsed((c) => !c)}
         className={`
@@ -502,12 +636,32 @@ export default function AdminSidebar() {
         `}
         aria-label={collapsed ? 'Ouvrir le menu' : 'Réduire le menu'}
       >
-        <span
-          className={`transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
-        >
-          {icons.chevron}
-        </span>
+        <ChevronRight
+          className={`w-4 h-4 transition-transform duration-300 ${
+            collapsed ? 'rotate-180' : ''
+          }`}
+        />
       </button>
+
+      {/* Styles pour l'animation */}
+      <style jsx>{`
+        @keyframes slide-in-left {
+          from {
+            transform: translateX(-100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
+
+        .animate-slide-in-left {
+          animation: slide-in-left 0.3s ease-out;
+        }
+
+        .safe-area-inset-bottom {
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+      `}</style>
     </aside>
   );
 }

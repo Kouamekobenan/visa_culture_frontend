@@ -25,7 +25,6 @@ import { CreateTicketFormValues } from './ValuedateTypeTicketDto';
 import { TicketTypeRepository } from '../../module/tickets/typesTicket/infrastructure/ticketType.repository';
 import { TicketTypeService } from '../../module/tickets/typesTicket/application/typeTicket.service';
 import { CreateTicketModal } from './TypeTicketForm';
-import toast from 'react-hot-toast';
 import { formatShortDate } from '../../utils/types/conversion.data';
 import SectionButton from './EventButton';
 import EditEventModal from './Update-form-event';
@@ -39,6 +38,8 @@ import { CreatePrizeDTO } from '../../module/prizes/domain/entities/prize.entity
 import TypeTicket from './Type-ticket';
 import { useRouter } from 'next/navigation';
 import { generateEventSummaryPDF } from './printTicket/PrintfEvent';
+import { toast } from 'react-toastify';
+import EventAnalytics from './EventAlytics';
 
 // ─── Theme store (même pattern qu'AdminEventPage) ─────────────────────────────
 function subscribeToTheme(cb: () => void) {
@@ -313,19 +314,49 @@ const handlePrint = () => {
     {
       label: 'Confirmés',
       val: data.ticketStats.byStatus.valid,
-      icon: <CheckCircle className="text-emerald-500" />,
+      icon: (
+        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
+          <Image
+            src="/images/icon_valid.jpg"
+            width={40}
+            height={40}
+            alt="Logo Admin"
+            className="object-cover"
+          />
+        </div>
+      ),
       bg: t.ticketStatusConfirm,
     },
     {
       label: 'Scanés',
       val: data.ticketStats.byStatus.used,
-      icon: <Activity className="text-blue-500" />,
+      icon: (
+        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
+          <Image
+            src="/images/icon_scan.jpg"
+            width={40}
+            height={40}
+            alt="Logo Admin"
+            className="object-cover"
+          />
+        </div>
+      ),
       bg: t.ticketStatusUsed,
     },
     {
       label: 'Annulés',
       val: data.ticketStats.byStatus.cancelled,
-      icon: <XCircle className="text-red-500" />,
+      icon: (
+        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
+          <Image
+            src="/images/icon_cancelled.jpg"
+            width={40}
+            height={40}
+            alt="Logo Admin"
+            className="object-cover"
+          />
+        </div>
+      ),
       bg: t.ticketStatusCancel,
     },
   ];
@@ -341,6 +372,9 @@ const handlePrint = () => {
         hasLottery={!!data?.lottery}
         onViewHistory={() =>
           router.push(`/frontend/admin/page/history/${data.event.id}`)
+        }
+        onAnalytic={() =>
+          router.push(`/frontend/admin/page/events/analytic/${data.event.id}`)
         }
         onPrintSummary={handlePrint}
       />
@@ -375,7 +409,6 @@ const handlePrint = () => {
               className={`object-cover rounded-xl border ${isDark ? 'border-white/[0.08]' : 'border-[#e5e7eb]'}`}
             />
           </div>
-
           <div className="flex-1 flex flex-col items-center md:items-start space-y-4 text-center md:text-left">
             {/* Badge Statut */}
             <span
@@ -406,7 +439,6 @@ const handlePrint = () => {
                 <Users size={14} /> {data.event.organizerName}
               </div>
             </div>
-
             <div className="pt-2">
               {data.event.isActive ? (
                 <Button
@@ -445,7 +477,17 @@ const handlePrint = () => {
             isDark={isDark}
             title="Ventes"
             value={data.ticketStats.totalSold}
-            icon={<Ticket />}
+            icon={
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
+                <Image
+                  src="/images/icon_valid.jpg"
+                  width={40}
+                  height={40}
+                  alt="Logo Admin"
+                  className="object-cover"
+                />
+              </div>
+            }
             iconColor="text-teal-500"
             subtitle={`/ ${data.ticketStats.totalAvailable}`}
           />
@@ -453,7 +495,17 @@ const handlePrint = () => {
             isDark={isDark}
             title="Remplissage"
             value={`${data.ticketStats.salesRate}%`}
-            icon={<Activity />}
+            icon={
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
+                <Image
+                  src="/images/icon_stat.jpg"
+                  width={40}
+                  height={40}
+                  alt="Logo Admin"
+                  className="object-cover"
+                />
+              </div>
+            }
             iconColor="text-blue-500"
             trend={5}
           />
@@ -468,7 +520,17 @@ const handlePrint = () => {
             isDark={isDark}
             title="Tombola"
             value={data.lottery?.totalEntries || 0}
-            icon={<Award />}
+            icon={
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
+                <Image
+                  src="/images/icon_lottery.jpg"
+                  width={40}
+                  height={40}
+                  alt="Logo Admin"
+                  className="object-cover"
+                />
+              </div>
+            }
             iconColor="text-purple-500"
           />
         </div>
@@ -481,7 +543,15 @@ const handlePrint = () => {
             <h2
               className={`text-lg font-bold mb-6 flex items-center gap-2 ${t.cardTitle}`}
             >
-              <PieChart size={20} className="text-teal-500" />
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
+                <Image
+                  src="/images/icon_stat.jpg"
+                  width={40}
+                  height={40}
+                  alt="Logo Admin"
+                  className="object-cover"
+                />
+              </div>
               Performance des catégories
             </h2>
             <div className="space-y-6">
@@ -511,7 +581,7 @@ const handlePrint = () => {
                     className={`flex justify-between mt-2 text-[11px] font-medium ${t.tableCellMuted}`}
                   >
                     <span>Prix: {formatCurrency(type.price)}</span>
-                    <span className="text-teal-500 font-bold">
+                    <span className="text-brand font-bold">
                       {formatCurrency(type.revenue)}
                     </span>
                   </div>
@@ -526,7 +596,15 @@ const handlePrint = () => {
             <h2
               className={`text-lg font-bold mb-6 flex items-center gap-2 ${t.cardTitle}`}
             >
-              <BarChart3 size={20} className="text-teal-500" />
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
+                <Image
+                  src="/images/icon_stat.jpg"
+                  width={40}
+                  height={40}
+                  alt="Logo Admin"
+                  className="object-cover"
+                />
+              </div>
               États des tickets
             </h2>
             <div className="space-y-3">
@@ -557,7 +635,15 @@ const handlePrint = () => {
             className={`rounded-2xl p-6 shadow-lg border transition-colors duration-200 ${t.lotterySectionBg}`}
           >
             <div className="flex items-center space-x-2 mb-6">
-              <Crown className="w-6 h-6 text-purple-500" />
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
+                <Image
+                  src="/images/icon_lottery.jpg"
+                  width={40}
+                  height={40}
+                  alt="Logo Admin"
+                  className="object-cover"
+                />
+              </div>
               <h2 className={`text-xl font-bold ${t.lotteryTitle}`}>Tombola</h2>
               <span
                 className={`ml-auto px-3 py-1 rounded-full text-xs font-bold ${
@@ -574,22 +660,18 @@ const handlePrint = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               {[
                 {
-                  icon: (
-                    <Award className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-                  ),
+                  icon: <Award className="w-8 h-8 text-muted mx-auto mb-2" />,
                   value: data.lottery.totalPrizes,
                   label: 'Prix Disponibles',
                 },
                 {
-                  icon: (
-                    <Users className="w-8 h-8 text-teal-500 mx-auto mb-2" />
-                  ),
+                  icon: <Users className="w-8 h-8 text-muted mx-auto mb-2" />,
                   value: data.lottery.totalEntries,
                   label: 'Participations',
                 },
                 {
                   icon: (
-                    <Sparkles className="w-8 h-8 text-purple-500 mx-auto mb-2" />
+                    <Sparkles className="w-8 h-8 text-muted mx-auto mb-2" />
                   ),
                   value: data.lottery.totalDraws,
                   label: 'Tirages Effectués',
@@ -631,7 +713,6 @@ const handlePrint = () => {
                           </span>
                         </div>
                       </div>
-
                       {/* Infos Gagnant avec gestion du débordement */}
                       <div className="min-w-0">
                         <p
@@ -652,7 +733,6 @@ const handlePrint = () => {
                         </p>
                       </div>
                     </div>
-
                     {/* Date et Statut à droite */}
                     <div className="flex flex-col items-end gap-1 flex-shrink-0 ml-4">
                       <div
@@ -670,7 +750,6 @@ const handlePrint = () => {
             )}
           </div>
         )}
-
         {/* ── Historique des ventes ── */}
         <TypeTicket eventId={eventId} />
       </div>

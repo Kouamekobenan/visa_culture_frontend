@@ -18,7 +18,6 @@ import {
   ChevronRight,
   Plus,
   PowerOff,
-  Search,
   Settings2,
   AlertCircle,
 } from 'lucide-react';

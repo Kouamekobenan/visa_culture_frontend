@@ -8,12 +8,7 @@ import { LotteryRepository } from '@/app/frontend/module/lotteries/infrastructur
 import { DrawRepository } from '@/app/frontend/module/draws/infrastructure/draws.repository';
 import { formatShortDate } from '@/app/frontend/utils/types/conversion.data';
 import { PaginatedResponseRepository } from '@/app/frontend/utils/types/manager.type';
-import {
-  CalendarDays,
-
-  Star,
-  Ticket,
-} from 'lucide-react';
+import { CalendarDays, Star, Ticket } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { LotteryVisualizer } from './LotteryVisualizer';
@@ -74,7 +69,7 @@ export default function LotteryPageAdmin() {
   const totalPages = lotteries ? Math.ceil(lotteries.total / LIMIT) : 1;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10 md:py-16">
+    <div className="max-w-7xl mx-auto px-4 py-10 md:py-16 bg-background">
       {/* ANIMATION DE 30S */}
       {isDrawing && selectedLottery && (
         <LotteryVisualizer
@@ -82,7 +77,6 @@ export default function LotteryPageAdmin() {
           onComplete={handleFinishDraw}
         />
       )}
-
       {/* MODAL GAGNANT (S'affiche après l'animation) */}
       {showWinnerModal && selectedLottery && (
         <DrawsWinners

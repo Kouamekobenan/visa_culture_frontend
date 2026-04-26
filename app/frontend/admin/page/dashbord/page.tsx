@@ -6,8 +6,6 @@ import { AdminRepository } from '../../module/infrastructure/admin.repository';
 const dashboardRepo = new AdminRepository();
 
 import { useSyncExternalStore } from 'react';
-import ThemeToggle from '@/app/frontend/components/ui/ThemeToggle';
-import AdminSearchBar from '../../components/search/Search';
 
 // ── Copie ces 3 fonctions depuis ThemeToggle ──────────────────────────────
 function subscribeToTheme(callback: () => void): () => void {
@@ -605,7 +603,6 @@ export default function AdminDashboard() {
     };
 
     load();
-
     return () => {
       cancelled = true; // évite les setState sur composant démonté
     };
@@ -652,9 +649,7 @@ export default function AdminDashboard() {
 
   return (
     <div className={`adm-root ${isDark ? 'dark-dashboard' : ''}`}>
-      <div className="relative mb-8 group">
-        <AdminSearchBar></AdminSearchBar>
-      </div>
+     
       <style>{styles}</style>
       <div className="adm-root">
         {/* ── Header ── */}
@@ -698,7 +693,7 @@ export default function AdminDashboard() {
             </button>
           </div>
         </div>
-      
+
         {/* ── KPI row ── */}
         <div className="adm-kpi-grid">
           {/* Revenus totaux */}

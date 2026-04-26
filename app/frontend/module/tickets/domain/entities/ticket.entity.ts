@@ -12,7 +12,7 @@ export class Ticket {
     public ticketTypeId: string,
     public status: TicketStatus,
     public scannedAt: string,
-    public createdAt: Date,
+    public createdAt: string,
     public buyerName: string,
     public buyerPhone: string,
     public event?: Event,

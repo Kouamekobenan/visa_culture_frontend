@@ -251,7 +251,15 @@ export default function Header() {
                   className="flex items-center gap-2 p-1 rounded-full border border-muted/20 bg-surface hover:bg-muted/5 transition-all"
                 >
                   <div className="h-8 w-8 rounded-full bg-brand flex items-center justify-center text-white font-bold text-xs uppercase">
-                    {user.name?.charAt(0) || 'U'}
+                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
+                      <Image
+                        src="/images/icon_profile.jpg"
+                        width={40}
+                        height={40}
+                        alt="Logo Admin"
+                        className="object-cover"
+                      />
+                    </div>
                   </div>
                   <span className="text-sm font-bold text-foreground/80 hidden lg:block pr-2">
                     Mon Compte

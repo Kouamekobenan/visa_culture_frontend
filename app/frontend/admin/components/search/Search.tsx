@@ -147,7 +147,6 @@ export default function AdminSearchBar() {
           placeholder="Rechercher un événement..."
           className="h-12 px-3 w-full rounded-2xl bg-surface border border-muted/20 text-foreground placeholder:text-muted/50 pl-12 pr-24 outline-none transition-all duration-300 focus:ring-2 focus:ring-brand/30 focus:border-brand shadow-sm"
         />
-
         {/* Shortcut KBD */}
         <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
           {query.length > 0 ? (

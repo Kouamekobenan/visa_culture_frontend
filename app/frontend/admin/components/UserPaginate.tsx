@@ -25,7 +25,6 @@ const getRoleBadge = (role: string) => {
   };
   return map[role] ?? map['USER'];
 };
-
 const getInitials = (name: string) =>
   name
     .split(' ')

@@ -17,7 +17,7 @@ export interface AdminResponse {
     topEvents: {
       id: string;
       title: string;
-      date: Date;
+      date: string;
       ticketCount: number;
     }[];
   };
@@ -60,5 +60,5 @@ export interface AdminResponse {
       count: number;
     }[];
   };
-  generatedAt: Date;
+  generatedAt:string;
 }

@@ -15,6 +15,7 @@ import {
 import { ApiErrorResponse, UserRole } from '../../utils/types/manager.type';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import Link from 'next/link';
 const userRepository = new UserRepository();
 const PER_PAGE = 8;
 
@@ -76,8 +77,7 @@ export default function EspaceController() {
         );
       } else {
         // --- MODE CRÉATION ---
-        // --- MODE CRÉATION ---
-        const response = await userRepository.create({
+         await userRepository.create({
           ...form,
           role: UserRole.CONTROLLER,
         });
@@ -91,7 +91,7 @@ export default function EspaceController() {
 
         setControllers((prev) => [newController, ...prev]);
       }
-      //   closeModal(); // Fermer et réinitialiser le formulaire
+        // closeModal(); // Fermer et réinitialiser le formulaire
     } catch (error: unknown) {
       if (axios.isAxiosError<ApiErrorResponse>(error)) {
         console.error('❌ Erreur Axios login:', error.response?.data);
@@ -268,12 +268,14 @@ export default function EspaceController() {
                 className="group relative bg-surface border border-foreground/5 rounded-[2rem] p-6 hover:shadow-2xl hover:shadow-brand/10 transition-all duration-500 hover:-translate-y-2 overflow-hidden"
               >
                 <div className="absolute top-0 right-0 p-4 cursor-pointer group-hover:opacity-100 transition-opacity">
-                  <button
-                    // onClick={() => deleteController(c.id)}
-                    className="text-brand bg-brand/25 p-2 hover:bg-error/10 rounded-full transition-colors"
-                  >
-                    <Eye size={18} className="cursor-pointer" />
-                  </button>
+                  <Link href={`/frontend/page/profile`}>
+                    <button
+                      // onClick={() => deleteController(c.id)}
+                      className="text-brand bg-brand/25 p-2 hover:bg-error/10 rounded-full transition-colors"
+                    >
+                      <Eye size={18} className="cursor-pointer" />
+                    </button>
+                  </Link>
                 </div>
                 <div className="flex flex-col items-center text-center space-y-4">
                   {/* Avatar avec effet "Inner Shadow" */}
