@@ -73,7 +73,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Notifications',
     description: 'Gérer vos alertes et rappels',
     icon: <Bell size={18} />,
-    href: '/notifications',
+    href: '/frontend/page/profile/notification',
     accent: 'bg-blue-500/10',
     accentText: 'text-blue-500',
   },

@@ -6,7 +6,6 @@ export const generateEventSummaryPDF = (data: AdminEventDTO) => {
 
   const dateGenere = new Date().toLocaleString('fr-FR');
   const eventDate = new Date(data.event.date).toLocaleDateString('fr-FR');
-
   printWindow.document.write(`
     <html>
       <head>
@@ -28,7 +27,6 @@ export const generateEventSummaryPDF = (data: AdminEventDTO) => {
             padding-bottom: 20px; 
             margin-bottom: 40px; 
           }
-          
           .header h1 { margin: 0; font-size: 26px; font-weight: 800; color: #0f172a; text-transform: uppercase; }
           .header-meta { text-align: right; font-size: 12px; color: #64748b; }
 
@@ -54,7 +52,6 @@ export const generateEventSummaryPDF = (data: AdminEventDTO) => {
             border-radius: 12px; 
             text-align: center; 
           }
-          
           .stat-value { font-size: 22px; font-weight: 800; color: #14b8a6; display: block; }
           .stat-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-top: 5px; }
 
@@ -62,10 +59,8 @@ export const generateEventSummaryPDF = (data: AdminEventDTO) => {
           th { background: #f1f5f9; padding: 12px; text-align: left; font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
           td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #334155; }
           .font-bold { font-weight: 700; }
-
           .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 10px; }
           .status-box { padding: 15px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); }
-          
           .footer { 
             margin-top: 60px; 
             padding-top: 20px; 
@@ -114,7 +109,6 @@ export const generateEventSummaryPDF = (data: AdminEventDTO) => {
             <span class="stat-label">Participations Tombola</span>
           </div>
         </div>
-
         <div class="section-title">Détails des catégories de tickets</div>
         <table>
           <thead>

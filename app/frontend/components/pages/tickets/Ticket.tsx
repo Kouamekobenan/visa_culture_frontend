@@ -25,13 +25,20 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { WhatsAppRepository } from '@/app/frontend/module/whatsApp/infrastructure/whatsAppRepository';
+import { typeItems } from '@/app/frontend/module/whatsApp/domain/interfaces/whatsApp.repository';
+import { toast } from 'react-toastify';
 
 const ticketTypeService = new TicketTypeService(new TicketTypeRepository());
 const serviceTicket = new TicketService(new TicketRepository());
 const eventService = new EventService(new EventRepository());
 
-export default function TicketSelection({ eventId }: { eventId: string }) {
+const sendWhatsApp = new WhatsAppRepository();
+interface props {
+  eventId: string;
+  eventName: string;
+}
+export default function TicketSelection({ eventId, eventName }: props) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [event, setEvent] = useState<Event | null>(null);
@@ -45,6 +52,8 @@ export default function TicketSelection({ eventId }: { eventId: string }) {
   const [paymentMethod, setPaymentMethod] = useState<
     'WAVE' | 'MTN' | 'ORANGE' | 'CASH' | null
   >(null);
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
   useEffect(() => {
@@ -92,19 +101,26 @@ export default function TicketSelection({ eventId }: { eventId: string }) {
       if (!user.name || !user.phone) {
         throw new Error('Informations utilisateur incomplètes');
       }
-      await serviceTicket.create(
-        {
-          userId: user.id,
-          eventId: eventId,
-          ticketTypeId: selectedTicketType.id,
-          buyerName: user.name,
-          buyerPhone: user.phone,
-        },
-        qty,
-      );
-      toast.success('Félicitations !', {
-        description: `Paiement ${paymentMethod} validé pour ${qty} ticket(s).`,
-      });
+      const dto: typeItems = {
+        phone: user.phone,
+        eventName: eventName,
+        ticketUrl: `${baseUrl}/frontend/page/tickets/${eventId}`,
+      };
+      await Promise.all([
+        serviceTicket.create(
+          {
+            userId: user.id,
+            eventId: eventId,
+            ticketTypeId: selectedTicketType.id,
+            buyerName: user.name,
+            buyerPhone: user.phone,
+          },
+          qty,
+        ),
+        sendWhatsApp.save(dto),
+      ]);
+
+      toast.success('Félicitation vous allez recévoir le lients par whatsApp');
       router.push(`/frontend/page/lottery/${eventId}`);
     } catch (err) {
       toast.error('Échec de la transaction. Veuillez réessayer.');
