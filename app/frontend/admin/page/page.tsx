@@ -6,10 +6,10 @@ import AdminDashboard from './dashbord/page';
 
 export default function AdminLayout() {
   return (
-    <div className="flex h-screen bg-foreground overflow-hidden">
+    <div className="flex h-screen bg-background overflow-hidden">
       <AdminSidebar />
       <main className="flex-1 overflow-y-auto">
-        <div className="bg-background px-2 pt-3">
+        <div className=" px-2 pt-3">
           <AdminSearchBar />
         </div>
         <div className="">

@@ -26,7 +26,6 @@ interface Slide {
   description: string;
   imageUrl: string;
 }
-
 const prizeRepository = new PrizeRepository();
 export default function ProfessionalAdBanner() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -95,7 +94,6 @@ export default function ProfessionalAdBanner() {
       </div>
     );
   }
-
   return (
     <div className="w-full bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-2 sm:py-4 md:py-6 lg:py-8">
       <div className="max-w-7xl mx-auto px-2 sm:px-3 lg:px-6">
@@ -117,7 +115,7 @@ export default function ProfessionalAdBanner() {
                       : 'opacity-0 translate-x-full z-0'
                 }`}
               >
-                {/* ✅ BLOC MODIFIÉ — 50/50 texte + image */}
+                {/* BLOC MODIFIÉ — 50/50 texte + image */}
                 <div className="flex flex-col md:flex-row items-center h-full">
                   {/* Contenu statique — 50% */}
                   <div className="w-full md:w-1/2 h-1/2 md:h-full flex items-center justify-center px-6 sm:px-8 md:px-10 lg:px-14 py-4 md:py-8">
@@ -133,7 +131,6 @@ export default function ProfessionalAdBanner() {
                       </Link>
                     </div>
                   </div>
-
                   {/* Image dynamique — 50% */}
                   <div className="w-full md:w-1/2 h-1/2 md:h-full relative">
                     <Image
@@ -149,7 +146,6 @@ export default function ProfessionalAdBanner() {
               </div>
             ))}
           </div>
-
           {/* Boutons navigation */}
           <button
             onClick={goToPreviousSlide}
@@ -163,7 +159,6 @@ export default function ProfessionalAdBanner() {
           >
             <ChevronRight className="w-6 h-6 lg:w-7 lg:h-7 text-gray-700" />
           </button>
-
           {/* Indicateurs */}
           <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-2 sm:space-x-3">
             {slides.map((_, index) => (
@@ -178,7 +173,6 @@ export default function ProfessionalAdBanner() {
               />
             ))}
           </div>
-
           {/* Compteur */}
           <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 bg-black/50 backdrop-blur-sm text-white text-xs sm:text-sm font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
             {currentSlide + 1} / {slides.length}

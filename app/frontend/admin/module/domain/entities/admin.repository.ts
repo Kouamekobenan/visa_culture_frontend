@@ -31,6 +31,7 @@ export interface AdminResponse {
   };
   payments: {
     totalRevenue: number;
+    dailyRevenue: number[];
     revenueLast7Days: number;
     revenueLastMonth: number;
     byStatus: {
@@ -60,5 +61,5 @@ export interface AdminResponse {
       count: number;
     }[];
   };
-  generatedAt:string;
+  generatedAt: string;
 }

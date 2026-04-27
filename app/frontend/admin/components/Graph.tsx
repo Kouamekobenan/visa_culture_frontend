@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import {
   Chart,
   BarController,
@@ -14,10 +14,9 @@ import {
   LinearScale,
   Tooltip,
   Filler,
+  ScriptableContext,
 } from 'chart.js';
-import Image from 'next/image';
-import { Calendar, Ticket } from 'lucide-react';
-
+import { Calendar, Ticket, Users, TrendingUp } from 'lucide-react';
 Chart.register(
   BarController,
   DoughnutController,
@@ -31,28 +30,18 @@ Chart.register(
   Tooltip,
   Filler,
 );
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface DashboardData {
+// --- Types ---
+// --- Types Améliorés ---
+export interface DashboardData {
   users: {
     total: number;
     byRole: { role: string; count: number }[];
-    newLast7Days: number;
     newLast30Days: number;
-    withPhone: number;
   };
   events: {
     total: number;
     active: number;
-    past: number;
-    upcoming: number;
-    topEvents: {
-      id: string;
-      title: string;
-      date: string;
-      ticketCount: number;
-    }[];
+    topEvents: { id: string; title: string; ticketCount: number }[];
   };
   tickets: {
     total: number;
@@ -61,29 +50,41 @@ interface DashboardData {
   };
   payments: {
     totalRevenue: number;
+    dailyRevenue:number[];
     revenueLast7Days: number;
-    revenueLastMonth: number;
     byStatus: { status: string; count: number; amount: number }[];
-    byProvider: unknown[];
   };
   lottery: {
-    total: number;
-    active: number;
     totalEntries: number;
-    totalDraws: number;
     prizesAwarded: number;
-  };
-  notifications: {
-    total: number;
-    unread: number;
-    readRate: number;
-    byType: unknown[];
   };
   generatedAt: string;
 }
+// --- Props Types ---
+interface KpiCardProps {
+  label: string;
+  value: number;
+  sub?: string;
+  accent: string;
+  icon: ReactNode;
+  delay?: number;
+}
 
-// ─── Animated counter hook ────────────────────────────────────────────────────
-
+interface CardProps {
+  title: string;
+  sub?: string;
+  legend?: { color: string; label: string }[];
+  children: ReactNode;
+  delay?: number;
+}
+const GRID_CONFIG = { color: 'rgba(0,0,0,0.05)', drawBorder: false };
+const TICK_CONFIG = {
+  color: '#64748b',
+  font: { size: 10, family: 'sans-serif', weight: 500 },
+} satisfies import('chart.js').TickOptions['font'] extends infer F
+  ? { color: string; font: F }
+  : never;
+// --- Hooks ---
 function useCountUp(target: number, duration = 1200, delay = 0) {
   const [value, setValue] = useState(0);
   useEffect(() => {
@@ -106,10 +107,7 @@ function useCountUp(target: number, duration = 1200, delay = 0) {
   }, [target, duration, delay]);
   return value;
 }
-
-// ─── Intersection observer hook ───────────────────────────────────────────────
-
-function useInView(threshold = 0.15) {
+function useInView(threshold = 0.1) {
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
   useEffect(() => {
@@ -130,97 +128,41 @@ function useInView(threshold = 0.15) {
   return { ref, inView };
 }
 
-// ─── KPI Card ────────────────────────────────────────────────────────────────
+// --- Sous-Composants ---
 
-function KpiCard({
-  label,
-  value,
-  sub,
-  accent,
-  icon,
-  delay = 0,
-}: {
-  label: string;
-  value: number;
-  sub?: string;
-  accent: string;
-  icon: React.ReactNode;
-  delay?: number;
-}) {
+function KpiCard({ label, value, sub, accent, icon, delay = 0 }: KpiCardProps) {
   const count = useCountUp(value, 1400, delay);
   const { ref, inView } = useInView();
-
   return (
     <div
       ref={ref}
+      className="bg-surface border border-muted/10 rounded-2xl p-6 relative overflow-hidden transition-all duration-700 shadow-sm"
       style={{
         opacity: inView ? 1 : 0,
         transform: inView ? 'translateY(0)' : 'translateY(20px)',
-        transition: `opacity 0.6s ease ${delay}ms, transform 0.6s ease ${delay}ms`,
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: 16,
-        padding: '20px 24px',
-        position: 'relative',
-        overflow: 'hidden',
+        transitionDelay: `${delay}ms`,
       }}
     >
-      {/* accent glow top */}
       <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 2,
-          background: accent,
-          borderRadius: '16px 16px 0 0',
-        }}
+        className="absolute top-0 left-0 right-0 h-1"
+        style={{ background: accent }}
       />
-      {/* subtle bg glow */}
-      <div
-        style={{
-          position: 'absolute',
-          top: -40,
-          right: -20,
-          width: 100,
-          height: 100,
-          borderRadius: '50%',
-          background: accent,
-          opacity: 0.06,
-          filter: 'blur(24px)',
-          pointerEvents: 'none',
-        }}
-      />
-
-      <div style={{ fontSize: 22, marginBottom: 10 }}>{icon}</div>
-      <div
-        style={{
-          fontSize: 13,
-          color: 'rgba(255,255,255,0.45)',
-          marginBottom: 6,
-          letterSpacing: '0.04em',
-          textTransform: 'uppercase',
-          fontWeight: 500,
-        }}
-      >
+      <div className="flex justify-between items-start mb-4">
+        <div
+          className="p-2 rounded-lg bg-background border border-muted/5 shadow-sm"
+          style={{ color: accent }}
+        >
+          {icon}
+        </div>
+      </div>
+      <div className="text-[11px] font-bold uppercase tracking-wider text-muted mb-1">
         {label}
       </div>
-      <div
-        style={{
-          fontSize: 36,
-          fontWeight: 700,
-          color: '#fff',
-          lineHeight: 1,
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
+      <div className="text-3xl font-black text-title leading-none tabular-nums">
         {count.toLocaleString('fr-FR')}
       </div>
       {sub && (
-        <div
-          style={{ fontSize: 12, color: accent, marginTop: 6, fontWeight: 500 }}
-        >
+        <div className="text-xs font-semibold mt-2" style={{ color: accent }}>
           {sub}
         </div>
       )}
@@ -228,548 +170,226 @@ function KpiCard({
   );
 }
 
-// ─── Section header ───────────────────────────────────────────────────────────
-
-function SectionLabel({ children }: { children: string }) {
-  return (
-    <div
-      style={{
-        fontSize: 11,
-        fontWeight: 600,
-        letterSpacing: '0.1em',
-        textTransform: 'uppercase',
-        color: 'rgba(255,255,255,0.3)',
-        marginBottom: 12,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-// ─── Chart wrapper card ───────────────────────────────────────────────────────
-
-function Card({
-  title,
-  sub,
-  legend,
-  children,
-  delay = 0,
-}: {
-  title: string;
-  sub?: string;
-  legend?: { color: string; label: string }[];
-  children: React.ReactNode;
-  delay?: number;
-}) {
+function Card({ title, sub, legend, children, delay = 0 }: CardProps) {
   const { ref, inView } = useInView();
   return (
     <div
       ref={ref}
+      className="bg-surface border border-muted/10 rounded-2xl p-6 transition-all duration-700 shadow-sm"
       style={{
         opacity: inView ? 1 : 0,
         transform: inView ? 'translateY(0)' : 'translateY(24px)',
-        transition: `opacity 0.7s ease ${delay}ms, transform 0.7s ease ${delay}ms`,
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: 16,
-        padding: '20px 22px',
+        transitionDelay: `${delay}ms`,
       }}
     >
-      <div style={{ marginBottom: 14 }}>
-        <div
-          style={{
-            fontSize: 15,
-            fontWeight: 600,
-            color: 'rgba(255,255,255,0.9)',
-          }}
-        >
-          {title}
-        </div>
-        {sub && (
-          <div
-            style={{
-              fontSize: 12,
-              color: 'rgba(255,255,255,0.35)',
-              marginTop: 2,
-            }}
-          >
-            {sub}
-          </div>
-        )}
+      <div className="mb-6">
+        <div className="text-lg font-bold text-title">{title}</div>
+        {sub && <div className="text-xs text-muted mt-1">{sub}</div>}
       </div>
-      {legend && legend.length > 0 && (
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 12,
-            marginBottom: 14,
-          }}
-        >
+      {legend && (
+        <div className="flex flex-wrap gap-4 mb-6">
           {legend.map((l) => (
             <span
               key={l.label}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                fontSize: 12,
-                color: 'rgba(255,255,255,0.5)',
-              }}
+              className="flex items-center gap-2 text-xs font-medium text-muted"
             >
               <span
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 2,
-                  background: l.color,
-                  display: 'inline-block',
-                }}
+                className="w-2.5 h-2.5 rounded-full"
+                style={{ background: l.color }}
               />
               {l.label}
             </span>
           ))}
         </div>
       )}
-      {children}
+      <div className="w-full">{children}</div>
+    </div>
+  );
+}
+// --- Graphiques Typés ---
+
+function RevenueLineChart({
+  data,
+  visible,
+}: {
+  data: number[];
+  visible: boolean;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (!visible || !canvasRef.current || data.length === 0) return;
+
+    const ctx = canvasRef.current.getContext('2d');
+    if (!ctx) return;
+
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+        datasets: [
+          {
+            label: 'Revenus',
+            data: data,
+            borderColor: '#10b981',
+            borderWidth: 3,
+            pointRadius: 2, // Augmenté pour vérifier si les points existent
+            fill: true,
+            tension: 0.4,
+            backgroundColor: (context: ScriptableContext<'line'>) => {
+              const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+              gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
+              gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+              return gradient;
+            },
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { grid: { display: false }, ticks: TICK_CONFIG },
+          y: {
+            beginAtZero: true, // Crucial pour ne pas "écraser" la courbe en bas
+            grid: GRID_CONFIG,
+            ticks: TICK_CONFIG,
+          },
+        },
+      },
+    });
+    return () => chart.destroy();
+  }, [data, visible]);
+
+  return (
+    <div className="h-64">
+      <canvas ref={canvasRef} />
     </div>
   );
 }
 
-// ─── Chart.js shared plugin: animate bars on draw ────────────────────────────
+// --- Graphiques ---
+interface RoleStat {
+  role: string;
+  count: number;
+}
 
-const CHART_DEFAULTS = {
-  animation: { duration: 900, easing: 'easeOutQuart' as const },
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { display: false }, tooltip: { enabled: true } },
-};
-
-const GRID = { color: 'rgba(255,255,255,0.05)', drawBorder: false };
-const TICK = {
-  color: 'rgba(255,255,255,0.35)',
-  font: { size: 11, family: "'DM Mono', monospace" },
-};
-
-// ─── Roles bar chart ──────────────────────────────────────────────────────────
-
-function RolesChart({
-  data,
-  visible,
-}: {
-  data: DashboardData['users']['byRole'];
+interface RolesChartProps {
+  data: RoleStat[];
   visible: boolean;
-}) {
+}
+
+function RolesChart({ data, visible }: RolesChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<Chart | null>(null);
 
   useEffect(() => {
     if (!visible || !canvasRef.current) return;
-    chartRef.current?.destroy();
-    chartRef.current = new Chart(canvasRef.current, {
+    const chart = new Chart(canvasRef.current, {
       type: 'bar',
       data: {
         labels: data.map((d) => d.role),
         datasets: [
           {
             data: data.map((d) => d.count),
-            backgroundColor: [
-              'rgba(99,179,237,0.85)',
-              'rgba(99,179,237,0.55)',
-              'rgba(99,179,237,0.3)',
-            ],
-            borderColor: [
-              '#63B3ED',
-              'rgba(99,179,237,0.7)',
-              'rgba(99,179,237,0.4)',
-            ],
-            borderWidth: 1,
-            borderRadius: 6,
-            borderSkipped: false,
+            backgroundColor: '#3b82f6',
+            borderRadius: 8,
+            barThickness: 30,
           },
         ],
       },
       options: {
-        ...CHART_DEFAULTS,
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: TICK, grid: { display: false } },
-          y: {
-            ticks: { ...TICK, stepSize: 1 },
-            grid: GRID,
-            min: 0,
-            border: { display: false },
-          },
+          x: { grid: { display: false }, ticks: TICK_CONFIG },
+          y: { grid: GRID_CONFIG, ticks: { ...TICK_CONFIG, stepSize: 1 } },
         },
       },
     });
-    return () => chartRef.current?.destroy();
+    return () => chart.destroy();
   }, [data, visible]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: 180 }}>
+    <div className="h-64">
       <canvas ref={canvasRef} />
     </div>
   );
 }
 
-// ─── Tickets doughnut ─────────────────────────────────────────────────────────
+interface TicketStat {
+  status: string;
+  count: number;
+}
 
-function TicketsDoughnut({
-  data,
-  total,
-  visible,
-}: {
-  data: DashboardData['tickets']['byStatus'];
+interface TicketsDoughnutProps {
+  data: TicketStat[];
   total: number;
   visible: boolean;
-}) {
+}
+
+function TicketsDoughnut({ data, total, visible }: TicketsDoughnutProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<Chart | null>(null);
 
   useEffect(() => {
     if (!visible || !canvasRef.current) return;
-    chartRef.current?.destroy();
-    chartRef.current = new Chart(canvasRef.current, {
+    const chart = new Chart(canvasRef.current, {
       type: 'doughnut',
       data: {
         labels: data.map((d) => d.status),
         datasets: [
           {
             data: data.map((d) => d.count),
-            backgroundColor: ['rgba(72,187,120,0.85)', 'rgba(72,187,120,0.3)'],
-            borderColor: ['#48BB78', 'rgba(72,187,120,0.5)'],
-            borderWidth: 1,
-            hoverOffset: 8,
+            backgroundColor: ['#10b981', '#e2e8f0'],
+            borderWidth: 0,
           },
         ],
       },
       options: {
-        ...CHART_DEFAULTS,
-        cutout: '72%',
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: (c) =>
-                ` ${c.label}: ${c.parsed} (${Math.round((c.parsed / total) * 100)}%)`,
-            },
-          },
-        },
+        cutout: '75%',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
       },
     });
-    return () => chartRef.current?.destroy();
-  }, [data, total, visible]);
-
-  const valid = data.find((d) => d.status === 'VALID')?.count ?? 0;
-  const pct = Math.round((valid / total) * 100);
-
-  return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: 180,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0 }} />
-      {/* center label */}
-      <div
-        style={{
-          position: 'relative',
-          textAlign: 'center',
-          pointerEvents: 'none',
-        }}
-      >
-        <div
-          style={{
-            fontSize: 28,
-            fontWeight: 700,
-            color: '#48BB78',
-            lineHeight: 1,
-          }}
-        >
-          {pct}%
-        </div>
-        <div
-          style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}
-        >
-          valides
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Top events horizontal bars ───────────────────────────────────────────────
-
-function TopEventsChart({
-  events,
-  visible,
-}: {
-  events: DashboardData['events']['topEvents'];
-  visible: boolean;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<Chart | null>(null);
-
-  useEffect(() => {
-    if (!visible || !canvasRef.current) return;
-    chartRef.current?.destroy();
-    chartRef.current = new Chart(canvasRef.current, {
-      type: 'bar',
-      data: {
-        labels: events.map((e) =>
-          e.title.length > 22 ? e.title.slice(0, 20) + '…' : e.title,
-        ),
-        datasets: [
-          {
-            data: events.map((e) => e.ticketCount),
-            backgroundColor: events.map(
-              (_, i) => `rgba(246,173,85,${0.9 - i * 0.25})`,
-            ),
-            borderColor: events.map(
-              (_, i) => `rgba(246,173,85,${1 - i * 0.2})`,
-            ),
-            borderWidth: 1,
-            borderRadius: 5,
-            borderSkipped: false,
-          },
-        ],
-      },
-      options: {
-        ...CHART_DEFAULTS,
-        indexAxis: 'y',
-        scales: {
-          x: {
-            ticks: { ...TICK, stepSize: 5 },
-            grid: GRID,
-            min: 0,
-            border: { display: false },
-          },
-          y: { ticks: { ...TICK, autoSkip: false }, grid: { display: false } },
-        },
-      },
-    });
-    return () => chartRef.current?.destroy();
-  }, [events, visible]);
-
-  return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: events.length * 56 + 32,
-      }}
-    >
-      <canvas ref={canvasRef} />
-    </div>
-  );
-}
-
-// ─── Payments dual-axis bar ───────────────────────────────────────────────────
-
-function PaymentsChart({
-  data,
-  visible,
-}: {
-  data: DashboardData['payments']['byStatus'];
-  visible: boolean;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<Chart | null>(null);
-
-  useEffect(() => {
-    if (!visible || !canvasRef.current) return;
-    chartRef.current?.destroy();
-    chartRef.current = new Chart(canvasRef.current, {
-      type: 'bar',
-      data: {
-        labels: data.map((d) => d.status),
-        datasets: [
-          {
-            label: 'Transactions',
-            data: data.map((d) => d.count),
-            backgroundColor: 'rgba(237,137,54,0.8)',
-            borderColor: '#ED8936',
-            borderWidth: 1,
-            borderRadius: 6,
-            borderSkipped: false,
-            yAxisID: 'y',
-          },
-          {
-            label: 'Montant',
-            data: data.map((d) => d.amount),
-            backgroundColor: 'rgba(237,137,54,0.25)',
-            borderColor: 'rgba(237,137,54,0.5)',
-            borderWidth: 1,
-            borderRadius: 6,
-            borderSkipped: false,
-            yAxisID: 'y2',
-          },
-        ],
-      },
-      options: {
-        ...CHART_DEFAULTS,
-        scales: {
-          x: { ticks: TICK, grid: { display: false } },
-          y: {
-            position: 'left',
-            ticks: TICK,
-            grid: GRID,
-            border: { display: false },
-            title: {
-              display: true,
-              text: 'Nb tx',
-              color: 'rgba(255,255,255,0.3)',
-              font: { size: 10 },
-            },
-          },
-          y2: {
-            position: 'right',
-            ticks: { ...TICK, callback: (v) => `${Number(v) / 1000}k` },
-            grid: { display: false },
-            border: { display: false },
-            title: {
-              display: true,
-              text: 'FCFA',
-              color: 'rgba(255,255,255,0.3)',
-              font: { size: 10 },
-            },
-          },
-        },
-      },
-    });
-    return () => chartRef.current?.destroy();
+    return () => chart.destroy();
   }, [data, visible]);
 
+  const valid = data.find((d) => d.status === 'VALID')?.count ?? 0;
+
   return (
-    <div style={{ position: 'relative', width: '100%', height: 180 }}>
+    <div className="h-64 relative flex items-center justify-center">
       <canvas ref={canvasRef} />
+      <div className="absolute text-center">
+        <div className="text-3xl font-black text-emerald-500">
+          {total > 0 ? Math.round((valid / total) * 100) : 0}%
+        </div>
+        <div className="text-[10px] uppercase font-bold text-muted">
+          Valides
+        </div>
+      </div>
     </div>
   );
 }
 
-// ─── Lottery bar chart ────────────────────────────────────────────────────────
+// --- Card Wrapper ---
+interface ChartCardProps {
+  title: string;
+  sub?: string;
+  children: React.ReactNode;
+}
 
-function LotteryChart({
-  lottery,
-  visible,
-}: {
-  lottery: DashboardData['lottery'];
-  visible: boolean;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<Chart | null>(null);
-
-  useEffect(() => {
-    if (!visible || !canvasRef.current) return;
-    chartRef.current?.destroy();
-    chartRef.current = new Chart(canvasRef.current, {
-      type: 'bar',
-      data: {
-        labels: ['Participations', 'Tirages', 'Prix'],
-        datasets: [
-          {
-            data: [
-              lottery.totalEntries,
-              lottery.totalDraws,
-              lottery.prizesAwarded,
-            ],
-            backgroundColor: [
-              'rgba(159,122,234,0.85)',
-              'rgba(159,122,234,0.55)',
-              'rgba(159,122,234,0.3)',
-            ],
-            borderColor: [
-              '#9F7AEA',
-              'rgba(159,122,234,0.7)',
-              'rgba(159,122,234,0.4)',
-            ],
-            borderWidth: 1,
-            borderRadius: 6,
-            borderSkipped: false,
-          },
-        ],
-      },
-      options: {
-        ...CHART_DEFAULTS,
-        scales: {
-          x: { ticks: TICK, grid: { display: false } },
-          y: { ticks: TICK, grid: GRID, border: { display: false }, min: 0 },
-        },
-      },
-    });
-    return () => chartRef.current?.destroy();
-  }, [lottery, visible]);
-
+function ChartCard({ title, sub, children }: ChartCardProps) {
   return (
-    <div style={{ position: 'relative', width: '100%', height: 160 }}>
-      <canvas ref={canvasRef} />
+    <div className="bg-surface border border-muted/10 rounded-2xl p-6 shadow-sm">
+      <div className="mb-6">
+        <h3 className="text-lg font-bold text-title">{title}</h3>
+        {sub && <p className="text-xs text-muted mt-1">{sub}</p>}
+      </div>
+      {children}
     </div>
   );
 }
-
-// ─── Scan rate progress bar ───────────────────────────────────────────────────
-
-function ScanRateBar({ rate, visible }: { rate: number; visible: boolean }) {
-  return (
-    <div style={{ marginTop: 8 }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: 8,
-        }}
-      >
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
-          Taux de scan global
-        </span>
-        <span style={{ fontSize: 13, fontWeight: 600, color: '#48BB78' }}>
-          {rate}%
-        </span>
-      </div>
-      <div
-        style={{
-          height: 6,
-          background: 'rgba(255,255,255,0.07)',
-          borderRadius: 99,
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          style={{
-            height: '100%',
-            width: visible ? `${rate}%` : '0%',
-            background: 'linear-gradient(90deg, #48BB78, #68D391)',
-            borderRadius: 99,
-            transition: 'width 1.2s cubic-bezier(0.16, 1, 0.3, 1) 300ms',
-          }}
-        />
-      </div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginTop: 6,
-        }}
-      >
-        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>
-          0%
-        </span>
-        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>
-          100%
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// ─── Main export ──────────────────────────────────────────────────────────────
-
 export default function AdminDashboardGraph({ data }: { data: DashboardData }) {
   const { users, events, tickets, payments, lottery } = data;
   const { ref: chartsRef, inView: chartsVisible } = useInView(0.05);
@@ -780,307 +400,142 @@ export default function AdminDashboardGraph({ data }: { data: DashboardData }) {
   }).format(new Date(data.generatedAt));
 
   return (
-    <div
-      className="bg-background"
-      style={{
-        fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
-        // background: 'transparent',
-        color: '#fff',
-        padding: '28px 24px',
-        maxWidth: 1200,
-        margin: '0 auto',
-      }}
-    >
-      {/* ── Header ── */}
-      <div
-        style={{
-          marginBottom: 32,
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: 8,
-        }}
-      >
-        <div>
-          <div
-            style={{
-              fontSize: 11,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.3)',
-              marginBottom: 6,
-              fontWeight: 600,
-            }}
-          >
-            Administration
+    <div className="bg-background min-h-screen text-foreground pb-12 transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <div>
+            <div className="text-[11px] font-black uppercase tracking-[0.2em] text-brand mb-2">
+              Statistiques Globales
+            </div>
+            <h1 className="text-4xl font-black text-title tracking-tight leading-none uppercase">
+              Vue Analytique
+            </h1>
           </div>
-          <h1
-            style={{
-              fontSize: 28,
-              fontWeight: 700,
-              margin: 0,
-              color: '#fff',
-              lineHeight: 1.1,
-            }}
-          >
-            Vue analytique
-          </h1>
+          <div className="text-xs font-bold text-muted bg-surface border border-muted/20 px-5 py-2.5 rounded-xl">
+            Dernière sync • {formattedDate}
+          </div>
         </div>
-        <div
-          style={{
-            fontSize: 12,
-            color: 'rgba(255,255,255,0.35)',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 8,
-            padding: '6px 12px',
-          }}
-        >
-          Sync · {formattedDate}
+
+        {/* KPIs Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <KpiCard
+            label="Utilisateurs"
+            value={users.total}
+            sub={`+${users.newLast30Days} ce mois`}
+            accent="#3b82f6"
+            icon={<Users className="w-5 h-5" />}
+          />
+          <KpiCard
+            label="Revenus Totaux"
+            value={payments.totalRevenue} // Passage du nombre brut ici
+            sub="FCFA"
+            accent="#10b981"
+            icon={<TrendingUp className="w-5 h-5" />}
+            delay={100}
+          />
+          <KpiCard
+            label="Événements"
+            value={events.total}
+            sub={`${events.active} actifs`}
+            accent="#f59e0b"
+            icon={<Calendar className="w-5 h-5" />}
+            delay={300}
+          />
+          <KpiCard
+            label="Tickets"
+            value={tickets.total}
+            sub={`${tickets.scanRate}% scannés`}
+            accent="#8b5cf6"
+            icon={<Ticket className="w-5 h-5" />}
+            delay={400}
+          />
         </div>
-      </div>
-
-      {/* ── KPI Row ── */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: 14,
-          marginBottom: 32,
-        }}
-      >
-        <KpiCard
-          label="Utilisateurs"
-          value={users.total}
-          sub={`↑ ${users.newLast7Days} cette semaine`}
-          accent="#63B3ED"
-          icon={
-            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/50">
-              <Image
-                src="/images/icon_profile.jpg"
-                width={40}
-                height={40}
-                alt="Logo"
-                className="object-cover"
-              />
-            </div>
-          }
-          delay={0}
-        />
-        <KpiCard
-          label="Billets émis"
-          value={tickets.total}
-          sub={`Scan rate ${tickets.scanRate}%`}
-          accent="#48BB78"
-          icon={<Ticket />}
-          delay={80}
-        />
-        <KpiCard
-          label="Événements"
-          value={events.total}
-          sub={`${events.upcoming} à venir`}
-          accent="#F6AD55"
-          icon={<Calendar />}
-        />
-        <KpiCard
-          label="Loterie — entrées"
-          value={lottery.totalEntries}
-          sub={`${lottery.prizesAwarded} prix attribué(s)`}
-          accent="#9F7AEA"
-          icon={
-            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/50">
-              <Image
-                src="/images/icon_lottery.jpg"
-                width={40}
-                height={40}
-                alt="Logo"
-                className="object-cover"
-              />
-            </div>
-          }
-          delay={240}
-        />
-      </div>
-
-      {/* ── Charts ── */}
-      <div ref={chartsRef}>
-        <SectionLabel>Utilisateurs & billets</SectionLabel>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: 14,
-            marginBottom: 14,
-          }}
-        >
+        {/* Charts Grid */}
+        <div ref={chartsRef} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Évolution des Revenus (Positionné en premier car important) */}
           <Card
-            title="Répartition des rôles"
-            sub={`${users.total} comptes actifs`}
-            legend={users.byRole.map((r, i) => ({
-              color:
-                ['#63B3ED', 'rgba(99,179,237,0.6)', 'rgba(99,179,237,0.35)'][
-                  i
-                ] ?? '#888',
-              label: `${r.role} · ${r.count}`,
-            }))}
-            delay={0}
+            title="Évolution des Revenus"
+            sub="Ventes de tickets sur les 7 derniers jours"
           >
-            <RolesChart data={users.byRole} visible={chartsVisible} />
+            <RevenueLineChart
+              data={payments.dailyRevenue || [0, 0, 0, 0, 0, 0, 0]}
+              visible={chartsVisible}
+            />
           </Card>
-
           <Card
-            title="Statut des billets"
-            sub={`${tickets.total} billets au total`}
-            legend={tickets.byStatus.map((s, i) => ({
-              color: ['#48BB78', 'rgba(72,187,120,0.4)'][i] ?? '#888',
-              label: `${s.status} · ${s.count}`,
-            }))}
-            delay={80}
+            title="Validation des Tickets"
+            sub="Rapport scan vs émission"
+            legend={[
+              { color: '#10b981', label: 'Validés' },
+              { color: '#e2e8f0', label: 'En attente' },
+            ]}
           >
             <TicketsDoughnut
               data={tickets.byStatus}
               total={tickets.total}
               visible={chartsVisible}
             />
-            <ScanRateBar rate={tickets.scanRate} visible={chartsVisible} />
-          </Card>
-        </div>
-
-        <SectionLabel>Événements & paiements</SectionLabel>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: 14,
-            marginBottom: 14,
-          }}
-        >
-          <Card
-            title="Billets par événement"
-            sub="Top événements"
-            legend={[{ color: '#F6AD55', label: 'Billets vendus' }]}
-            delay={0}
-          >
-            <TopEventsChart events={events.topEvents} visible={chartsVisible} />
           </Card>
 
           <Card
-            title="Paiements"
-            sub="Montant & transactions par statut"
-            legend={[
-              { color: '#ED8936', label: 'Transactions' },
-              { color: 'rgba(237,137,54,0.4)', label: 'Montant (FCFA)' },
-            ]}
-            delay={80}
+            title="Utilisateurs par Rôle"
+            sub="Répartition de la base de données"
           >
-            <PaymentsChart data={payments.byStatus} visible={chartsVisible} />
-            {/* pending amount highlight */}
-            {payments.byStatus[0] && (
-              <div
-                style={{
-                  marginTop: 12,
-                  padding: '10px 14px',
-                  background: 'rgba(237,137,54,0.08)',
-                  border: '1px solid rgba(237,137,54,0.2)',
-                  borderRadius: 8,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
-                  Montant en attente
-                </span>
-                <span
-                  style={{ fontSize: 15, fontWeight: 700, color: '#F6AD55' }}
-                >
-                  {payments.byStatus[0].amount.toLocaleString('fr-FR')} FCFA
-                </span>
-              </div>
-            )}
+            <RolesChart data={users.byRole} visible={chartsVisible} />
           </Card>
-        </div>
-
-        <SectionLabel>Loterie</SectionLabel>
-        <Card
-          title="Vue d'ensemble — Loterie"
-          sub={`${lottery.active} loteries actives · ${lottery.total} au total`}
-          legend={[
-            {
-              color: '#9F7AEA',
-              label: `Participations · ${lottery.totalEntries}`,
-            },
-            {
-              color: 'rgba(159,122,234,0.55)',
-              label: `Tirages · ${lottery.totalDraws}`,
-            },
-            {
-              color: 'rgba(159,122,234,0.3)',
-              label: `Prix · ${lottery.prizesAwarded}`,
-            },
-          ]}
-          delay={0}
-        >
-          <LotteryChart lottery={lottery} visible={chartsVisible} />
-
-          {/* ratio pill row */}
-          <div
-            style={{
-              display: 'flex',
-              gap: 10,
-              marginTop: 14,
-              flexWrap: 'wrap',
-            }}
+          <Card
+            title="Loteries & Engagements"
+            sub="Participations aux tirages au sort"
           >
-            {[
-              {
-                label: 'Entrées / loterie',
-                value: (
-                  lottery.totalEntries / Math.max(lottery.total, 1)
-                ).toFixed(1),
-                color: '#9F7AEA',
-              },
-              {
-                label: 'Taux de gain',
-                value: `${Math.round((lottery.prizesAwarded / Math.max(lottery.totalDraws, 1)) * 100)}%`,
-                color: '#68D391',
-              },
-              {
-                label: 'Tirages actifs',
-                value: lottery.totalDraws,
-                color: '#63B3ED',
-              },
-            ].map((pill) => (
-              <div
-                key={pill.label}
-                style={{
-                  flex: 1,
-                  minWidth: 100,
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.07)',
-                  borderRadius: 10,
-                  padding: '10px 14px',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: 'rgba(255,255,255,0.35)',
-                    marginBottom: 4,
-                  }}
-                >
-                  {pill.label}
-                </div>
-                <div
-                  style={{ fontSize: 20, fontWeight: 700, color: pill.color }}
-                >
-                  {pill.value}
-                </div>
+            <div className="space-y-4 py-2">
+              <div className="flex justify-between items-center p-4 bg-background rounded-xl border border-muted/5">
+                <span className="text-sm font-bold text-muted">
+                  Total Entrées
+                </span>
+                <span className="text-2xl font-black text-title">
+                  {lottery.totalEntries}
+                </span>
               </div>
-            ))}
+              <div className="flex justify-between items-center p-4 bg-background rounded-xl border border-muted/5">
+                <span className="text-sm font-bold text-muted">
+                  Gagnants Notifiés
+                </span>
+                <span className="text-2xl font-black text-brand">
+                  {lottery.prizesAwarded}
+                </span>
+              </div>
+            </div>
+          </Card>
+          <div className="lg:col-span-2">
+            {/* Top Événements */}
+            <ChartCard
+              title="Top Événements"
+              sub="Basé sur le volume de ventes"
+            >
+              <div className="space-y-4">
+                {data.events.topEvents.map((event, i) => (
+                  <div
+                    key={event.id}
+                    className="flex items-center justify-between p-4 bg-background border border-muted/5 rounded-xl"
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="text-lg font-black text-brand/50">
+                        0{i + 1}
+                      </span>
+                      <span className="font-bold text-title text-sm">
+                        {event.title}
+                      </span>
+                    </div>
+                    <span className="text-xs font-black bg-brand/10 text-brand px-3 py-1 rounded-full">
+                      {event.ticketCount} tickets
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </ChartCard>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );

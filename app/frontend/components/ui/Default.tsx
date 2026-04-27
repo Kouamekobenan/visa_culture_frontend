@@ -9,7 +9,7 @@ function AppLogo({ spinning }: { spinning: boolean }) {
         animation: spinning ? "spin 2s linear infinite" : "none",
       }}
     >
-      {/* 👇 Remplace ce SVG par ton <Image src="/logo.svg" ... /> si tu as un vrai logo */}
+      {/* Remplace ce SVG par ton <Image src="/logo.svg" ... /> si tu as un vrai logo */}
       <svg
         width="100"
         height="100"
