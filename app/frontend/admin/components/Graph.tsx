@@ -17,6 +17,7 @@ import {
   ScriptableContext,
 } from 'chart.js';
 import { Calendar, Ticket, Users, TrendingUp } from 'lucide-react';
+
 Chart.register(
   BarController,
   DoughnutController,
@@ -30,8 +31,8 @@ Chart.register(
   Tooltip,
   Filler,
 );
+
 // --- Types ---
-// --- Types Améliorés ---
 export interface DashboardData {
   users: {
     total: number;
@@ -50,7 +51,7 @@ export interface DashboardData {
   };
   payments: {
     totalRevenue: number;
-    dailyRevenue:number[];
+    dailyRevenue: number[];
     revenueLast7Days: number;
     byStatus: { status: string; count: number; amount: number }[];
   };
@@ -60,6 +61,7 @@ export interface DashboardData {
   };
   generatedAt: string;
 }
+
 // --- Props Types ---
 interface KpiCardProps {
   label: string;
@@ -77,6 +79,7 @@ interface CardProps {
   children: ReactNode;
   delay?: number;
 }
+
 const GRID_CONFIG = { color: 'rgba(0,0,0,0.05)', drawBorder: false };
 const TICK_CONFIG = {
   color: '#64748b',
@@ -84,6 +87,7 @@ const TICK_CONFIG = {
 } satisfies import('chart.js').TickOptions['font'] extends infer F
   ? { color: string; font: F }
   : never;
+
 // --- Hooks ---
 function useCountUp(target: number, duration = 1200, delay = 0) {
   const [value, setValue] = useState(0);
@@ -107,6 +111,7 @@ function useCountUp(target: number, duration = 1200, delay = 0) {
   }, [target, duration, delay]);
   return value;
 }
+
 function useInView(threshold = 0.1) {
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
@@ -206,6 +211,7 @@ function Card({ title, sub, legend, children, delay = 0 }: CardProps) {
     </div>
   );
 }
+
 // --- Graphiques Typés ---
 
 function RevenueLineChart({
@@ -233,7 +239,7 @@ function RevenueLineChart({
             data: data,
             borderColor: '#10b981',
             borderWidth: 3,
-            pointRadius: 2, // Augmenté pour vérifier si les points existent
+            pointRadius: 2,
             fill: true,
             tension: 0.4,
             backgroundColor: (context: ScriptableContext<'line'>) => {
@@ -251,7 +257,7 @@ function RevenueLineChart({
         scales: {
           x: { grid: { display: false }, ticks: TICK_CONFIG },
           y: {
-            beginAtZero: true, // Crucial pour ne pas "écraser" la courbe en bas
+            beginAtZero: true,
             grid: GRID_CONFIG,
             ticks: TICK_CONFIG,
           },
@@ -268,7 +274,6 @@ function RevenueLineChart({
   );
 }
 
-// --- Graphiques ---
 interface RoleStat {
   role: string;
   count: number;
@@ -372,7 +377,136 @@ function TicketsDoughnut({ data, total, visible }: TicketsDoughnutProps) {
   );
 }
 
-// --- Card Wrapper ---
+// --- TOP EVENTS BAR CHART (nouveau) ---
+
+interface TopEvent {
+  id: string;
+  title: string;
+  ticketCount: number;
+}
+
+interface TopEventsBarChartProps {
+  data: TopEvent[];
+  visible: boolean;
+}
+
+function TopEventsBarChart({ data, visible }: TopEventsBarChartProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (!visible || !canvasRef.current || data.length === 0) return;
+
+    const maxTickets = Math.max(...data.map((e) => e.ticketCount));
+    const capacity = Math.round(maxTickets * 1.35);
+
+    const chart = new Chart(canvasRef.current, {
+      type: 'bar',
+      data: {
+        labels: data.map((e) =>
+          e.title.length > 24 ? e.title.slice(0, 24) + '…' : e.title,
+        ),
+        datasets: [
+          {
+            label: 'Tickets vendus',
+            data: data.map((e) => e.ticketCount),
+            backgroundColor: '#8b5cf6',
+            borderRadius: 6,
+            borderSkipped: false,
+            barThickness: 28,
+          },
+          {
+            label: 'Capacité restante',
+            data: data.map((e) => Math.round(capacity - e.ticketCount)),
+            backgroundColor: 'rgba(226,232,240,0.5)',
+            borderRadius: 6,
+            borderSkipped: false,
+            barThickness: 28,
+          },
+        ],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.x ?? 0}`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            stacked: true,
+            grid: GRID_CONFIG,
+            ticks: {
+              ...TICK_CONFIG,
+              callback: (v) => Number(v).toLocaleString('fr-FR'),
+            },
+          },
+          y: {
+            stacked: true,
+            grid: { display: false },
+            ticks: TICK_CONFIG,
+          },
+        },
+      },
+    });
+    return () => chart.destroy();
+  }, [data, visible]);
+
+  return (
+    <div className="space-y-5">
+      {/* Légende */}
+      <div className="flex flex-wrap gap-4">
+        <span className="flex items-center gap-2 text-xs font-medium text-muted">
+          <span className="w-2.5 h-2.5 rounded-sm bg-violet-500" />
+          Tickets vendus
+        </span>
+        <span className="flex items-center gap-2 text-xs font-medium text-muted">
+          <span className="w-2.5 h-2.5 rounded-sm bg-slate-200" />
+          Capacité restante
+        </span>
+      </div>
+
+      {/* Canvas Chart */}
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: `${data.length * 52 + 40}px`,
+        }}
+      >
+        <canvas ref={canvasRef} />
+      </div>
+
+      {/* Labels numérotés en dessous */}
+      <div className="space-y-2 pt-2 border-t border-muted/10">
+        {data.map((event, i) => (
+          <div
+            key={event.id}
+            className="flex items-center justify-between gap-3"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="text-sm font-black text-brand/40 shrink-0">
+                0{i + 1}
+              </span>
+              <span className="font-bold text-title text-sm truncate">
+                {event.title}
+              </span>
+            </div>
+            <span className="text-xs font-black bg-brand/10 text-brand px-3 py-1 rounded-full shrink-0">
+              {event.ticketCount.toLocaleString('fr-FR')} tickets
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// --- Card Wrapper générique ---
 interface ChartCardProps {
   title: string;
   sub?: string;
@@ -390,6 +524,8 @@ function ChartCard({ title, sub, children }: ChartCardProps) {
     </div>
   );
 }
+
+// --- Composant principal ---
 export default function AdminDashboardGraph({ data }: { data: DashboardData }) {
   const { users, events, tickets, payments, lottery } = data;
   const { ref: chartsRef, inView: chartsVisible } = useInView(0.05);
@@ -428,7 +564,7 @@ export default function AdminDashboardGraph({ data }: { data: DashboardData }) {
           />
           <KpiCard
             label="Revenus Totaux"
-            value={payments.totalRevenue} // Passage du nombre brut ici
+            value={payments.totalRevenue}
             sub="FCFA"
             accent="#10b981"
             icon={<TrendingUp className="w-5 h-5" />}
@@ -451,9 +587,10 @@ export default function AdminDashboardGraph({ data }: { data: DashboardData }) {
             delay={400}
           />
         </div>
+
         {/* Charts Grid */}
         <div ref={chartsRef} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Évolution des Revenus (Positionné en premier car important) */}
+          {/* Évolution des Revenus */}
           <Card
             title="Évolution des Revenus"
             sub="Ventes de tickets sur les 7 derniers jours"
@@ -463,6 +600,8 @@ export default function AdminDashboardGraph({ data }: { data: DashboardData }) {
               visible={chartsVisible}
             />
           </Card>
+
+          {/* Validation des Tickets */}
           <Card
             title="Validation des Tickets"
             sub="Rapport scan vs émission"
@@ -478,12 +617,15 @@ export default function AdminDashboardGraph({ data }: { data: DashboardData }) {
             />
           </Card>
 
+          {/* Utilisateurs par Rôle */}
           <Card
             title="Utilisateurs par Rôle"
             sub="Répartition de la base de données"
           >
             <RolesChart data={users.byRole} visible={chartsVisible} />
           </Card>
+
+          {/* Loteries & Engagements */}
           <Card
             title="Loteries & Engagements"
             sub="Participations aux tirages au sort"
@@ -507,32 +649,17 @@ export default function AdminDashboardGraph({ data }: { data: DashboardData }) {
               </div>
             </div>
           </Card>
+
+          {/* Top Événements — pleine largeur avec bar chart horizontal */}
           <div className="lg:col-span-2">
-            {/* Top Événements */}
             <ChartCard
               title="Top Événements"
               sub="Basé sur le volume de ventes"
             >
-              <div className="space-y-4">
-                {data.events.topEvents.map((event, i) => (
-                  <div
-                    key={event.id}
-                    className="flex items-center justify-between p-4 bg-background border border-muted/5 rounded-xl"
-                  >
-                    <div className="flex items-center gap-4">
-                      <span className="text-lg font-black text-brand/50">
-                        0{i + 1}
-                      </span>
-                      <span className="font-bold text-title text-sm">
-                        {event.title}
-                      </span>
-                    </div>
-                    <span className="text-xs font-black bg-brand/10 text-brand px-3 py-1 rounded-full">
-                      {event.ticketCount} tickets
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <TopEventsBarChart
+                data={events.topEvents}
+                visible={chartsVisible}
+              />
             </ChartCard>
           </div>
         </div>

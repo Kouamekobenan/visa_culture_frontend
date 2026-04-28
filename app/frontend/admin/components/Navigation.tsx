@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useSyncExternalStore, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -18,6 +17,9 @@ import {
   ChevronRight,
   Menu,
   X,
+  MessageSquare,
+  ClipboardList,
+  ChevronDown,
 } from 'lucide-react';
 
 // ─── Theme store ──────────────────────────────────────────────────────────────
@@ -36,17 +38,36 @@ const getThemeSnapshot = () => {
   if (saved) return saved === 'dark';
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
-
 const getServerSnapshot = () => false;
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+type SubNavItem = {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+};
+
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  isExternal?: boolean;
+  children?: SubNavItem[];
+};
+
+type NavGroup = {
+  label: string;
+  items: NavItem[];
+};
+
 // ─── Nav groups ───────────────────────────────────────────────────────────────
-const navGroups = [
+const navGroups: NavGroup[] = [
   {
     label: 'Navigation',
     items: [
       {
         href: '/frontend/page/event',
-        label: 'Accueil Site',
+        label: 'Accueil site',
         icon: <Home className="w-4 h-4" />,
         isExternal: true,
       },
@@ -96,13 +117,88 @@ const navGroups = [
         icon: <BarChart3 className="w-4 h-4" />,
       },
       {
-        href: '/frontend/admin/page/settings/templates',
+        href: '/frontend/admin/page/settings',
         label: 'Paramètres',
         icon: <Settings className="w-4 h-4" />,
+        children: [
+          {
+            href: '/frontend/admin/page/settings/whatsApp',
+            label: 'Logs WhatsApp',
+            icon: <MessageSquare className="w-3.5 h-3.5" />,
+          },
+          {
+            href: '/frontend/admin/page/settings/audit',
+            label: 'Audit',
+            icon: <ClipboardList className="w-3.5 h-3.5" />,
+          },
+        ],
       },
     ],
   },
 ];
+
+// ─── SubNavLink ───────────────────────────────────────────────────────────────
+function SubNavLink({
+  href,
+  label,
+  icon,
+  isActive,
+  isDark,
+}: {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  isActive: boolean;
+  isDark: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`
+        group relative flex items-center gap-2.5 pl-9 pr-3 py-2 rounded-lg
+        transition-all duration-150 font-['Inter',sans-serif]
+        ${
+          isActive
+            ? isDark
+              ? 'bg-[#0d9488]/15 text-[#f9fafb]'
+              : 'bg-[#0d9488]/10 text-[#111827]'
+            : isDark
+              ? 'text-[#6b7280] hover:bg-white/[0.04] hover:text-[#d1d5db]'
+              : 'text-[#9ca3af] hover:bg-[#0d9488]/[0.06] hover:text-[#374151]'
+        }
+      `}
+    >
+      {/* Ligne verticale connecteur */}
+      <span
+        className={`
+          absolute left-[18px] top-0 bottom-0 w-px
+          ${isDark ? 'bg-white/[0.08]' : 'bg-black/[0.08]'}
+        `}
+      />
+
+      {/* Ligne horizontale connecteur */}
+      <span
+        className={`
+          absolute left-[18px] top-1/2 w-3 h-px
+          ${isDark ? 'bg-white/[0.08]' : 'bg-black/[0.08]'}
+        `}
+      />
+
+      {/* Dot actif */}
+      {isActive && (
+        <span className="absolute left-[15px] top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#0d9488] z-10" />
+      )}
+
+      {/* Icon */}
+      <span className={`flex-shrink-0 ${isActive ? 'text-[#0d9488]' : ''}`}>
+        {icon}
+      </span>
+
+      {/* Label */}
+      <span className="text-[12px] font-medium whitespace-nowrap">{label}</span>
+    </Link>
+  );
+}
 
 // ─── NavLink ──────────────────────────────────────────────────────────────────
 function NavLink({
@@ -113,6 +209,9 @@ function NavLink({
   collapsed,
   isDark,
   isMobile = false,
+  hasChildren,
+  isOpen,
+  onToggle,
 }: {
   href: string;
   label: string;
@@ -121,7 +220,83 @@ function NavLink({
   collapsed: boolean;
   isDark: boolean;
   isMobile?: boolean;
+  hasChildren?: boolean;
+  isOpen?: boolean;
+  onToggle?: () => void;
 }) {
+  // Si le lien a des enfants, on gère le clic pour toggle sans naviguer
+  if (hasChildren && onToggle) {
+    return (
+      <button
+        onClick={onToggle}
+        className={`
+          group relative flex items-center gap-3 px-3 py-2.5 rounded-xl w-full text-left
+          transition-all duration-150 font-['Inter',sans-serif]
+          ${isMobile ? 'flex-col gap-1 px-2 py-2' : ''}
+          ${
+            isActive
+              ? isDark
+                ? 'bg-[#0d9488]/15 text-[#f9fafb]'
+                : 'bg-[#0d9488]/10 text-[#111827]'
+              : isDark
+                ? 'text-[#9ca3af] hover:bg-white/[0.04] hover:text-[#f9fafb]'
+                : 'text-[#6b7280] hover:bg-[#0d9488]/[0.06] hover:text-[#111827]'
+          }
+        `}
+      >
+        {/* Barre active */}
+        {isActive && !isMobile && (
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-[#0d9488]" />
+        )}
+
+        {/* Icon */}
+        <span
+          className={`flex-shrink-0 transition-colors duration-150 ${
+            isActive ? 'text-[#0d9488]' : ''
+          }`}
+        >
+          {icon}
+        </span>
+
+        {/* Label */}
+        {!collapsed && (
+          <span className="text-[13px] font-medium whitespace-nowrap flex-1">
+            {label}
+          </span>
+        )}
+
+        {/* Chevron pour sous-menu */}
+        {!collapsed && (
+          <ChevronDown
+            className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${
+              isOpen ? 'rotate-180' : ''
+            } ${isActive ? 'text-[#0d9488]' : ''}`}
+          />
+        )}
+
+        {/* Tooltip collapsed */}
+        {collapsed && !isMobile && (
+          <div
+            className={`
+              absolute left-full ml-3 px-2.5 py-1.5 rounded-lg
+              text-[11px] whitespace-nowrap font-['Inter',sans-serif]
+              opacity-0 group-hover:opacity-100
+              pointer-events-none transition-opacity duration-150
+              shadow-lg z-50
+              ${
+                isDark
+                  ? 'bg-[#1f2937] border border-white/[0.12] text-[#f9fafb]'
+                  : 'bg-white border border-black/[0.08] text-[#111827]'
+              }
+            `}
+          >
+            {label}
+          </div>
+        )}
+      </button>
+    );
+  }
+
   return (
     <Link
       href={href}
@@ -197,6 +372,7 @@ function NavLink({
     </Link>
   );
 }
+
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -206,6 +382,9 @@ export default function AdminSidebar() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  // État des sous-menus ouverts : clé = href de l'item parent
+  const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({});
 
   const isDark = useSyncExternalStore(
     subscribeToTheme,
@@ -218,17 +397,38 @@ export default function AdminSidebar() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Auto-ouvrir le sous-menu si une sous-route est active
+  useEffect(() => {
+    navGroups.forEach((group) => {
+      group.items.forEach((item) => {
+        if (item.children) {
+          const hasActiveChild = item.children.some(
+            (child) =>
+              pathname === child.href || pathname.startsWith(child.href),
+          );
+          if (hasActiveChild) {
+            setOpenSubMenus((prev) => ({ ...prev, [item.href]: true }));
+          }
+        }
+      });
+    });
+  }, [pathname]);
+
+  const toggleSubMenu = (href: string) => {
+    setOpenSubMenus((prev) => ({ ...prev, [href]: !prev[href] }));
+  };
 
   const handleLogout = (): void => {
     setIsLoggingOut(true);
     logout();
     router.push('/frontend/page/login');
   };
+
   // Navigation items principales pour le bottom nav mobile
   const mobileNavItems = [
     {
@@ -253,7 +453,101 @@ export default function AdminSidebar() {
     },
   ];
 
-  // Rendu Mobile (Bottom Navigation)
+  // Helper : est-ce qu'un item (ou ses enfants) est actif ?
+  const isItemActive = (item: NavItem) => {
+    if (item.children) {
+      return item.children.some(
+        (child) => pathname === child.href || pathname.startsWith(child.href),
+      );
+    }
+    return (
+      pathname === item.href ||
+      (item.href !== '/frontend/admin/page' && pathname.startsWith(item.href))
+    );
+  };
+
+  // ─── Rendu d'un item nav avec sous-menu éventuel ──────────────────────────
+  const renderNavItem = (
+    item: NavItem,
+    opts: { collapsed: boolean; isMobile?: boolean },
+  ) => {
+    const { collapsed, isMobile = false } = opts;
+    const isActive = isItemActive(item);
+    const hasChildren = !!(item.children && item.children.length > 0);
+    const isOpen = openSubMenus[item.href] ?? false;
+
+    return (
+      <div key={item.href}>
+        <NavLink
+          href={item.href}
+          label={item.label}
+          icon={item.icon}
+          isActive={isActive}
+          collapsed={collapsed}
+          isDark={isDark}
+          isMobile={isMobile}
+          hasChildren={hasChildren}
+          isOpen={isOpen}
+          onToggle={hasChildren ? () => toggleSubMenu(item.href) : undefined}
+        />
+
+        {/* Sous-menu dépliable */}
+        {hasChildren && !collapsed && (
+          <div
+            className={`
+              overflow-hidden transition-all duration-250 ease-in-out
+              ${isOpen ? 'max-h-40 opacity-100 mt-0.5' : 'max-h-0 opacity-0'}
+            `}
+          >
+            <div className="flex flex-col gap-0.5 ml-1 pb-1">
+              {item.children!.map((child) => {
+                const childActive =
+                  pathname === child.href || pathname.startsWith(child.href);
+                return (
+                  <SubNavLink
+                    key={child.href}
+                    href={child.href}
+                    label={child.label}
+                    icon={child.icon}
+                    isActive={childActive}
+                    isDark={isDark}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Sous-menu en tooltip quand collapsed */}
+        {hasChildren && collapsed && isOpen && (
+          <div
+            className={`
+              absolute left-full ml-2 top-0 z-50 min-w-[160px]
+              rounded-xl shadow-xl border p-1.5
+              ${isDark ? 'bg-[#111827] border-white/[0.12]' : 'bg-white border-black/[0.08]'}
+            `}
+          >
+            {item.children!.map((child) => {
+              const childActive =
+                pathname === child.href || pathname.startsWith(child.href);
+              return (
+                <SubNavLink
+                  key={child.href}
+                  href={child.href}
+                  label={child.label}
+                  icon={child.icon}
+                  isActive={childActive}
+                  isDark={isDark}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ─── Rendu Mobile (Bottom Navigation) ────────────────────────────────────
   if (isMobile) {
     return (
       <>
@@ -292,7 +586,9 @@ export default function AdminSidebar() {
               `}
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-5 py-4 border-b ${isDark ? 'border-white/10' : 'border-black/10'}">
+              <div
+                className={`flex items-center justify-between px-5 py-4 border-b ${isDark ? 'border-white/10' : 'border-black/10'}`}
+              >
                 <Link
                   href="/frontend/page/event"
                   className="flex items-center gap-3"
@@ -335,22 +631,9 @@ export default function AdminSidebar() {
                       {group.label}
                     </p>
                     <div className="space-y-1">
-                      {group.items.map((item) => {
-                        const isActive =
-                          pathname === item.href ||
-                          (item.href !== '/frontend/admin/page' &&
-                            pathname.startsWith(item.href));
-
-                        return (
-                          <NavLink
-                            key={item.href}
-                            {...item}
-                            isActive={isActive}
-                            collapsed={false}
-                            isDark={isDark}
-                          />
-                        );
-                      })}
+                      {group.items.map((item) =>
+                        renderNavItem(item, { collapsed: false }),
+                      )}
                     </div>
                   </div>
                 ))}
@@ -368,7 +651,6 @@ export default function AdminSidebar() {
                         : 'bg-[#0d9488]/10 border-[#0d9488]/30'
                     }`}
                   >
-                    {/* {getAvatarContent()} */}
                     <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
                       <Image
                         src="/images/icon_profile.jpg"
@@ -449,7 +731,7 @@ export default function AdminSidebar() {
     );
   }
 
-  // Rendu Desktop (Sidebar classique)
+  // ─── Rendu Desktop (Sidebar classique) ───────────────────────────────────
   return (
     <aside
       className={`
@@ -518,22 +800,7 @@ export default function AdminSidebar() {
             </p>
 
             <div className="flex flex-col gap-0.5">
-              {group.items.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== '/frontend/admin/page' &&
-                    pathname.startsWith(item.href));
-
-                return (
-                  <NavLink
-                    key={item.href}
-                    {...item}
-                    isActive={isActive}
-                    collapsed={collapsed}
-                    isDark={isDark}
-                  />
-                );
-              })}
+              {group.items.map((item) => renderNavItem(item, { collapsed }))}
             </div>
           </div>
         ))}

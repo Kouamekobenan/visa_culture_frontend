@@ -13,4 +13,8 @@ export interface IWhatsAppRepo {
     page: number,
     phone: string,
   ): Promise<PaginatedResponseRepository<WhatsAppLogEntity>>;
+  finddAll(
+    limit: number,
+    page: number,
+  ): Promise<PaginatedResponseRepository<WhatsAppLogEntity>>;
 }

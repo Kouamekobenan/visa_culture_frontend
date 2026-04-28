@@ -15,11 +15,24 @@ export class WhatsAppRepository implements IWhatsAppRepo {
     page: number,
     phone: string,
   ): Promise<PaginatedResponseRepository<WhatsAppLogEntity>> {
-    // ✅ phone en query param, encodé pour éviter les problèmes avec le "+"
+    //  phone en query param, encodé pour éviter les problèmes avec le "+"
     const res = await api.get(
       `/whatsapp/logs/phone/${encodeURIComponent(phone)}?page=${page}&limit=${limit}`,
     );
 
+    return {
+      data: res.data.data,
+      total: res.data.total,
+      totalPages: res.data.totalPages,
+      limit: res.data.limit,
+      page: res.data.page,
+    };
+  }
+  async finddAll(
+    limit: number,
+    page: number,
+  ): Promise<PaginatedResponseRepository<WhatsAppLogEntity>> {
+    const res = await api.get(`/whatsapp/logs/?page=${page}&limit=${limit}`);
     return {
       data: res.data.data,
       total: res.data.total,

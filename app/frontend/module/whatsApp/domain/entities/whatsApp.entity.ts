@@ -1,3 +1,4 @@
+import { User } from '../../../authentification/domain/entities/user.entity';
 import {
   WhatsAppMessageStatus,
   WhatsAppMessageType,
@@ -14,5 +15,6 @@ export class WhatsAppLogEntity {
     public readonly errorMessage?: string,
     public readonly ultramsgMessageId?: string,
     public readonly userId?: string,
+    public readonly user?: User,
   ) {}
 }
