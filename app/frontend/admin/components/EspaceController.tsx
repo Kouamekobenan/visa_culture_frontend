@@ -33,6 +33,7 @@ export default function EspaceController() {
     email: '',
     password: '',
   });
+  
   const [isLoading, setIsLoading] = useState(false);
 
   async function saveController() {
@@ -48,15 +49,12 @@ export default function EspaceController() {
       alert("Format d'email invalide.");
       return;
     }
-
     // Pour une création, le mot de passe est obligatoire
     if (!editTarget && (!form.password || form.password.length < 6)) {
       alert('Le mot de passe doit contenir au moins 6 caractères.');
       return;
     }
-
     setLoading(true); // Activer un loader sur le bouton
-
     try {
       if (editTarget) {
         // --- MODE ÉDITION ---

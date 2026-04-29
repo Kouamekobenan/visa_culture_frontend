@@ -123,18 +123,20 @@ export default function Header() {
       >
         <div className="container mx-auto flex h-16 items-center justify-between px-4 gap-2 md:gap-4">
           {' '}
-          {/* LOGO */}
           {/* 1. LOGO : "shrink-0" pour qu'il ne soit jamais écrasé */}
           <Link
             href="/frontend/page/event"
-            className="flex items-center gap-2 shrink-0"
+            className="flex items-center gap-2 shrink-0 transition-transform active:scale-95"
           >
-            <span className="text-xl font-black tracking-tighter text-title uppercase">
-              VISA
-            </span>
-            <span className="text-xl font-black tracking-tighter text-foreground/70 uppercase hidden xl:inline">
-              FOR CULTURE
-            </span>
+            <div className="relative h-15 w-60 md:h-20 md:w-100">
+              <Image
+                src="/images/logo.png"
+                fill
+                priority
+                className="object-contain object-left"
+                alt="Visa For Culture Logo"
+              />
+            </div>
           </Link>
           {/* --- ZONE RECHERCHE DESKTOP --- */}
           <div
