@@ -26,12 +26,14 @@ import {
 import { Event } from '../../module/event/domain/entities/event.entity';
 import { EventRepository } from '../../module/event/infrastructure/event.repository';
 import { EventService } from '../../module/event/application/event.service';
+import { UserRole } from '../../utils/types/manager.type';
 // Configuration de la navigation
 const NAV_LINKS = [
   { href: '/frontend/page/event', label: 'Événements', icon: Calendar },
   { href: '/frontend/page/about', label: 'À propos', icon: Info },
   { href: '/frontend/page/contact', label: 'Contact', icon: MessageSquare },
 ];
+
 const eventRepo = new EventRepository();
 const eventService = new EventService(eventRepo);
 
@@ -52,6 +54,7 @@ export default function Header() {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const isAdmin = user?.role === 'ADMIN';
+  const isControleur = user?.role === UserRole.CONTROLLER;
   // 1. Logique de recherche API
   useEffect(() => {
     const performSearch = async () => {
@@ -72,7 +75,6 @@ export default function Header() {
         setIsSearching(false);
       }
     };
-
     performSearch();
   }, [debouncedQuery]);
 
@@ -122,8 +124,6 @@ export default function Header() {
         }`}
       >
         <div className="container mx-auto flex h-16 items-center justify-between px-4 gap-2 md:gap-4">
-          {' '}
-          {/* 1. LOGO : "shrink-0" pour qu'il ne soit jamais écrasé */}
           <Link
             href="/frontend/page/event"
             className="flex items-center gap-2 shrink-0 transition-transform active:scale-95"
@@ -289,6 +289,14 @@ export default function Header() {
                       />
                     )}
 
+                    {isControleur && (
+                      <MenuLink
+                        href="/frontend/controler/page"
+                        icon={LayoutDashboard}
+                        label="Eespace controleur"
+                        className="text-brand bg-brand/5 mb-1"
+                      />
+                    )}
                     <MenuLink
                       href="/frontend/page/profile"
                       icon={User}
@@ -427,6 +435,25 @@ export default function Header() {
               href="/frontend/admin/page"
               icon={LayoutDashboard}
               label="Admin"
+              isActive={pathname.includes('/admin')}
+            />
+          ) : (
+            NAV_LINKS.map((link) => (
+              <MobileTab
+                key={link.href}
+                href={link.href}
+                icon={link.icon}
+                label={link.label}
+                isActive={pathname === link.href}
+              />
+            ))
+          )}
+
+          {isControleur ? (
+            <MobileTab
+              href="/frontend/controleur/page"
+              icon={LayoutDashboard}
+              label="Controleur"
               isActive={pathname.includes('/admin')}
             />
           ) : (
