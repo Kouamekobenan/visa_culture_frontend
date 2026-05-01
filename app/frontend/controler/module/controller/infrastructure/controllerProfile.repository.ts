@@ -4,6 +4,7 @@ import {
   IControllerRepository,
   IGate,
 } from '../domain/interface/controllerProfile.port';
+import { ControllerDashboardDto } from '../domain/interface/dashbord-controlleur.dto';
 
 export class ControllerRepository implements IControllerRepository {
   async getEventDay(): Promise<EventDay[]> {
@@ -19,5 +20,11 @@ export class ControllerRepository implements IControllerRepository {
       dto,
     );
     return res.data;
+  }
+  async getDashboard(controllerId: string): Promise<ControllerDashboardDto> {
+    const result = await api.get(
+      `/controller-profiles/dashboard/${controllerId}`,
+    );
+    return result.data;
   }
 }

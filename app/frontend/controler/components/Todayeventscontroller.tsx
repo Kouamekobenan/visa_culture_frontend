@@ -3,118 +3,20 @@ import { useState, useEffect } from 'react';
 import { ControllerRepository } from '../module/controller/infrastructure/controllerProfile.repository';
 import { EventDay, IGates } from '../module/controller/domain/entites/entity';
 import { formatDateTime } from '../../utils/types/conversion.data';
+import {
+  Calendar,
+  MapPin,
+  Ticket,
+  DoorOpen,
+  CheckCircle2,
+  ChevronDown,
+  CheckCheck,
+  AlertCircle,
+  ArrowRight,
+  Wifi,
+} from 'lucide-react';
 
 const controllerService = new ControllerRepository();
-
-// ─── Icons ────────────────────────────────────────────────────────────────────
-function CalendarIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="3" y="4" width="18" height="18" rx="3" />
-      <line x1="16" y1="2" x2="16" y2="6" />
-      <line x1="8" y1="2" x2="8" y2="6" />
-      <line x1="3" y1="10" x2="21" y2="10" />
-    </svg>
-  );
-}
-function PinIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
-}
-function TicketIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z" />
-    </svg>
-  );
-}
-
-function DoorIcon() {
-  return (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M13 4h3a2 2 0 0 1 2 2v14" />
-      <path d="M2 20h3" />
-      <path d="M13 20h9" />
-      <path d="M10 12v.01" />
-      <path d="M13 4l-6 2v14l6 2V4Z" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-
-function ChevronIcon({ rotated }: { rotated: boolean }) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={`transition-transform duration-200 ${rotated ? 'rotate-180' : 'rotate-0'}`}
-    >
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
-  );
-}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -138,6 +40,7 @@ interface EventCardProps {
 interface TodayEventsControllerProps {
   controllerId: string;
 }
+
 // ─── GateSelector ─────────────────────────────────────────────────────────────
 
 function GateSelector({
@@ -149,11 +52,13 @@ function GateSelector({
 }: GateSelectorProps) {
   if (!gates || gates.length === 0) {
     return (
-      <p className="py-3 text-sm text-[#8c8880]">
+      <div className="flex items-center gap-2 py-3 text-sm text-muted">
+        <AlertCircle size={14} strokeWidth={1.8} />
         Aucune porte disponible pour cet événement.
-      </p>
+      </div>
     );
   }
+
   return (
     <div className="flex flex-wrap gap-2 mt-3">
       {gates.map((gate: IGates) => {
@@ -165,21 +70,21 @@ function GateSelector({
             onClick={() => onSelect(gate.id)}
             disabled={assigning}
             className={`
-              flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[13px] 
+              flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px]
               border transition-all duration-200 outline-none font-[inherit]
               ${
                 isSelected
-                  ? 'border-[#2a6b4f] bg-[rgba(42,107,79,0.18)] text-[#5dcaa5] font-medium'
-                  : 'border-white/10 bg-white/5 text-[#c2bfb6] font-normal'
+                  ? 'border-brand/50 bg-brand/10 text-brand font-medium shadow-[0_0_12px_rgba(13,148,136,0.15)]'
+                  : 'border-foreground/10 bg-surface text-muted hover:border-foreground/20 hover:text-foreground'
               }
-              ${assigning ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-white/20'}
+              ${assigning ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
             `}
           >
-            <DoorIcon />
+            <DoorOpen size={13} strokeWidth={1.8} />
             {gate.name}
             {isAssigned && (
-              <span className="text-[#5dcaa5] flex items-center">
-                <CheckIcon />
+              <span className="text-btn flex items-center ml-0.5">
+                <CheckCircle2 size={13} strokeWidth={2.5} />
               </span>
             )}
           </button>
@@ -224,67 +129,72 @@ function EventCard({
       setLocalAssigning(false);
     }
   }
+
   return (
     <div
       className={`
-        rounded-2xl overflow-hidden transition-all duration-200 cursor-pointer
+        rounded-2xl overflow-hidden transition-all duration-200
         ${
           isThisEventAssigned
-            ? 'bg-white/[0.07] border border-[rgba(93,202,165,0.4)]'
+            ? 'bg-btn/[0.06] border border-btn/30 shadow-[0_0_20px_rgba(34,197,94,0.06)]'
             : isExpanded
-              ? 'bg-white/[0.07] border border-white/[0.15]'
-              : 'bg-white/[0.04] border border-white/[0.07]'
+              ? 'bg-surface border border-foreground/10 shadow-lg'
+              : 'bg-surface border border-foreground/5 hover:border-foreground/10'
         }
       `}
     >
       {/* Card header */}
-      <div onClick={onToggle} className="flex items-start gap-3.5 p-4">
-        {/* Event image or placeholder */}
+      <div
+        onClick={onToggle}
+        className="flex items-center gap-4 p-4 sm:p-5 cursor-pointer group"
+      >
+        {/* Event image / placeholder */}
         <div
-          className="w-13 h-13 rounded-xl shrink-0 flex items-center justify-center border border-white/10"
+          className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl shrink-0 flex items-center justify-center border border-foreground/8 overflow-hidden"
           style={{
-            width: 52,
-            height: 52,
             background: event.imageUrl
               ? `url(${event.imageUrl}) center/cover`
-              : 'linear-gradient(135deg, #1a4d38 0%, #0e2d20 100%)',
+              : 'linear-gradient(135deg, rgba(13,148,136,0.2) 0%, rgba(13,148,136,0.05) 100%)',
           }}
         >
           {!event.imageUrl && (
-            <span className="text-[#5dcaa5] opacity-70">
-              <CalendarIcon />
-            </span>
+            <Calendar
+              size={22}
+              className="text-brand opacity-60"
+              strokeWidth={1.5}
+            />
           )}
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="m-0 text-[15px] font-semibold text-[#f0ede6] truncate">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <h3 className="font-title font-bold text-foreground text-[15px] sm:text-[16px] truncate">
               {event.title}
             </h3>
             {isThisEventAssigned && (
-              <span className="text-[11px] font-medium text-[#5dcaa5] bg-[rgba(93,202,165,0.15)] border border-[rgba(93,202,165,0.3)] rounded-full px-2 py-0.5 whitespace-nowrap">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-btn bg-btn/10 border border-btn/25 rounded-full px-2.5 py-0.5 whitespace-nowrap">
+                <CheckCircle2 size={10} strokeWidth={2.5} />
                 Assigné
               </span>
             )}
           </div>
-          <div className="flex flex-wrap gap-2.5 text-xs text-[#8c8880]">
-            <span className="flex items-center gap-1">
-              <CalendarIcon />
+          <div className="flex flex-wrap gap-3 text-xs text-muted">
+            <span className="flex items-center gap-1.5">
+              <Calendar size={11} strokeWidth={2} />
               {formatDateTime(event.date)}
             </span>
             {event.location && (
-              <span className="flex items-center gap-1">
-                <PinIcon />
+              <span className="flex items-center gap-1.5">
+                <MapPin size={11} strokeWidth={2} />
                 {event.location}
               </span>
             )}
-            <span className="flex items-center gap-1">
-              <TicketIcon />
+            <span className="flex items-center gap-1.5">
+              <Ticket size={11} strokeWidth={2} />
               {event.totalTickets} ticket{event.totalTickets !== 1 ? 's' : ''}
             </span>
-            <span className="flex items-center gap-1">
-              <DoorIcon />
+            <span className="flex items-center gap-1.5">
+              <DoorOpen size={11} strokeWidth={2} />
               {event.gates?.length ?? 0} porte
               {(event.gates?.length ?? 0) !== 1 ? 's' : ''}
             </span>
@@ -292,15 +202,17 @@ function EventCard({
         </div>
 
         {/* Chevron */}
-        <div className="text-[#5c5a55] shrink-0 mt-0.5">
-          <ChevronIcon rotated={isExpanded} />
+        <div
+          className={`shrink-0 text-muted transition-all duration-200 ${isExpanded ? 'rotate-180' : 'rotate-0'} group-hover:text-foreground`}
+        >
+          <ChevronDown size={16} strokeWidth={2} />
         </div>
       </div>
 
       {/* Expanded panel */}
       {isExpanded && (
-        <div className="px-4 pb-4 pt-4 border-t border-white/[0.06]">
-          <p className="m-0 mb-2.5 text-xs text-[#8c8880] font-medium tracking-widest uppercase">
+        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-4 border-t border-foreground/[0.06]">
+          <p className="text-[10px] font-bold text-muted uppercase tracking-[0.1em] mb-3">
             Choisir une porte
           </p>
 
@@ -313,12 +225,15 @@ function EventCard({
           />
 
           {error && (
-            <p className="mt-2.5 text-[13px] text-[#e24b4a]">{error}</p>
+            <div className="flex items-center gap-1.5 mt-3 text-[13px] text-error">
+              <AlertCircle size={13} strokeWidth={2} />
+              {error}
+            </div>
           )}
 
           {success && (
-            <div className="flex items-center gap-1.5 mt-2.5 text-[#5dcaa5] text-[13px]">
-              <CheckIcon />
+            <div className="flex items-center gap-1.5 mt-3 text-[13px] text-btn">
+              <CheckCheck size={14} strokeWidth={2.5} />
               Porte assignée avec succès
             </div>
           )}
@@ -327,16 +242,27 @@ function EventCard({
             onClick={handleAssign}
             disabled={!selectedGate || localAssigning}
             className={`
-              mt-3.5 w-full py-3 rounded-xl text-[14px] font-semibold 
-              tracking-[0.01em] transition-all duration-200 font-[inherit] border-none
+              mt-4 w-full py-3 rounded-xl text-[14px] font-semibold
+              tracking-[0.01em] transition-all duration-200 border-none font-[inherit]
+              flex items-center justify-center gap-2
               ${
                 selectedGate && !localAssigning
-                  ? 'bg-gradient-to-br from-[#1d9e75] to-[#0f6e56] text-white cursor-pointer hover:opacity-90'
-                  : 'bg-white/[0.06] text-[#5c5a55] cursor-not-allowed'
+                  ? 'bg-btn text-background cursor-pointer hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] shadow-[0_4px_16px_rgba(34,197,94,0.2)]'
+                  : 'bg-foreground/5 text-muted cursor-not-allowed'
               }
             `}
           >
-            {localAssigning ? 'Assignation en cours...' : 'Confirmer la porte'}
+            {localAssigning ? (
+              <>
+                <span className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                Assignation en cours...
+              </>
+            ) : (
+              <>
+                <CheckCircle2 size={15} strokeWidth={2} />
+                Confirmer la porte
+              </>
+            )}
           </button>
         </div>
       )}
@@ -348,7 +274,29 @@ function EventCard({
 
 function SkeletonCard() {
   return (
-    <div className="h-[84px] rounded-2xl bg-white/[0.04] border border-white/[0.07] animate-pulse" />
+    <div className="h-[88px] rounded-2xl bg-surface border border-foreground/5 animate-pulse" />
+  );
+}
+
+// ─── Empty State ──────────────────────────────────────────────────────────────
+
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-surface border border-foreground/8 flex items-center justify-center mb-4">
+        <Calendar
+          size={28}
+          className="text-muted opacity-50"
+          strokeWidth={1.5}
+        />
+      </div>
+      <p className="font-title font-semibold text-foreground/40 text-[15px] mb-1">
+        Aucun événement prévu aujourd&apos;hui
+      </p>
+      <p className="text-muted text-sm">
+        Revenez plus tard ou contactez l&apos;organisateur
+      </p>
+    </div>
   );
 }
 
@@ -385,10 +333,13 @@ export default function TodayEventsController({
     fetchDataEvent();
   }, [controllerId]);
 
-  async function handleAssignGate(gateId: string): Promise<void> {
+  async function handleAssignGate(
+    gateId: string,
+    eventId: string,
+  ): Promise<void> {
     await controllerService.assigneGate(controllerId, { gateId });
     setAssignedGateId(gateId);
-    // setAssignedEventId(controlerId);
+    setAssignedEventId(eventId);
   }
 
   const assignedGateName: string =
@@ -396,86 +347,226 @@ export default function TodayEventsController({
       .find((e: EventDay) => e.id === assignedEventId)
       ?.gates?.find((g: IGates) => g.id === assignedGateId)?.name ??
     'une porte';
+
   return (
-    <div className="min-h-screen bg-[#0d1710] font-['DM_Sans','Helvetica_Neue',sans-serif] px-4 py-6 max-w-[520px] mx-auto box-border">
-      {/* Header */}
-      <div className="mb-7">
-        <div className="flex items-center gap-2.5 mb-1.5">
-          <div className="w-2 h-2 rounded-full bg-[#1d9e75] shadow-[0_0_8px_#1d9e75]" />
-          <span className="text-xs text-[#5dcaa5] font-medium tracking-[0.08em] uppercase">
-            Aujourd&apos;hui
-          </span>
-        </div>
-        <h1 className="m-0 text-[26px] font-bold text-[#f0ede6] tracking-[-0.02em]">
-          Événements du jour
-        </h1>
-        <p className="mt-1.5 text-[14px] text-[#6b6860] m-0">
-          Sélectionnez un événement et assignez-vous à une porte
-        </p>
-      </div>
-      {/* Assigned pill */}
-      {assignedGateId && (
-        <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[rgba(29,158,117,0.12)] border border-[rgba(29,158,117,0.3)] mb-4 text-[13px] text-[#5dcaa5]">
-          <CheckIcon />
-          <span>
-            Vous êtes assigné à <strong>{assignedGateName}</strong>
-          </span>
-        </div>
-      )}
+    <div className="min-h-screen bg-background">
+      {/* Subtle dot pattern */}
+      <div
+        className="fixed inset-0 pointer-events-none opacity-[0.015] dark:opacity-[0.03]"
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, var(--foreground) 1px, transparent 0)`,
+          backgroundSize: '28px 28px',
+        }}
+      />
 
-      {/* Loading */}
-      {loading && (
-        <div className="flex flex-col gap-3">
-          <SkeletonCard />
-          <SkeletonCard />
-        </div>
-      )}
-
-      {/* Error */}
-      {!loading && error && (
-        <div className="px-4 py-3.5 rounded-xl bg-[rgba(226,75,74,0.1)] border border-[rgba(226,75,74,0.3)] text-[#e24b4a] text-[14px]">
-          {error}
-        </div>
-      )}
-
-      {/* Empty state */}
-      {!loading && !error && events.length === 0 && (
-        <div className="text-center py-12 text-[#4a4844]">
-          <div className="text-[40px] mb-3 opacity-40 flex justify-center">
-            <CalendarIcon />
-          </div>
-          <p className="m-0 text-[15px]">
-            Aucun événement prévu aujourd&apos;hui
-          </p>
-        </div>
-      )}
-
-      {/* Events list */}
-      {!loading && !error && events.length > 0 && (
-        <div className="flex flex-col gap-2.5">
-          {events.map((event: EventDay) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              isExpanded={expandedId === event.id}
-              onToggle={() =>
-                setExpandedId(expandedId === event.id ? null : event.id)
-              }
-              onAssignGate={handleAssignGate}
-              assignedGateId={assignedGateId}
-              assignedEventId={assignedEventId}
-            />
-          ))}
-        </div>
-      )}
-      {/* CTA dashboard */}
-      {assignedGateId && (
-        <button
-          onClick={() => (window.location.href = '/controller/dashboard')}
-          className="mt-6 w-full py-3.5 rounded-xl border border-[rgba(93,202,165,0.3)] bg-[rgba(93,202,165,0.08)] text-[#5dcaa5] text-[15px] font-semibold cursor-pointer font-[inherit] tracking-[0.01em] transition-all duration-200 hover:bg-[rgba(93,202,165,0.14)]"
+      {/* ── Two-column layout on lg+ ── */}
+      <div className="relative min-h-screen flex flex-col lg:flex-row">
+        {/* ── LEFT SIDEBAR (desktop only sticky panel) ── */}
+        <aside
+          className="
+          lg:w-[320px] xl:w-[360px] shrink-0
+          lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto
+          lg:flex lg:flex-col lg:justify-between
+          bg-surface border-b lg:border-b-0 lg:border-r border-foreground/5
+          px-6 py-7 lg:px-8 lg:py-10
+        "
         >
-          Accéder au dashboard →
-        </button>
+          <div>
+            {/* Live indicator */}
+            <div className="flex items-center gap-2 mb-5">
+              <span className="w-2 h-2 rounded-full bg-btn animate-pulse shadow-[0_0_6px_rgba(34,197,94,0.6)]" />
+              <span className="text-xs text-btn font-semibold tracking-[0.08em] uppercase">
+                Aujourd&apos;hui
+              </span>
+            </div>
+
+            <h1 className="font-title text-2xl lg:text-[28px] font-bold text-foreground leading-tight mb-2">
+              Événements
+              <br className="hidden lg:block" /> du jour
+            </h1>
+            <p className="text-muted text-sm mb-7">
+              Sélectionnez un événement et assignez-vous à une porte pour
+              démarrer le contrôle.
+            </p>
+
+            {/* Quick stats */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-background border border-foreground/8">
+                <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center">
+                  <Calendar size={14} className="text-brand" strokeWidth={2} />
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted uppercase tracking-[0.08em] font-semibold">
+                    Événements
+                  </p>
+                  <p className="text-foreground font-bold text-[15px] font-title leading-tight">
+                    {loading
+                      ? '—'
+                      : `${events.length} programmé${events.length !== 1 ? 's' : ''}`}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-background border border-foreground/8">
+                <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center">
+                  <DoorOpen size={14} className="text-brand" strokeWidth={2} />
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted uppercase tracking-[0.08em] font-semibold">
+                    Portes
+                  </p>
+                  <p className="text-foreground font-bold text-[15px] font-title leading-tight">
+                    {loading
+                      ? '—'
+                      : `${events.reduce((acc, e) => acc + (e.gates?.length ?? 0), 0)} disponibles`}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Assigned block — desktop */}
+          {assignedGateId && (
+            <div className="hidden lg:block mt-8 space-y-3">
+              <div className="flex items-start gap-3 p-4 rounded-2xl bg-btn/[0.08] border border-btn/25">
+                <div className="w-9 h-9 rounded-xl bg-btn/15 flex items-center justify-center shrink-0">
+                  <CheckCircle2
+                    size={17}
+                    className="text-btn"
+                    strokeWidth={2}
+                  />
+                </div>
+                <div>
+                  <p className="text-[11px] text-muted font-medium mb-0.5">
+                    Vous êtes assigné à
+                  </p>
+                  <p className="font-title font-bold text-btn text-[15px] leading-tight">
+                    {assignedGateName}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() =>
+                  (window.location.href = `/frontend/controler/page/dashboard/${controllerId}`)
+                }
+                className="
+                  w-full flex items-center justify-center gap-2
+                  py-3.5 rounded-2xl
+                  bg-btn text-background
+                  font-title font-bold text-[14px]
+                  shadow-[0_8px_24px_rgba(34,197,94,0.25)]
+                  hover:opacity-90 hover:scale-[1.01] active:scale-[0.99]
+                  transition-all duration-200
+                "
+              >
+                Accéder au dashboard
+                <ArrowRight size={15} strokeWidth={2.5} />
+              </button>
+              <div className="flex items-center gap-1.5 text-xs text-muted justify-center pt-1">
+                <Wifi size={11} strokeWidth={2} />
+                Synchronisation automatique
+              </div>
+            </div>
+          )}
+        </aside>
+
+        {/* ── MAIN CONTENT ── */}
+        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-10 pb-28 lg:pb-10 overflow-y-auto">
+          <div className="max-w-2xl mx-auto lg:max-w-3xl">
+            {/* Assigned pill — mobile */}
+            {assignedGateId && (
+              <div className="lg:hidden flex items-center gap-2 px-4 py-3 rounded-xl bg-btn/[0.08] border border-btn/25 mb-5 text-[13px] text-btn">
+                <CheckCircle2 size={14} strokeWidth={2.5} />
+                <span>
+                  Assigné à <strong>{assignedGateName}</strong>
+                </span>
+              </div>
+            )}
+
+            {/* Section title (desktop) */}
+            <div className="hidden lg:flex items-center justify-between mb-6">
+              <h2 className="font-title font-bold text-foreground text-xl">
+                {loading
+                  ? 'Chargement...'
+                  : events.length === 0
+                    ? 'Aucun événement'
+                    : `${events.length} événement${events.length !== 1 ? 's' : ''} disponible${events.length !== 1 ? 's' : ''}`}
+              </h2>
+              {!loading && events.length > 0 && (
+                <span className="text-xs text-muted bg-surface border border-foreground/8 px-3 py-1.5 rounded-full">
+                  Cliquez pour sélectionner une porte
+                </span>
+              )}
+            </div>
+
+            {/* Loading */}
+            {loading && (
+              <div className="flex flex-col gap-3">
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </div>
+            )}
+
+            {/* Error */}
+            {!loading && error && (
+              <div className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-error/10 border border-error/25 text-error text-[14px]">
+                <AlertCircle size={18} strokeWidth={1.8} className="shrink-0" />
+                {error}
+              </div>
+            )}
+
+            {/* Empty */}
+            {!loading && !error && events.length === 0 && <EmptyState />}
+
+            {/* Events list */}
+            {!loading && !error && events.length > 0 && (
+              <div className="flex flex-col gap-3">
+                {events.map((event: EventDay) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    isExpanded={expandedId === event.id}
+                    onToggle={() =>
+                      setExpandedId(expandedId === event.id ? null : event.id)
+                    }
+                    onAssignGate={handleAssignGate}
+                    assignedGateId={assignedGateId}
+                    assignedEventId={assignedEventId}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+
+      {/* ── Fixed bottom CTA (mobile only) ── */}
+      {assignedGateId && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background/95 to-transparent">
+          <button
+            onClick={() =>
+              (window.location.href = `/frontend/controler/page/dashboard/${controllerId}`)
+            }
+            className="
+              w-full flex items-center justify-between
+              px-5 py-4 rounded-2xl
+              bg-btn text-background
+              font-title font-bold text-[15px]
+              shadow-[0_8px_32px_rgba(34,197,94,0.3)]
+              hover:shadow-[0_12px_40px_rgba(34,197,94,0.4)]
+              hover:scale-[1.01] active:scale-[0.99]
+              transition-all duration-200
+            "
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-background/20 flex items-center justify-center">
+                <CheckCircle2 size={18} strokeWidth={2} />
+              </div>
+              Accéder au dashboard
+            </div>
+            <ArrowRight size={18} strokeWidth={2.5} className="opacity-70" />
+          </button>
+        </div>
       )}
     </div>
   );

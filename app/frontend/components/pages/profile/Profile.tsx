@@ -268,7 +268,6 @@ export default function ProfileUser() {
                         }
                       />
                     </div>
-
                     {/* Infos */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
@@ -352,7 +351,7 @@ export default function ProfileUser() {
                 <Button
                   variant="title"
                   onClick={() =>
-                    router.push('/frontend/page/tickets/controller')
+                    router.push('/frontend/controler/page')
                   }
                   className="mt-2 flex items-center gap-2 px-4 py-2 rounded-xl  transition-colors text-sm font-bold"
                 >
