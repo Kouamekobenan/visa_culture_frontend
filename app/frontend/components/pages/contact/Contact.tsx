@@ -45,7 +45,7 @@ export default function ContactForm() {
         {/* Colonne Gauche : Texte Descriptif & Branding */}
         <div className="lg:col-span-2 bg-green-600 p-8 md:p-12 text-white rounded-2xl flex flex-col justify-between">
           <div>
-            <h2 className="text-3xl font-extrabold mb-6 leading-tight">
+            <h2 className="text-3xl text-title font-bold mb-6 leading-tight">
               Donnez vie à vos projets culturels
             </h2>
             <p className="text-teal-50 text-lg leading-relaxed mb-8">
@@ -54,7 +54,6 @@ export default function ContactForm() {
               Un besoin d&apos;accompagnement pour votre festival ? Notre équipe est
               à votre écoute.
             </p>
-
             <div className="space-y-4">
               <div className="flex items-center gap-4">
                 <div className="bg-white/20 p-3 rounded-full">
@@ -76,7 +75,6 @@ export default function ContactForm() {
               </div>
             </div>
           </div>
-
           <div className="mt-12 pt-8 border-t border-green-500/50">
             <p className="text-sm italic opacity-80">
               `La culture ne s&apos;hérite pas, elle se conquiert.` – Malraux

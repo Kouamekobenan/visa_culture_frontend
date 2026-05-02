@@ -97,7 +97,7 @@ const navGroups: NavGroup[] = [
     label: 'Gestion',
     items: [
       {
-        href: '/frontend/admin/page/controller',
+        href: '/frontend/admin/page/controller/page',
         label: 'Contrôleurs',
         icon: <Ticket className="w-4 h-4" />,
       },

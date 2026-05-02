@@ -24,3 +24,31 @@ export interface RecentScanDto {
   eventTitle: string;
   ticketType: string;
 }
+
+export interface CreateProfileDto {
+  fullName: string;
+  email: string;
+  phone: string;
+  educationLevel?: string;
+  photoUrl?: string;
+  password: string;
+}
+
+export interface ControllerWithStats {
+  id: string;
+  fullName: string;
+  photoUrl: string | null;
+  educationLevel: string | null;
+  userId: string;
+  gateId: string | null;
+  gate: {
+    id: string;
+    name: string;
+    event: { id: string; title: string };
+  } | null;
+  user: { email: string; phone: string | null };
+  totalScansToday: number;
+  totalScansAllTime: number;
+  lastScanAt: string | null;
+  isActive: boolean; // true si scannedAt dans les 30 dernières minutes
+}

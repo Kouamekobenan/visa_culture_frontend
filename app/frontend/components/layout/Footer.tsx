@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Mail, Phone, MapPin, Send, ShieldCheck } from 'lucide-react';
+import { Button } from '../ui/Button';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -120,22 +121,12 @@ export default function Footer() {
                 Restez informé des prochains tirages.
               </p>
             </div>
-            <form
-              className="relative group max-w-sm mx-auto lg:mx-0"
-              onSubmit={(e) => e.preventDefault()}
-            >
-              <input
-                type="email"
-                placeholder="votre@email.com"
-                className="w-full bg-background border border-muted/20 rounded-full py-3.5 px-6 text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all shadow-sm"
-              />
-              <button
-                type="submit"
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2.5 bg-brand text-white rounded-full hover:scale-105 active:scale-95 transition-all shadow-md"
-              >
-                <Send size={16} />
-              </button>
-            </form>
+            <div className="">
+              <Link href="/frontend/page/contact">
+                <Button variant="outline">Contactez-nous!</Button>
+              </Link>
+            </div>
+
             <div className="flex items-center justify-center lg:justify-start gap-2 text-[10px] text-muted font-bold uppercase tracking-widest opacity-80">
               <ShieldCheck size={14} className="text-green-500" />
               Paiements sécurisés par Wave

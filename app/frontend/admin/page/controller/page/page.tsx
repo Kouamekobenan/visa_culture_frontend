@@ -1,6 +1,6 @@
-import EspaceController from '../../components/EspaceController';
-import AdminSidebar from '../../components/Navigation';
-import AdminSearchBar from '../../components/search/Search';
+import AdminControllerDashboard from '../../../components/DashbordControllers';
+import AdminSidebar from '../../../components/Navigation';
+import AdminSearchBar from '../../../components/search/Search';
 
 export default function Controller() {
   return (
@@ -10,7 +10,7 @@ export default function Controller() {
         <div className="bg-background px-2 pt-3">
           <AdminSearchBar />
         </div>
-        <EspaceController />
+        <AdminControllerDashboard />
       </main>
     </div>
   );
