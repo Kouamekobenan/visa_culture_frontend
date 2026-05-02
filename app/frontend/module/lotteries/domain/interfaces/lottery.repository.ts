@@ -7,4 +7,5 @@ export interface ILotteryRepository {
     page: number,
   ): Promise<PaginatedResponseRepository<Lottery>>;
   toggleActivation(eventId: string): Promise<Lottery>;
+  create(eventId: string): Promise<Lottery>;
 }

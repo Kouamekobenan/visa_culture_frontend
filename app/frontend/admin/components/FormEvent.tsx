@@ -77,9 +77,10 @@ export default function EventFormModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-slate-950 w-full max-w-lg rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-slate-800/50 overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
-        {/* HEADER MINIMALISTE */}
-        <div className="relative px-8 pt-8 pb-4">
+      {/* Conteneur principal avec hauteur maximale contrôlée */}
+      <div className="bg-white dark:bg-slate-950 w-full max-w-lg max-h-[90vh] flex flex-col rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-slate-800/50 overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
+        {/* HEADER - Fixé en haut */}
+        <div className="relative px-8 pt-8 pb-4 shrink-0">
           <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase">
             {initialData ? 'Édition' : 'Nouvel Événement'}
           </h2>
@@ -94,14 +95,15 @@ export default function EventFormModal({
           </button>
         </div>
 
+        {/* FORMULAIRE - Défilable si le contenu est trop grand */}
         <form
           onSubmit={handleSubmit(onFormSubmit)}
-          className="px-8 pb-8 space-y-5"
+          className="px-8 pb-8 space-y-5 overflow-y-auto custom-scrollbar"
         >
-          {/* UPLOAD SECTION - Plus compacte */}
-          <div className="relative group">
+          {/* UPLOAD SECTION */}
+          <div className="relative group shrink-0">
             <div
-              className={`relative h-32 w-full rounded-2xl border-2 border-dashed transition-all overflow-hidden flex items-center justify-center ${
+              className={`relative h-28 w-full rounded-2xl border-2 border-dashed transition-all overflow-hidden flex items-center justify-center ${
                 preview
                   ? 'border-transparent'
                   : 'border-slate-200 dark:border-slate-800 group-hover:border-brand/50 bg-slate-50/50 dark:bg-slate-900/50'
@@ -122,7 +124,7 @@ export default function EventFormModal({
                         setPreview(null);
                         setSelectedFile(null);
                       }}
-                      className="bg-white text-black text-xs font-bold px-3 py-1.5 rounded-full shadow-xl"
+                      className="bg-white text-black text-[10px] font-bold px-3 py-1.5 rounded-full shadow-xl uppercase"
                     >
                       Changer l&apos;image
                     </button>
@@ -130,8 +132,8 @@ export default function EventFormModal({
                 </>
               ) : (
                 <div className="text-center">
-                  <Upload className="h-6 w-6 text-brand mx-auto mb-2" />
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  <Upload className="h-5 w-5 text-brand mx-auto mb-1" />
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                     Affiche (PNG, JPG)
                   </span>
                   <input
@@ -144,40 +146,42 @@ export default function EventFormModal({
               )}
             </div>
           </div>
+
           <div className="space-y-4">
             {/* TITRE */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1">
+              <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1">
                 Nom de l&apos;événement
               </label>
               <div className="relative">
                 <Type className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input
                   {...register('title', { required: true })}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all outline-none"
+                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all outline-none"
                   placeholder="ex: Festival d'Été"
                 />
               </div>
             </div>
+
             {/* LIEU */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1">
+              <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1">
                 Localisation
               </label>
               <div className="relative">
                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input
                   {...register('location', { required: true })}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all outline-none"
+                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all outline-none"
                   placeholder="Ville, Stade, Salle..."
                 />
               </div>
             </div>
 
-            {/* DATE & HEURE - Sur une ligne */}
+            {/* DATE & HEURE */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1">
+                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1">
                   Date
                 </label>
                 <div className="relative">
@@ -185,12 +189,12 @@ export default function EventFormModal({
                   <input
                     type="date"
                     {...register('date', { required: true })}
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-sm font-medium outline-none focus:border-brand"
+                    className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-sm font-medium outline-none"
                   />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1">
+                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1">
                   Heure
                 </label>
                 <div className="relative">
@@ -198,7 +202,7 @@ export default function EventFormModal({
                   <input
                     type="time"
                     {...register('time', { required: true })}
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-sm font-medium outline-none focus:border-brand"
+                    className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-sm font-medium outline-none"
                   />
                 </div>
               </div>
@@ -206,23 +210,23 @@ export default function EventFormModal({
 
             {/* DESCRIPTION */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1">
+              <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1">
                 Description
               </label>
               <div className="relative">
-                <AlignLeft className="absolute left-4 top-4 h-4 w-4 text-slate-400" />
+                <AlignLeft className="absolute left-4 top-3 h-4 w-4 text-slate-400" />
                 <textarea
                   {...register('description')}
                   rows={2}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-sm font-medium outline-none focus:border-brand resize-none"
+                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-sm font-medium outline-none focus:border-brand resize-none"
                   placeholder="Quelques mots sur l'événement..."
                 />
               </div>
             </div>
           </div>
 
-          {/* ACTIONS FINALES */}
-          <div className="flex gap-3 pt-2">
+          {/* ACTIONS FINALES - Souvent le problème sur petit écran */}
+          <div className="flex gap-3 pt-2 sticky bottom-0 bg-white dark:bg-slate-950 py-2">
             <button
               type="button"
               onClick={onClose}
@@ -244,6 +248,23 @@ export default function EventFormModal({
           </div>
         </form>
       </div>
+
+      {/* Style CSS pour cacher la scrollbar mais garder le scroll (optionnel) */}
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 10px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #334155;
+        }
+      `}</style>
     </div>
   );
 }

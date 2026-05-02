@@ -26,13 +26,18 @@ export interface ResponseProfile {
   };
   assignedGate: string;
 }
+export interface CreateGateDto {
+  name: string;
+  eventId: string;
+}
 export interface IControllerRepository {
   getEventDay(): Promise<EventDay[]>;
   assigneGate(controllerId: string, dto: IGate): Promise<ControllerProfile>;
-  unassigneGate(id:string): Promise<ControllerProfile>;
+  unassigneGate(id: string): Promise<ControllerProfile>;
   getDashboard(controllerId: string): Promise<ControllerDashboardDto>;
   create(dto: CreateProfileDto): Promise<ResponseProfile>;
   findAllWithStats(): Promise<ControllerWithStats[]>;
   findAllGates(): Promise<Gate[]>;
   delete(id: string): Promise<void>;
+  createGate(dto: CreateGateDto): Promise<Gate>;
 }

@@ -15,6 +15,9 @@ import {
   Activity,
   Sparkles,
   Crown,
+  TrendingUp,
+  ArrowUpRight,
+  ArrowDownRight,
 } from 'lucide-react';
 import Image from 'next/image';
 import { AdminRepository } from '../module/infrastructure/admin.repository';
@@ -39,9 +42,9 @@ import TypeTicket from './Type-ticket';
 import { useRouter } from 'next/navigation';
 import { generateEventSummaryPDF } from './printTicket/PrintfEvent';
 import { toast } from 'react-toastify';
-import EventAnalytics from './EventAlytics';
+import GateFormModal from './tickets/templates/GateFormModal';
 
-// ─── Theme store (même pattern qu'AdminEventPage) ─────────────────────────────
+// ─── Theme Management ────────────────────────────────────────────────────────
 function subscribeToTheme(cb: () => void) {
   const mq = window.matchMedia('(prefers-color-scheme: dark)');
   mq.addEventListener('change', cb);
@@ -56,130 +59,93 @@ const getThemeSnapshot = () => {
   if (saved) return saved === 'dark';
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
-const getServerSnapshot = () => false;
 
 // ============================================
-// COMPOSANT STATCARD
+// COMPOSANT STATCARD (Version Pro)
 // ============================================
 interface StatCardProps {
   title: string;
   value: string | number;
-  icon: React.ReactNode;
+  icon: React.ElementType;
   trend?: number;
   subtitle?: string;
-  iconColor: string;
+  colorClass: string;
   isDark: boolean;
 }
 
 const StatCard = ({
   title,
   value,
-  icon,
+  icon: Icon,
   trend,
   subtitle,
-  iconColor,
+  colorClass,
   isDark,
 }: StatCardProps) => {
   const t = {
     card: isDark
-      ? 'bg-[#111827] border-white/[0.06]'
-      : 'bg-white border-[#e5e7eb]',
-    title: isDark ? 'text-[#9ca3af]' : 'text-[#6b7280]',
-    value: isDark ? 'text-[#f9fafb]' : 'text-[#111827]',
-    iconBg: isDark ? 'bg-white/[0.04]' : 'bg-[#f8fafc]',
-    subtitle: isDark ? 'text-[#6b7280]' : 'text-[#9ca3af]',
+      ? 'bg-[#111827]/50 border-white/[0.08]'
+      : 'bg-white border-gray-200',
+    textMuted: isDark ? 'text-gray-400' : 'text-gray-500',
+    textMain: isDark ? 'text-white' : 'text-gray-900',
   };
 
   return (
     <div
-      className={`border rounded-xl p-5 shadow-sm transition-colors duration-200 ${t.card}`}
+      className={`border rounded-2xl p-6 shadow-sm transition-all duration-300 hover:shadow-md group ${t.card} backdrop-blur-sm`}
     >
-      <div className="flex items-center justify-between mb-3">
-        <p className={`text-sm font-semibold ${t.title}`}>{title}</p>
-        <div className={`${iconColor} ${t.iconBg} p-2 rounded-lg`}>{icon}</div>
-      </div>
-      <div className="flex flex-col">
-        <h3 className={`text-2xl font-bold ${t.value}`}>{value}</h3>
-        <div className="flex items-center mt-1 space-x-2">
-          {trend !== undefined && (
-            <span
-              className={`text-xs font-bold ${trend >= 0 ? 'text-emerald-500' : 'text-red-500'}`}
-            >
-              {trend >= 0 ? '↑' : '↓'} {Math.abs(trend)}%
-            </span>
-          )}
-          {subtitle && (
-            <span className={`text-xs ${t.subtitle}`}>{subtitle}</span>
-          )}
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <p
+            className={`text-xs font-bold uppercase tracking-wider mb-1 ${t.textMuted}`}
+          >
+            {title}
+          </p>
+          <h3 className={`text-2xl font-black ${t.textMain}`}>{value}</h3>
         </div>
+        <div
+          className={`p-3 rounded-xl transition-transform group-hover:scale-110 ${colorClass} bg-current/10`}
+        >
+          <Icon size={24} strokeWidth={2.5} />
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        {trend !== undefined && (
+          <div
+            className={`flex items-center text-xs font-bold px-2 py-0.5 rounded-full ${trend >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}
+          >
+            {trend >= 0 ? (
+              <ArrowUpRight size={12} className="mr-1" />
+            ) : (
+              <ArrowDownRight size={12} className="mr-1" />
+            )}
+            {Math.abs(trend)}%
+          </div>
+        )}
+        {subtitle && (
+          <span className={`text-xs font-medium ${t.textMuted}`}>
+            {subtitle}
+          </span>
+        )}
       </div>
     </div>
   );
 };
 
-// ─── Services ─────────────────────────────────────────────────────────────────
+// ─── Shared Services ──────────────────────────────────────────────────────────
 const ticketTypeRepo = new TicketTypeRepository();
 const ticketTypeService = new TicketTypeService(ticketTypeRepo);
 const eventRepo = new EventRepository();
 const eventService = new EventService(eventRepo);
 const prizeRepo = new PrizeRepository();
 
-// ============================================
-// COMPOSANT PRINCIPAL
-// ============================================
 export default function EventDashboard({ eventId }: { eventId: string }) {
-  // ─── Dark mode (même pattern qu'AdminEventPage) ──────────────────────────
   const isDark = useSyncExternalStore(
     subscribeToTheme,
     getThemeSnapshot,
-    getServerSnapshot,
+    () => false,
   );
-  // RESUMER DU CONCERT
-const handlePrint = () => {
-  if (data) generateEventSummaryPDF(data);
-};
-  // ─── Tokens dark/light ────────────────────────────────────────────────────
-  const t = {
-    page: isDark ? 'bg-[#030712]' : 'bg-[#f9fafb]',
-    text: isDark ? 'text-[#f9fafb]' : 'text-[#111827]',
-    textMuted: isDark ? 'text-[#9ca3af]' : 'text-[#6b7280]',
-    card: isDark
-      ? 'bg-[#111827] border-white/[0.06]'
-      : 'bg-white border-[#e5e7eb]',
-    cardInner: isDark ? 'bg-[#1f2937]' : 'bg-white',
-    cardTitle: isDark ? 'text-[#f9fafb]' : 'text-[#111827]',
-    cardSubtitle: isDark ? 'text-[#9ca3af]' : 'text-[#6b7280]',
-    divider: isDark ? 'border-white/[0.06]' : 'border-[#f1f5f9]',
-    tableHead: isDark
-      ? 'bg-white/[0.03] text-[#6b7280]'
-      : 'bg-[#f8fafc] text-[#9ca3af]',
-    tableRow: isDark
-      ? 'border-white/[0.04] hover:bg-white/[0.02]'
-      : 'border-[#f1f5f9] hover:bg-[#f8fafc]',
-    tableCell: isDark ? 'text-[#e2e8f0]' : 'text-[#1e293b]',
-    tableCellMuted: isDark ? 'text-[#6b7280]' : 'text-[#94a3b8]',
-    progressBg: isDark ? 'bg-white/[0.06]' : 'bg-[#f1f5f9]',
-    lotterySectionBg: isDark
-      ? 'bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-800/50'
-      : 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200',
-    lotteryCard: isDark ? 'bg-[#1f2937]' : 'bg-white',
-    lotteryTitle: isDark ? 'text-[#f9fafb]' : 'text-[#111827]',
-    lotterySubtitle: isDark ? 'text-[#6b7280]' : 'text-[#9ca3af]',
-    winnerCard: isDark ? 'bg-[#1f2937]' : 'bg-white',
-    winnerName: isDark ? 'text-[#f9fafb]' : 'text-[#1f2937]',
-    winnerMeta: isDark ? 'text-[#6b7280]' : 'text-[#9ca3af]',
-    statusBadgeActive: isDark
-      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-      : 'bg-emerald-100 text-emerald-700',
-    statusBadgeInactive: isDark
-      ? 'bg-white/[0.04] text-[#6b7280] border border-white/[0.08]'
-      : 'bg-[#f1f5f9] text-[#6b7280]',
-    ticketStatusConfirm: isDark ? 'bg-emerald-900/20' : 'bg-emerald-50/50',
-    ticketStatusUsed: isDark ? 'bg-blue-900/20' : 'bg-blue-50/50',
-    ticketStatusCancel: isDark ? 'bg-red-900/20' : 'bg-red-50/50',
-    ticketStatusText: isDark ? 'text-[#cbd5e1]' : 'text-[#374151]',
-    ticketStatusValue: isDark ? 'text-[#f9fafb]' : 'text-[#111827]',
-  };
+  const router = useRouter();
 
   const [data, setData] = useState<AdminEventDTO | null>(null);
   const [loading, setLoading] = useState(true);
@@ -187,59 +153,124 @@ const handlePrint = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPrizeModalOpen, setIsPrizeModalOpen] = useState(false);
+  const [isGateModalOpen, setIsGateModalOpen] = useState(false);
+
   const adminRepository = useMemo(() => new AdminRepository(), []);
-  const router = useRouter();
 
-  const handleCreatePrize = async (
-    data: CreatePrizeFormValues,
-    file: File | null,
-  ) => {
+  // ─── Design Tokens ─────────────────────────────────────────────────────────
+  const t = {
+    page: isDark ? 'bg-[#030712]' : 'bg-[#f8fafc]',
+    card: isDark
+      ? 'bg-[#111827] border-white/[0.08]'
+      : 'bg-white border-gray-200',
+    title: isDark ? 'text-white' : 'text-gray-900',
+    subtitle: isDark ? 'text-gray-400' : 'text-gray-500',
+    accent: 'text-teal-500',
+    progressBg: isDark ? 'bg-white/5' : 'bg-gray-100',
+  };
+
+  // ─── Actions ───────────────────────────────────────────────────────────────
+  const fetchDashboard = async () => {
+    if (!eventId) return;
     try {
-      // On crée un objet qui respecte strictement l'interface CreatePrizeDTO
-      const prizeDto: CreatePrizeDTO = {
-        title: data.title,
-        description: data.description,
-        lotteryId: data.lotterId, // On renomme 'lotterId' en 'lotteryId'
-        imageUrl: '', // On initialise à vide, le repository s'occupera du fichier
-      };
-
-      await prizeRepo.create(prizeDto, file);
-
-      setIsPrizeModalOpen(false);
-      // Refresh data...
+      setLoading(true);
+      const dashboardData = await adminRepository.getAdminEventsStats(eventId);
+      setData(dashboardData);
     } catch (err) {
-      console.error(err);
+      setError(err instanceof Error ? err.message : 'Erreur de chargement');
+    } finally {
+      setLoading(false);
     }
   };
+
   useEffect(() => {
-    const fetchDashboard = async () => {
-      if (!eventId) return;
-      try {
-        setLoading(true);
-        const dashboardData =
-          await adminRepository.getAdminEventsStats(eventId);
-        setData(dashboardData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erreur de chargement');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchDashboard();
   }, [eventId, adminRepository]);
+
+  const handleUpdateEvent = async (dto: UpdateEventDto, file: File | null) => {
+    try {
+      setLoading(true);
+      await eventService.update(eventId, dto, file);
+      await fetchDashboard();
+      setIsEditModalOpen(false);
+      toast.success('Événement mis à jour !');
+    } catch (err) {
+      toast.error('Erreur lors de la mise à jour');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+   const handleCreatePrize = async (
+     data: CreatePrizeFormValues,
+
+     file: File | null,
+   ) => {
+     try {
+       // On crée un objet qui respecte strictement l'interface CreatePrizeDTO
+
+       const prizeDto: CreatePrizeDTO = {
+         title: data.title,
+
+         description: data.description,
+
+         lotteryId: data.lotterId, // On renomme 'lotterId' en 'lotteryId'
+
+         imageUrl: '', // On initialise à vide, le repository s'occupera du fichier
+       };
+
+       await prizeRepo.create(prizeDto, file);
+
+       setIsPrizeModalOpen(false);
+
+       // Refresh data...
+     } catch (err) {
+       console.error(err);
+     }
+   };
+
+   useEffect(() => {
+     const fetchDashboard = async () => {
+       if (!eventId) return;
+
+       try {
+         setLoading(true);
+
+         const dashboardData =
+           await adminRepository.getAdminEventsStats(eventId);
+
+         setData(dashboardData);
+       } catch (err) {
+         setError(err instanceof Error ? err.message : 'Erreur de chargement');
+       } finally {
+         setLoading(false);
+       }
+     };
+
+     fetchDashboard();
+   }, [eventId, adminRepository]);
+
 
   const handleCreateTicketType = async (formData: CreateTicketFormValues) => {
     try {
       setLoading(true);
+
       const finalDto: CreateTicketTypeDTO = {
         ...formData,
+
         saleStart: new Date(formData.saleStart),
+
         saleEnd: new Date(formData.saleEnd),
       };
+
       await ticketTypeService.create(finalDto);
+
       const updatedData = await adminRepository.getAdminEventsStats(eventId);
+
       setData(updatedData);
+
       setIsModalOpen(false);
+
       toast.success('Type de ticket créé avec succès!');
     } catch (err) {
       console.error('Erreur lors de la création:', err);
@@ -247,124 +278,57 @@ const handlePrint = () => {
       setLoading(false);
     }
   };
-
   const handleDeleteEvent = async () => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) return;
+    if (!confirm('Changer le statut de cet événement ?')) return;
     try {
       setLoading(true);
       await eventService.toggleEventStatus(eventId);
-      toast.success('Événement mis à jour avec succès !');
-    } catch (err) {
-      console.error('Erreur lors de la mise à jour:', err);
-      toast.error("Erreur lors de la mise à jour de l'événement.");
+      await fetchDashboard();
+      toast.success('Statut mis à jour !');
     } finally {
       setLoading(false);
     }
   };
-
-  const handleUpdateEvent = async (dto: UpdateEventDto, file: File | null) => {
-    try {
-      setLoading(true);
-      await eventService.update(eventId, dto, file);
-      const refreshedData = await adminRepository.getAdminEventsStats(eventId);
-      setData(refreshedData);
-      setIsEditModalOpen(false);
-      toast.success('Événement mis à jour avec succès !');
-    } catch (err) {
-      console.error('Erreur lors de la mise à jour:', err);
-      toast.error(
-        "Une erreur est survenue lors de la modification de l'événement.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const formatCurrency = (amount: number) =>
     `${amount.toLocaleString('fr-FR')} FCFA`;
 
-  // ─── Loading ──────────────────────────────────────────────────────────────
   if (loading)
     return (
       <div
-        className={`min-h-screen flex items-center justify-center ${t.page} transition-colors duration-200`}
+        className={`min-h-screen flex items-center justify-center ${t.page}`}
       >
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-teal-500" />
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 border-4 border-teal-500/20 rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-t-teal-500 rounded-full animate-spin"></div>
+        </div>
       </div>
     );
 
-  // ─── Error ────────────────────────────────────────────────────────────────
   if (error || !data)
     return (
       <div
-        className={`min-h-screen flex items-center justify-center ${t.page} p-6 transition-colors duration-200`}
+        className={`min-h-screen flex items-center justify-center ${t.page} p-6`}
       >
         <div
-          className={`text-center p-8 rounded-xl border shadow-xl ${t.card}`}
+          className={`text-center p-10 rounded-3xl border shadow-xl ${t.card}`}
         >
-          <XCircle className="mx-auto mb-4 text-red-500" size={48} />
-          <p className={`font-bold ${t.cardTitle}`}>
+          <XCircle
+            className="mx-auto mb-4 text-red-500"
+            size={60}
+            strokeWidth={1.5}
+          />
+          <h2 className={`text-xl font-bold ${t.title}`}>
             {error || 'Événement introuvable'}
-          </p>
+          </h2>
         </div>
       </div>
     );
 
-  const ticketStatusRows = [
-    {
-      label: 'Confirmés',
-      val: data.ticketStats.byStatus.valid,
-      icon: (
-        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
-          <Image
-            src="/images/icon_valid.jpg"
-            width={40}
-            height={40}
-            alt="Logo Admin"
-            className="object-cover"
-          />
-        </div>
-      ),
-      bg: t.ticketStatusConfirm,
-    },
-    {
-      label: 'Scanés',
-      val: data.ticketStats.byStatus.used,
-      icon: (
-        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
-          <Image
-            src="/images/icon_scan.jpg"
-            width={40}
-            height={40}
-            alt="Logo Admin"
-            className="object-cover"
-          />
-        </div>
-      ),
-      bg: t.ticketStatusUsed,
-    },
-    {
-      label: 'Annulés',
-      val: data.ticketStats.byStatus.cancelled,
-      icon: (
-        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
-          <Image
-            src="/images/icon_cancelled.jpg"
-            width={40}
-            height={40}
-            alt="Logo Admin"
-            className="object-cover"
-          />
-        </div>
-      ),
-      bg: t.ticketStatusCancel,
-    },
-  ];
-
   return (
     <div
-      className={`min-h-screen ${t.page} ${t.text} py-10 px-4 md:px-10 transition-colors duration-200`}
+      className={`min-h-screen ${t.page} py-10 px-4 md:px-10 transition-colors duration-300`}
     >
+      {/* ── Section Actions ── */}
       <SectionButton
         onAddTicket={() => setIsModalOpen(true)}
         onEditEvent={() => setIsEditModalOpen(true)}
@@ -376,16 +340,22 @@ const handlePrint = () => {
         onAnalytic={() =>
           router.push(`/frontend/admin/page/events/analytic/${data.event.id}`)
         }
-        onPrintSummary={handlePrint}
+        onGate={() => setIsGateModalOpen(true)}
+        onPrintSummary={() => generateEventSummaryPDF(data)}
       />
+
       <EditEventModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        initialData={{
-          ...data.event,
-          isActivate: data.event.isActive,
-        }}
+        initialData={{ ...data.event, isActivate: data.event.isActive }}
         onSubmit={handleUpdateEvent}
+      />
+
+      <GateFormModal
+        isOpen={isGateModalOpen}
+        onClose={() => setIsGateModalOpen(false)}
+        eventId={eventId}
+        onSuccess={() => fetchDashboard()} // Rafraîchir les données si nécessaire
       />
       {data.lottery !== null && (
         <PrizeFormModal
@@ -395,233 +365,233 @@ const handlePrint = () => {
           lotterId={data.lottery?.lotteryId}
         />
       )}
-
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* ── Header ── */}
+      <div className="max-w-7xl mx-auto mt-8 space-y-8">
+        {/* ── Header Card ── */}
         <div
-          className={`border rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-start transition-colors duration-200 ${t.card}`}
+          className={`relative overflow-hidden border rounded-3xl p-8 ${t.card} transition-all`}
         >
-          <div className="relative w-32 h-32 flex-shrink-0 mx-auto md:mx-0">
-            <Image
-              src={data.event.imageUrl || '/placeholder.jpg'}
-              alt={data.event.title}
-              fill
-              className={`object-cover rounded-xl border ${isDark ? 'border-white/[0.08]' : 'border-[#e5e7eb]'}`}
-            />
-          </div>
-          <div className="flex-1 flex flex-col items-center md:items-start space-y-4 text-center md:text-left">
-            {/* Badge Statut */}
-            <span
-              className={`px-3 py-1 text-[10px] font-black uppercase rounded-md inline-block ${
-                data.event.isActive
-                  ? t.statusBadgeActive
-                  : t.statusBadgeInactive
-              }`}
-            >
-              {data.event.isActive ? 'Événement Actif' : 'Clôturé'}
-            </span>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/5 blur-3xl -mr-32 -mt-32 rounded-full" />
 
-            <h1 className={`text-3xl font-black leading-tight ${t.cardTitle}`}>
-              {data.event.title}
-            </h1>
-
-            <div
-              className={`flex flex-wrap justify-center md:justify-start gap-4 text-sm ${t.cardSubtitle}`}
-            >
-              <div className="flex items-center gap-1">
-                <Calendar size={14} />
-                {new Date(data.event.date).toLocaleDateString()}
-              </div>
-              <div className="flex items-center gap-1">
-                <MapPin size={14} /> {data.event.location}
-              </div>
-              <div className="flex items-center gap-1">
-                <Users size={14} /> {data.event.organizerName}
-              </div>
+          <div className="relative flex flex-col md:flex-row gap-8 items-center">
+            <div className="relative w-44 h-44 flex-shrink-0">
+              <Image
+                src={data.event.imageUrl || '/placeholder.jpg'}
+                alt={data.event.title}
+                fill
+                className="object-cover rounded-2xl shadow-2xl ring-4 ring-white/10"
+              />
             </div>
-            <div className="pt-2">
-              {data.event.isActive ? (
+
+            <div className="flex-1 text-center md:text-left space-y-4">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                <span
+                  className={`px-4 py-1 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border ${
+                    data.event.isActive
+                      ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                      : 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+                  }`}
+                >
+                  {data.event.isActive
+                    ? '• Événement Actif'
+                    : '• Session Clôturée'}
+                </span>
+              </div>
+
+              <h1 className={`text-4xl font-black tracking-tight ${t.title}`}>
+                {data.event.title}
+              </h1>
+
+              <div
+                className={`flex flex-wrap justify-center md:justify-start gap-6 text-sm font-semibold ${t.subtitle}`}
+              >
+                <div className="flex items-center gap-2">
+                  <Calendar size={18} className="text-teal-500" />{' '}
+                  {new Date(data.event.date).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin size={18} className="text-teal-500" />{' '}
+                  {data.event.location}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users size={18} className="text-teal-500" />{' '}
+                  {data.event.organizerName}
+                </div>
+              </div>
+              <div className="pt-4 flex justify-center md:justify-start">
                 <Button
                   onClick={handleDeleteEvent}
-                  className="bg-teal-400 hover:bg-brand text-white"
+                  className={`rounded-xl px-4 py-3 font-bold shadow-lg transition-all active:scale-95 ${
+                    data.event.isActive
+                      ? 'bg-red-500 hover:bg-red-600 text-white'
+                      : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                  }`}
                 >
-                  <span className="flex items-center gap-2">
-                    <XCircle size={18} />
-                    Clôturer l&apos;événement
-                  </span>
+                  {data.event.isActive ? (
+                    <>
+                      <XCircle className="mr-2" size={20} /> Clôturer la
+                      billetterie
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="mr-2" size={20} /> Réouvrir les
+                      ventes
+                    </>
+                  )}
                 </Button>
-              ) : (
-                <Button
-                  onClick={handleDeleteEvent}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                >
-                  <span className="flex items-center gap-2">
-                    <CheckCircle size={18} />
-                    Rouvrir l&apos;événement
-                  </span>
-                </Button>
-              )}
+              </div>
             </div>
           </div>
-          <CreateTicketModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSubmit={handleCreateTicketType}
-            eventId={eventId}
-            isLoading={loading}
-          />
         </div>
+        <CreateTicketModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleCreateTicketType}
+          eventId={eventId}
+          isLoading={loading}
+        />
         {/* ── Stats Grid ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             isDark={isDark}
-            title="Ventes"
+            title="Tickets Vendus"
             value={data.ticketStats.totalSold}
-            icon={
-              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
-                <Image
-                  src="/images/icon_valid.jpg"
-                  width={40}
-                  height={40}
-                  alt="Logo Admin"
-                  className="object-cover"
-                />
-              </div>
-            }
-            iconColor="text-teal-500"
-            subtitle={`/ ${data.ticketStats.totalAvailable}`}
+            icon={Ticket}
+            colorClass="text-teal-500"
+            subtitle={`Objectif: ${data.ticketStats.totalAvailable}`}
           />
           <StatCard
             isDark={isDark}
-            title="Remplissage"
+            title="Taux de Remplissage"
             value={`${data.ticketStats.salesRate}%`}
-            icon={
-              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
-                <Image
-                  src="/images/icon_stat.jpg"
-                  width={40}
-                  height={40}
-                  alt="Logo Admin"
-                  className="object-cover"
-                />
-              </div>
-            }
-            iconColor="text-blue-500"
+            icon={PieChart}
+            colorClass="text-blue-500"
             trend={5}
           />
           <StatCard
             isDark={isDark}
-            title="Recettes"
+            title="Revenus Totaux"
             value={formatCurrency(data.revenue.total)}
-            icon={<DollarSign />}
-            iconColor="text-emerald-600"
+            icon={DollarSign}
+            colorClass="text-emerald-500"
           />
           <StatCard
             isDark={isDark}
-            title="Tombola"
+            title="Engagement Tombola"
             value={data.lottery?.totalEntries || 0}
-            icon={
-              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
-                <Image
-                  src="/images/icon_lottery.jpg"
-                  width={40}
-                  height={40}
-                  alt="Logo Admin"
-                  className="object-cover"
-                />
-              </div>
-            }
-            iconColor="text-purple-500"
+            icon={Crown}
+            colorClass="text-purple-500"
           />
         </div>
-        {/* ── Analytics ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Performance catégories */}
-          <div
-            className={`lg:col-span-2 border rounded-2xl p-6 transition-colors duration-200 ${t.card}`}
-          >
+
+        {/* ── Analytics & Verification ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Performance par catégorie */}
+          <div className={`lg:col-span-2 border rounded-3xl p-8 ${t.card}`}>
             <h2
-              className={`text-lg font-bold mb-6 flex items-center gap-2 ${t.cardTitle}`}
+              className={`text-xl font-black mb-8 flex items-center gap-3 ${t.title}`}
             >
-              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
-                <Image
-                  src="/images/icon_stat.jpg"
-                  width={40}
-                  height={40}
-                  alt="Logo Admin"
-                  className="object-cover"
-                />
+              <div className="p-2 rounded-lg bg-teal-500/10">
+                <BarChart3 className="text-teal-500" size={24} />
               </div>
-              Performance des catégories
+              Performance des Catégories
             </h2>
-            <div className="space-y-6">
+            <div className="space-y-8">
               {data.ticketStats.byType.map((type, i) => (
-                <div key={i}>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span
-                      className={`font-bold ${isDark ? 'text-[#e2e8f0]' : 'text-[#374151]'}`}
-                    >
-                      {type.typeName}
-                    </span>
-                    <span className={t.cardSubtitle}>
-                      {type.sold} / {type.available}
-                    </span>
+                <div key={i} className="group">
+                  <div className="flex justify-between items-end mb-3">
+                    <div>
+                      <p className={`font-bold text-lg ${t.title}`}>
+                        {type.typeName}
+                      </p>
+                      <p className={`text-xs font-medium ${t.subtitle}`}>
+                        Prix: {formatCurrency(type.price)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className={`text-sm font-black ${t.title}`}>
+                        {type.sold}
+                      </span>
+                      <span className={`text-sm font-medium ${t.subtitle}`}>
+                        {' '}
+                        / {type.available}
+                      </span>
+                    </div>
                   </div>
                   <div
-                    className={`h-2 w-full rounded-full overflow-hidden ${t.progressBg}`}
+                    className={`h-3 w-full rounded-full overflow-hidden ${t.progressBg}`}
                   >
                     <div
-                      className="h-full bg-teal-500 rounded-full transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-teal-500 to-emerald-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(20,184,166,0.3)]"
                       style={{
                         width: `${(type.sold / (type.available || 1)) * 100}%`,
                       }}
                     />
                   </div>
-                  <div
-                    className={`flex justify-between mt-2 text-[11px] font-medium ${t.tableCellMuted}`}
-                  >
-                    <span>Prix: {formatCurrency(type.price)}</span>
-                    <span className="text-brand font-bold">
-                      {formatCurrency(type.revenue)}
+                  <div className="mt-2 flex justify-end">
+                    <span className="text-xs font-bold text-teal-500">
+                      {formatCurrency(type.revenue)} générés
                     </span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
+
           {/* États des tickets */}
-          <div
-            className={`border rounded-2xl p-6 transition-colors duration-200 ${t.card}`}
-          >
+          <div className={`border rounded-3xl p-8 ${t.card}`}>
             <h2
-              className={`text-lg font-bold mb-6 flex items-center gap-2 ${t.cardTitle}`}
+              className={`text-xl font-black mb-8 flex items-center gap-3 ${t.title}`}
             >
-              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
-                <Image
-                  src="/images/icon_stat.jpg"
-                  width={40}
-                  height={40}
-                  alt="Logo Admin"
-                  className="object-cover"
-                />
+              <div className="p-2 rounded-lg bg-blue-500/10">
+                <Activity className="text-blue-500" size={24} />
               </div>
-              États des tickets
+              Flux de Validation
             </h2>
-            <div className="space-y-3">
-              {ticketStatusRows.map((status, i) => (
+            <div className="space-y-4">
+              {[
+                {
+                  label: 'Confirmés',
+                  val: data.ticketStats.byStatus.valid,
+                  icon: CheckCircle,
+                  color: 'text-emerald-500',
+                  bg: 'bg-emerald-500/5',
+                },
+                {
+                  label: 'Scannés',
+                  val: data.ticketStats.byStatus.used,
+                  icon: Activity,
+                  color: 'text-blue-500',
+                  bg: 'bg-blue-500/5',
+                },
+                {
+                  label: 'Annulés',
+                  val: data.ticketStats.byStatus.cancelled,
+                  icon: XCircle,
+                  color: 'text-red-500',
+                  bg: 'bg-red-500/5',
+                },
+              ].map((status, i) => (
                 <div
                   key={i}
-                  className={`p-4 rounded-xl flex items-center justify-between ${status.bg}`}
+                  className={`p-5 rounded-2xl border border-transparent hover:border-white/10 transition-all ${status.bg} flex items-center justify-between`}
                 >
-                  <div className="flex items-center gap-3">
-                    {status.icon}
-                    <span
-                      className={`text-sm font-medium ${t.ticketStatusText}`}
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`p-2 rounded-xl bg-white dark:bg-gray-800 shadow-sm ${status.color}`}
                     >
+                      <status.icon size={20} strokeWidth={2.5} />
+                    </div>
+                    <span className={`font-bold ${t.title}`}>
                       {status.label}
                     </span>
                   </div>
-                  <span className={`font-black ${t.ticketStatusValue}`}>
+                  <span
+                    className={`text-2xl font-black tracking-tighter ${t.title}`}
+                  >
                     {status.val}
                   </span>
                 </div>
@@ -629,129 +599,133 @@ const handlePrint = () => {
             </div>
           </div>
         </div>
-        {/* ── Tombola ── */}
+
+        {/* ── Section Tombola (Version Pro) ── */}
         {data.lottery && (
           <div
-            className={`rounded-2xl p-6 shadow-lg border transition-colors duration-200 ${t.lotterySectionBg}`}
+            className={`rounded-[2.5rem] p-8 md:p-12 shadow-2xl border relative overflow-hidden transition-all duration-500 ${
+              isDark
+                ? 'bg-gradient-to-br from-purple-900/40 via-black to-slate-900 border-purple-500/20'
+                : 'bg-gradient-to-br from-purple-50 via-white to-pink-50 border-purple-100'
+            }`}
           >
-            <div className="flex items-center space-x-2 mb-6">
-              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand/10 flex-shrink-0 shadow-lg">
-                <Image
-                  src="/images/icon_lottery.jpg"
-                  width={40}
-                  height={40}
-                  alt="Logo Admin"
-                  className="object-cover"
-                />
+            <div className="absolute top-0 right-0 p-10 opacity-10 rotate-12">
+              <Crown size={200} />
+            </div>
+
+            <div className="relative flex flex-col md:flex-row items-center justify-between mb-12 gap-6">
+              <div className="flex items-center gap-4 text-center md:text-left">
+                <div className="p-4 bg-purple-500 rounded-2xl shadow-xl shadow-purple-500/20 text-white">
+                  <Sparkles size={32} />
+                </div>
+                <div>
+                  <h2 className={`text-3xl font-black ${t.title}`}>
+                    Tombola Exclusive
+                  </h2>
+                  <p className={`font-medium ${t.subtitle}`}>
+                    Suivi des tirages en temps réel
+                  </p>
+                </div>
               </div>
-              <h2 className={`text-xl font-bold ${t.lotteryTitle}`}>Tombola</h2>
-              <span
-                className={`ml-auto px-3 py-1 rounded-full text-xs font-bold ${
+              <div
+                className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest ${
                   data.lottery.isActive
-                    ? 'bg-emerald-500 text-white'
-                    : isDark
-                      ? 'bg-white/[0.08] text-[#9ca3af]'
-                      : 'bg-[#e5e7eb] text-[#6b7280]'
+                    ? 'bg-emerald-500 text-white animate-pulse'
+                    : 'bg-gray-500/20 text-gray-500'
                 }`}
               >
-                {data.lottery.isActive ? 'Active' : 'Inactive'}
-              </span>
+                {data.lottery.isActive ? 'Session en cours' : 'Terminée'}
+              </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
               {[
                 {
-                  icon: <Award className="w-8 h-8 text-muted mx-auto mb-2" />,
-                  value: data.lottery.totalPrizes,
-                  label: 'Prix Disponibles',
+                  icon: Award,
+                  label: 'Prix en jeu',
+                  val: data.lottery.totalPrizes,
+                  color: 'text-yellow-500',
                 },
                 {
-                  icon: <Users className="w-8 h-8 text-muted mx-auto mb-2" />,
-                  value: data.lottery.totalEntries,
-                  label: 'Participations',
+                  icon: Users,
+                  label: 'Participants',
+                  val: data.lottery.totalEntries,
+                  color: 'text-blue-500',
                 },
                 {
-                  icon: (
-                    <Sparkles className="w-8 h-8 text-muted mx-auto mb-2" />
-                  ),
-                  value: data.lottery.totalDraws,
-                  label: 'Tirages Effectués',
+                  icon: TrendingUp,
+                  label: 'Tirages faits',
+                  val: data.lottery.totalDraws,
+                  color: 'text-emerald-500',
                 },
               ].map((item, i) => (
                 <div
                   key={i}
-                  className={`text-center p-4 rounded-xl transition-colors duration-200 ${t.lotteryCard}`}
+                  className={`p-8 rounded-3xl text-center border transition-all hover:scale-105 ${t.card}`}
                 >
-                  {item.icon}
-                  <p className={`text-2xl font-black ${t.cardTitle}`}>
-                    {item.value}
+                  <item.icon
+                    className={`mx-auto mb-4 ${item.color}`}
+                    size={40}
+                    strokeWidth={1.5}
+                  />
+                  <p className={`text-4xl font-black mb-1 ${t.title}`}>
+                    {item.val}
                   </p>
-                  <p className={`text-xs mt-1 ${t.lotterySubtitle}`}>
+                  <p
+                    className={`text-xs font-bold uppercase tracking-widest ${t.subtitle}`}
+                  >
                     {item.label}
                   </p>
                 </div>
               ))}
             </div>
 
-            {/* Gagnants */}
+            {/* Liste des Gagnants */}
             {data.lottery.winners.length > 0 && (
-              <div className="space-y-3">
-                {data.lottery.winners.slice(0, 5).map((winner, index) => (
-                  <div
-                    key={index}
-                    className={`group flex items-center justify-between p-4 rounded-2xl border border-muted/5 transition-all duration-300 hover:shadow-md hover:scale-[1.01] ${t.winnerCard} bg-surface/50 backdrop-blur-sm`}
-                  >
-                    <div className="flex items-center gap-4 min-w-0">
-                      {/* Numéro de chance stylisé en badge "Ticket" */}
-                      <div className="relative flex-shrink-0">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-300" />
-                        <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-gray-900 to-black border border-white/10 flex flex-col items-center justify-center shadow-lg">
-                          <span className="text-[10px] text-yellow-500/80 font-bold uppercase leading-none">
-                            N°
-                          </span>
-                          <span className="text-sm text-white font-black leading-none">
-                            {winner.luckyNumber}
-                          </span>
+              <div className="space-y-4 relative">
+                <h3 className={`text-lg font-black mb-6 px-2 ${t.title}`}>
+                  Derniers Heureux Gagnants
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {data.lottery.winners.slice(0, 4).map((winner, idx) => (
+                    <div
+                      key={idx}
+                      className={`p-4 rounded-2xl border flex items-center gap-4 transition-all hover:shadow-lg ${t.card} bg-opacity-50 backdrop-blur-xl group`}
+                    >
+                      <div className="relative">
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center text-white font-black text-xl shadow-lg group-hover:rotate-12 transition-transform">
+                          {winner.luckyNumber}
+                        </div>
+                        <div className="absolute -top-1 -right-1 bg-yellow-500 text-[8px] p-1 rounded-md text-black font-black uppercase">
+                          Win
                         </div>
                       </div>
-                      {/* Infos Gagnant avec gestion du débordement */}
-                      <div className="min-w-0">
-                        <p
-                          className={`font-bold text-sm truncate flex items-center gap-2 ${t.winnerName}`}
-                        >
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-black truncate ${t.title}`}>
                           {winner.userName}
-                          {index === 0 && (
-                            <span className="bg-yellow-500/10 text-yellow-600 text-[9px] px-1.5 py-0.5 rounded-md border border-yellow-500/20 uppercase tracking-tighter">
-                              Grand Gagnant
-                            </span>
-                          )}
                         </p>
+                        <p className="text-xs text-purple-500 font-bold flex items-center gap-1">
+                          <Crown size={12} /> {winner.prizeTitle}
+                        </p>
+                      </div>
+                      <div className="text-right">
                         <p
-                          className={`text-xs opacity-70 truncate font-medium flex items-center gap-1 ${t.winnerMeta}`}
+                          className={`text-[10px] font-bold opacity-50 uppercase ${t.subtitle}`}
                         >
-                          <span className="inline-block w-1 h-1 rounded-full bg-brand" />
-                          {winner.prizeTitle}
+                          Le {formatShortDate(winner.wonAt)}
                         </p>
                       </div>
                     </div>
-                    {/* Date et Statut à droite */}
-                    <div className="flex flex-col items-end gap-1 flex-shrink-0 ml-4">
-                      <div
-                        className={`text-[10px] font-bold uppercase tracking-tighter opacity-40 text-title ${t.winnerMeta}`}
-                      >
-                        Remporté le
-                      </div>
-                      <div className={`text-xs font-semibold  ${t.winnerMeta}`}>
-                        {formatShortDate(winner.wonAt)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
           </div>
         )}
-        {/* ── Historique des ventes ── */}
-        <TypeTicket eventId={eventId} />
+
+        <div className="pt-8">
+          <TypeTicket eventId={eventId} />
+        </div>
       </div>
     </div>
   );

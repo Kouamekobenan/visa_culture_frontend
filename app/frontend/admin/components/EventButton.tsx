@@ -8,6 +8,7 @@ interface SectionButtonProps {
   onAddLotteryPrize: () => void;
   onViewHistory: () => void;
   onAnalytic: () => void;
+  onGate: () => void;
   onPrintSummary: () => void; // Nouvelle Prop pour l'impression
   hasLottery: boolean;
 }
@@ -17,6 +18,7 @@ export default function SectionButton({
   onAddLotteryPrize,
   onViewHistory,
   onAnalytic,
+  onGate,
   onPrintSummary, // On récupère la fonction ici
   hasLottery,
 }: SectionButtonProps) {
@@ -56,6 +58,13 @@ export default function SectionButton({
         >
           <AlignStartVertical size={18} className="text-brand" />
           <span className="text-foreground">Données analytics</span>
+        </Button>
+        <Button
+          onClick={onGate}
+          className={`${baseBtnClass} bg-surface border-muted/20 text-foreground hover:border-brand/50 hover:bg-brand/5`}
+        >
+          <AlignStartVertical size={18} className="text-brand" />
+          <span className="text-foreground">Créer une porte</span>
         </Button>
         {/* BOUTON TOMBOLA */}
         <Button

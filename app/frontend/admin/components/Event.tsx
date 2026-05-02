@@ -32,9 +32,9 @@ import {
 } from '../../module/event/domain/entities/event.entity';
 import { LotteryRepository } from '../../module/lotteries/infrastructure/lottery.entity';
 import { LotteryService } from '../../module/lotteries/application/lottery.service';
-import toast from 'react-hot-toast';
 import EventFormModal from './FormEvent';
 import AdminSearchBar from './search/Search';
+import { toast } from 'react-toastify';
 
 // ─── Theme store ──────────────────────────────────────────────────────────────
 function subscribeToTheme(cb: () => void) {
@@ -87,6 +87,15 @@ export default function AdminEventPage() {
       toast.success('Événement créé avec succès !');
     } catch (err) {
       toast.error('Erreur lors de la création');
+    }
+  };
+  // -------------CREATE LOTTERY-----------------------------------------------
+  const handleCreateLottery = async (eventId: string) => {
+    try {
+      const res = await lotteryRepo.create(eventId);
+      toast.success(`Lottérie activée avec succès! ${res.event}`);
+    } catch (error) {
+      console.error('Error to created lottery');
     }
   };
   // ─── Fetch ────────────────────────────────────────────────────────────────
@@ -262,7 +271,6 @@ export default function AdminEventPage() {
                       alt={event?.title}
                     />
                   </div>
-
                   {/* Infos */}
                   <div className="flex-grow min-w-0 space-y-1.5">
                     <div className="flex flex-wrap items-center gap-2.5">
@@ -316,44 +324,66 @@ export default function AdminEventPage() {
                   `}
                   >
                     {/* Toggle loterie */}
-                    <button
-                      onClick={() =>
-                        toggleLottery(
-                          event.id,
-                          event.lottery?.isActive ?? false,
-                        )
-                      }
-                      disabled={processingId === event.id}
-                      className={`
-                        flex-1 md:flex-none flex items-center justify-center gap-2
-                        px-5 py-2.5 rounded-xl text-sm font-bold
-                        transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
-                        ${
-                          event.lottery?.isActive
-                            ? isDark
-                              ? 'bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 hover:border-transparent'
-                              : 'bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-200 hover:border-transparent'
-                            : isDark
-                              ? 'bg-[#0d9488]/10 text-[#0d9488] hover:bg-[#0d9488] hover:text-white border border-[#0d9488]/20 hover:border-transparent'
-                              : 'bg-[#0d9488]/10 text-[#0d9488] hover:bg-[#0d9488] hover:text-white border border-[#0d9488]/20 hover:border-transparent'
+                    {!event.lottery && (
+                      <div className="">
+                        <Button>Activer la lotterie</Button>
+                      </div>
+                    )}
+                    {/* SECTION LOGIQUE LOTERIE */}
+                    {!event.lottery ? (
+                      /* CAS 1 : La loterie n'existe pas du tout -> Bouton de création */
+                      <div className="flex-1 md:flex-none">
+                        <Button
+                          onClick={() => handleCreateLottery(event.id)}
+                          className="w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-teal-900/10 transition-all"
+                        >
+                          <Ticket className="h-4 w-4" />
+                          <span className="whitespace-nowrap">
+                            Initialiser la Loterie
+                          </span>
+                        </Button>
+                      </div>
+                    ) : (
+                      /* CAS 2 : La loterie existe -> Bouton Toggle (Activer/Désactiver) */
+                      <button
+                        onClick={() =>
+                          toggleLottery(
+                            event.id,
+                            event.lottery?.isActive ?? false,
+                          )
                         }
-                      `}
-                    >
-                      {processingId === event.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : event.lottery?.isActive ? (
-                        <PowerOff className="h-4 w-4" />
-                      ) : (
-                        <Ticket className="h-4 w-4" />
-                      )}
-                      <span className="whitespace-nowrap">
-                        {processingId === event.id
-                          ? 'En cours...'
-                          : event.lottery?.isActive
-                            ? 'Désactiver'
-                            : 'Activer Loterie'}
-                      </span>
-                    </button>
+                        disabled={processingId === event.id}
+                        className={`
+                    flex-1 md:flex-none flex items-center justify-center gap-2
+                    px-5 py-2.5 rounded-xl text-sm font-bold
+                    transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                    ${
+                      event.lottery?.isActive
+                        ? isDark
+                          ? 'bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 hover:border-transparent'
+                          : 'bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-200 hover:border-transparent'
+                        : isDark
+                          ? 'bg-teal-500/10 text-teal-400 hover:bg-teal-500 hover:text-white border border-teal-500/20 hover:border-transparent'
+                          : 'bg-teal-50 text-teal-600 hover:bg-teal-600 hover:text-white border border-teal-200 hover:border-transparent'
+                    }
+                  `}
+                      >
+                        {processingId === event.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : event.lottery?.isActive ? (
+                          <PowerOff className="h-4 w-4" />
+                        ) : (
+                          <Ticket className="h-4 w-4" />
+                        )}
+                        <span className="whitespace-nowrap">
+                          {processingId === event.id
+                            ? 'Traitement...'
+                            : event.lottery?.isActive
+                              ? 'Désactiver Loterie'
+                              : 'Activer Loterie'}
+                        </span>
+                      </button>
+                    )}
                     {/* Paramètres */}
                     <Link
                       href={`/frontend/admin/page/events/edit/${event.id}`}

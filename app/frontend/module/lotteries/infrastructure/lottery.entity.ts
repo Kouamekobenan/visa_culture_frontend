@@ -20,4 +20,8 @@ export class LotteryRepository implements ILotteryRepository {
     const res = await api.patch(`/lotteries/event/${eventId}/toggle`);
     return res.data;
   }
+  async create(eventId: string): Promise<Lottery> {
+    const res = await api.post(`/lotteries`, { eventId });
+    return res.data;
+  }
 }

@@ -1,6 +1,7 @@
 import { api } from '@/app/backend/database/api';
 import { ControllerProfile, EventDay } from '../domain/entites/entity';
 import {
+  CreateGateDto,
   Gate,
   IControllerRepository,
   IGate,
@@ -50,5 +51,9 @@ export class ControllerRepository implements IControllerRepository {
   }
   async unassigneGate(id: string): Promise<ControllerProfile> {
     return await api.patch(`/controller-profiles/unsignGate/${id}`);
+  }
+  async createGate(dto: CreateGateDto): Promise<Gate> {
+    const res = await api.post(`/gates`, dto);
+    return res.data;
   }
 }
