@@ -701,7 +701,7 @@ export default function AdminControllerDashboard() {
       setControllers(ctrl);
       setGates(gts);
       setError(null);
-      console.log('data', ctrl);
+      // console.log('data', ctrl);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erreur de chargement');
     } finally {

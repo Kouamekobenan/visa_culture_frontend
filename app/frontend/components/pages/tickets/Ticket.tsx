@@ -23,6 +23,8 @@ import {
   Banknote,
   CheckCircle2,
   ChevronRight,
+  BellRing,
+  Ticket,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { WhatsAppRepository } from '@/app/frontend/module/whatsApp/infrastructure/whatsAppRepository';
@@ -162,45 +164,74 @@ export default function TicketSelection({ eventId, eventName }: props) {
         <h2 className="text-2xl font-bold flex items-center gap-2 px-2 font-title italic">
           <ShoppingCart className="text-brand" /> Sélectionner vos places
         </h2>
-
-        {types.map((t) => (
-          <div
-            key={t.id}
-            className="group bg-surface p-6 rounded-[2rem] flex flex-col md:flex-row justify-between items-center gap-6 shadow-sm border border-transparent hover:border-brand/20 transition-all duration-300"
-          >
-            <div className="text-center md:text-left">
-              <h3 className="text-xl font-bold font-title">{t.name}</h3>
-              <p className="text-3xl font-black text-brand tracking-tighter">
-                {t.price.toLocaleString()}{' '}
-                <span className="text-xs font-normal">FCFA</span>
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4 bg-background/50 p-2 rounded-2xl border border-muted/10">
-              <input
-                type="number"
-                value={quantities[t.id] || 0}
-                onChange={(e) =>
-                  handleQtyChange(t.id, parseInt(e.target.value))
-                }
-                className="w-16 bg-transparent text-center font-black text-xl outline-none"
-                min="0"
-              />
-              <Button
-                onClick={() => openPaymentModal(t)}
-                className="bg-btn hover:scale-105 px-8 py-6 rounded-xl shadow-xl shadow-btn/20 group"
+        {types.length !== 0 ? (
+          <div className="">
+            {types.map((t) => (
+              <div
+                key={t.id}
+                className="group bg-surface p-6 rounded-[2rem] flex flex-col md:flex-row justify-between items-center gap-6 shadow-sm border border-transparent hover:border-brand/20 transition-all duration-300"
               >
-                Réserver{' '}
-                <ChevronRight
-                  size={18}
-                  className="ml-1 group-hover:translate-x-1 transition-transform"
-                />
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
+                <div className="text-center md:text-left">
+                  <h3 className="text-xl font-bold font-title">{t.name}</h3>
+                  <p className="text-3xl font-black text-brand tracking-tighter">
+                    {t.price.toLocaleString()}{' '}
+                    <span className="text-xs font-normal">FCFA</span>
+                  </p>
+                </div>
 
+                <div className="flex items-center gap-4 bg-background/50 p-2 rounded-2xl border border-muted/10">
+                  <input
+                    type="number"
+                    value={quantities[t.id] || 0}
+                    onChange={(e) =>
+                      handleQtyChange(t.id, parseInt(e.target.value))
+                    }
+                    className="w-16 bg-transparent text-center font-black text-xl outline-none"
+                    min="0"
+                  />
+                  <Button
+                    onClick={() => openPaymentModal(t)}
+                    className="bg-btn hover:scale-105 px-8 py-6 rounded-xl shadow-xl shadow-btn/20 group"
+                  >
+                    Réserver{' '}
+                    <ChevronRight
+                      size={18}
+                      className="ml-1 group-hover:translate-x-1 transition-transform"
+                    />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+            {/* Icône avec effet de cercle en fond */}
+            <div className="relative mb-4">
+              <div className="absolute inset-0 bg-amber-100 dark:bg-amber-900/30 rounded-full blur-xl scale-150 opacity-50" />
+              <div className="relative bg-amber-50 dark:bg-amber-900/20 p-4 rounded-full border border-amber-100 dark:border-amber-800">
+                <Ticket className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+              </div>
+            </div>
+            {/* Contenu textuel */}
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+              Billetterie bientôt disponible
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-[280px] leading-relaxed">
+              L&apos;organisateur n&apos;a pas encore ouvert la vente des
+              tickets pour cet événement. Revenez très prochainement pour
+              réserver votre place.
+            </p>
+
+            {/* Bouton d'action optionnel (Style Premium) */}
+            <Link href="/frontend/page/contact">
+              <Button className="mt-6 flex items-center gap-2 px-6 py-2.5  dark:shadow-none">
+                <BellRing size={16} />
+                M&apos;informer de l&apos;ouverture
+              </Button>
+            </Link>
+          </div>
+        )}
+      </div>
       {/* MODAL DE PAIEMENT COMPACTE */}
       {isPaymentStep && selectedTicketType && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
@@ -235,13 +266,11 @@ export default function TicketSelection({ eventId, eventName }: props) {
                   {quantities[selectedTicketType.id]}x {selectedTicketType.name}
                 </div>
               </div>
-
               {/* Grille des Opérateurs */}
               <div className="space-y-3">
                 <p className="text-[10px] font-black text-muted uppercase tracking-[0.2em] px-1 text-center">
                   Opérateurs disponibles
                 </p>
-
                 <div className="grid grid-cols-2 gap-3">
                   <PaymentOptionSmall
                     active={paymentMethod === 'WAVE'}

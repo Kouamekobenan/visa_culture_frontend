@@ -6,7 +6,7 @@ export default function AnalyticEvent() {
   const params = useParams();
   const eventId = params?.id as string;
   return (
-    <div className="flex h-screen bg-foreground overflow-hidden">
+    <div className="flex h-screen bg-foreground overflow-hidden pb-24 md:pb-6">
       <AdminSidebar />
       <main className="flex-1 overflow-y-auto">
         <EventAnalytics eventId={eventId} />

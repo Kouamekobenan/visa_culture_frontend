@@ -9,7 +9,6 @@ import {
 import { TicketRepository } from '@/app/frontend/module/tickets/infrastructure/ticket.repository';
 import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
-// Import des icônes Lucide
 import {
   MapPin,
   Calendar,
@@ -19,40 +18,119 @@ import {
   Printer,
   Loader2,
   Tag,
+  Filter,
+  CheckCircle,
+  XCircle,
+  Clock,
+  X,
+  QrCode,
 } from 'lucide-react';
 import { Button } from '../../ui/Button';
+
 const ticketService = new TicketRepository();
 const service = new TicketService(ticketService);
 const PREVIEW_COUNT = 3;
 
-const StatusBadge = ({ status }: { status: string }) => (
-  <span
-    className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
-      status === 'VALID'
-        ? 'bg-green-50 text-green-700 border-green-200'
-        : 'bg-red-50 text-red-600 border-red-200'
-    }`}
-  >
-    {status}
-  </span>
-);
+// Types pour les filtres
+type FilterType = 'all' | 'valid' | 'used' | 'cancelled';
+
+interface FilterOption {
+  value: FilterType;
+  label: string;
+  icon: React.ReactNode;
+  color: string;
+  description: string;
+}
+
+const FILTER_OPTIONS: FilterOption[] = [
+  {
+    value: 'all',
+    label: 'Tous les billets',
+    icon: <Ticket size={16} />,
+    color: 'brand',
+    description: 'Afficher tous vos billets',
+  },
+  {
+    value: 'valid',
+    label: 'Réservations en cours',
+    icon: <Clock size={16} />,
+    color: 'blue',
+    description: 'Billets valides non encore utilisés',
+  },
+  {
+    value: 'used',
+    label: 'Utilisés',
+    icon: <CheckCircle size={16} />,
+    color: 'green',
+    description: 'Billets déjà scannés',
+  },
+  {
+    value: 'cancelled',
+    label: 'Annulés',
+    icon: <XCircle size={16} />,
+    color: 'red',
+    description: 'Billets annulés',
+  },
+];
+
+const StatusBadge = ({ status }: { status: string }) => {
+  // 1. On définit l'objet de configuration à l'extérieur ou avant la sélection
+  const statusConfig = {
+    VALID: {
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      text: 'text-blue-700 dark:text-blue-400',
+      border: 'border-blue-200 dark:border-blue-800',
+      icon: <Clock size={10} />,
+    },
+    USED: {
+      bg: 'bg-green-50 dark:bg-green-900/20',
+      text: 'text-green-700 dark:text-green-400',
+      border: 'border-green-200 dark:border-green-800',
+      icon: <CheckCircle size={10} />,
+    },
+    CANCELLED: {
+      bg: 'bg-red-50 dark:bg-red-900/20',
+      text: 'text-red-700 dark:text-red-400',
+      border: 'border-red-200 dark:border-red-800',
+      icon: <XCircle size={10} />,
+    },
+  };
+  // 2. On récupère la config correspondante ou la valeur par défaut (VALID)
+  // On utilise un "type assertion" pour permettre l'indexation par string
+  const config =
+    statusConfig[status as keyof typeof statusConfig] || statusConfig.VALID;
+  return (
+    <span
+      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border flex items-center gap-1 ${config.bg} ${config.text} ${config.border}`}
+    >
+      {config.icon}
+      {status}
+    </span>
+  );
+};
+
 const TicketRow = ({ t }: { t: HistoriqueTicketDto }) => (
-  <div className="flex items-center justify-between px-3 py-2.5 bg-background border border-gray-100 dark:border-gray-800 rounded-xl hover:border-brand/30 transition-colors">
-    <div className="flex items-center gap-3">
-      <div className="bg-brand/10 p-1.5 rounded-lg">
-        <Ticket size={14} className="text-brand" />
+  <div className="flex items-center justify-between px-4 py-3 bg-background border border-gray-200 dark:border-gray-700 rounded-xl hover:border-brand/50 hover:shadow-md transition-all duration-200 group">
+    <div className="flex items-center gap-3 flex-1 min-w-0">
+      <div className="bg-brand/10 p-2 rounded-lg group-hover:bg-brand/20 transition-colors">
+        <QrCode size={16} className="text-brand" />
       </div>
-      <div>
-        <p className="font-mono text-xs font-black text-foreground">{t.code}</p>
-        <p className="text-[10px] text-muted flex items-center gap-1">
-          {t.ticketType.name} •{' '}
-          {new Date(t.createdAt).toLocaleDateString('fr-FR')}
+      <div className="flex-1 min-w-0">
+        <p className="font-mono text-sm font-black text-foreground truncate">
+          {t.code}
         </p>
+        <div className="flex items-center gap-2 text-[11px] text-muted">
+          <Tag size={10} />
+          <span className="font-semibold">{t.ticketType.name}</span>
+          <span>•</span>
+          <span>{new Date(t.createdAt).toLocaleDateString('fr-FR')}</span>
+        </div>
       </div>
     </div>
     <StatusBadge status={t.status} />
   </div>
 );
+
 const EventCard = ({
   event,
   tickets,
@@ -63,14 +141,12 @@ const EventCard = ({
   tickets: HistoriqueTicketDto[];
 }) => {
   const [expanded, setExpanded] = useState(false);
-  // AJOUT : État de chargement
   const [isPrinting, setIsPrinting] = useState(false);
 
   const handlePrint = async () => {
     try {
       setIsPrinting(true);
       await service.printTickets(userId, event.id);
-      // Optionnel : Notification de succès (toast)
     } catch (error) {
       console.error('Erreur impression:', error);
       alert('Impossible de générer les tickets pour le moment.');
@@ -78,53 +154,104 @@ const EventCard = ({
       setIsPrinting(false);
     }
   };
+
   const visible = expanded ? tickets : tickets.slice(0, PREVIEW_COUNT);
   const hiddenCount = tickets.length - PREVIEW_COUNT;
+
+  // Stats des tickets
+  const stats = useMemo(() => {
+    return {
+      valid: tickets.filter((t) => t.status === 'VALID').length,
+      used: tickets.filter((t) => t.status === 'USED').length,
+      cancelled: tickets.filter((t) => t.status === 'CANCELLED').length,
+    };
+  }, [tickets]);
+
   return (
-    <div className="bg-surface rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
-      <div className="flex flex-col sm:flex-row">
-        {/* Bannière avec Overlay d'info */}
-        <div className="relative sm:w-64 h-48 sm:h-auto flex-shrink-0 overflow-hidden">
+    <div className="bg-surface rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
+      {/* Layout adaptatif */}
+      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr]">
+        {/* Image de l'événement */}
+        <div className="relative h-64 lg:h-full overflow-hidden">
           <Image
             src={event.imageUrl}
             alt={event.title}
             fill
-            sizes="(max-width: 640px) 100vw, 256px"
             className="object-cover transition-transform duration-500 hover:scale-105"
           />
-          {/* Dégradé sombre pour le texte */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-          <span className="absolute top-3 left-3 bg-brand/90 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg flex items-center gap-1">
-            <Tag size={10} /> Événement
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+          {/* Badge événement */}
+          <span className="absolute top-4 left-4 bg-brand/95 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-lg">
+            <Tag size={12} /> Événement
           </span>
-          {/* Zone de texte avec fond flouté/couleur */}
-          <div className="absolute bottom-3 left-3 right-3 z-10 p-3 bg-black/40 backdrop-blur-sm rounded-xl border border-white/10">
-            <h2 className="font-title text-sm font-bold text-white leading-tight mb-2">
+
+          {/* Info de l'événement */}
+          <div className="absolute bottom-4 left-4 right-4 p-4 bg-black/50 backdrop-blur-md rounded-xl border border-white/20">
+            <h2 className="font-title text-lg font-bold text-white leading-tight mb-3">
               {event.title}
             </h2>
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center gap-2 text-[10px] text-white/90">
-                <MapPin size={12} className="text-brand" />
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-xs text-white/90">
+                <MapPin size={14} className="text-brand flex-shrink-0" />
                 <span className="truncate">{event.location}</span>
               </div>
-              <div className="flex items-center gap-2 text-[10px] text-white/90">
-                <Calendar size={12} className="text-brand" />
-                <span>{new Date(event.date).toLocaleDateString('fr-FR')}</span>
+              <div className="flex items-center gap-2 text-xs text-white/90">
+                <Calendar size={14} className="text-brand flex-shrink-0" />
+                <span>
+                  {new Date(event.date).toLocaleDateString('fr-FR', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </span>
               </div>
             </div>
           </div>
         </div>
-        {/* Contenu Droite */}
-        <div className="flex-1 p-5 flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-title text-[11px] font-bold text-muted uppercase tracking-widest flex items-center gap-2">
-              <Ticket size={14} /> Billets réservés
-            </h3>
-            <span className="bg-brand/10 text-brand text-[10px] font-black px-2.5 py-1 rounded-lg">
-              {tickets.length} AU TOTAL
-            </span>
+
+        {/* Contenu des tickets */}
+        <div className="p-6 flex flex-col">
+          {/* Header avec stats */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+            <div>
+              <h3 className="font-title text-sm font-bold text-muted uppercase tracking-widest flex items-center gap-2 mb-2">
+                <Ticket size={16} /> Vos Billets
+              </h3>
+              <div className="flex items-center gap-3">
+                <span className="bg-brand/10 text-brand text-xs font-black px-3 py-1.5 rounded-lg">
+                  {tickets.length} Total
+                </span>
+                {stats.valid > 0 && (
+                  <span className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-800">
+                    {stats.valid} Valide{stats.valid > 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Bouton d'impression */}
+            <Button
+              onClick={handlePrint}
+              disabled={isPrinting}
+              className={`flex items-center gap-2 font-bold text-sm px-5 py-2.5 rounded-xl transition-all shadow-lg ${
+                isPrinting
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-btn text-white hover:bg-btn/90 active:scale-95'
+              }`}
+            >
+              {isPrinting ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Printer size={16} />
+              )}
+              {isPrinting ? 'Génération...' : 'Tout Imprimer'}
+            </Button>
           </div>
-          <div className="flex flex-col gap-2">
+
+          {/* Liste des tickets */}
+          <div className="flex-1 space-y-3 mb-6">
             {visible.map((t, i) => (
               <TicketRow key={i} t={t} />
             ))}
@@ -132,54 +259,211 @@ const EventCard = ({
             {tickets.length > PREVIEW_COUNT && (
               <button
                 onClick={() => setExpanded((p) => !p)}
-                className="group w-full mt-1 py-2 text-[11px] font-bold text-brand border border-dashed border-brand/30 rounded-xl bg-brand/5 hover:bg-brand/10 transition-all flex items-center justify-center gap-2"
+                className="w-full mt-2 py-3 text-sm font-bold text-brand border-2 border-dashed border-brand/30 rounded-xl bg-brand/5 hover:bg-brand/10 transition-all flex items-center justify-center gap-2 group"
               >
                 {expanded ? (
                   <>
-                    {' '}
-                    <ChevronUp size={14} /> Voir moins{' '}
+                    <ChevronUp
+                      size={16}
+                      className="group-hover:-translate-y-1 transition-transform"
+                    />
+                    Voir moins
                   </>
                 ) : (
                   <>
-                    {' '}
-                    <ChevronDown size={14} /> +{hiddenCount} autres tickets{' '}
+                    <ChevronDown
+                      size={16}
+                      className="group-hover:translate-y-1 transition-transform"
+                    />
+                    Voir {hiddenCount} autres billets
                   </>
                 )}
               </button>
             )}
           </div>
-          <div className="pt-4 mt-auto gap-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
-            <p className="text-[10px] text-muted italic">
-              Veuillez présenter votre code numérique à l&apos;entrée.
+
+          {/* Footer info */}
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-xs text-muted flex items-center gap-2">
+              <QrCode size={14} className="text-brand" />
+              Présentez votre code QR à l&apos;entrée de l&apos;événement
             </p>
-            <Button
-              onClick={handlePrint}
-              disabled={isPrinting} // Empêche le double clic
-              className={`flex items-center gap-2 font-title text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-lg 
-        ${
-          isPrinting
-            ? 'bg-gray-400 cursor-not-allowed'
-            : 'bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 shadow-emerald-900/10'
-        }`}
-            >
-              {isPrinting ? (
-                <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full" />
-              ) : (
-                <Printer size={14} />
-              )}
-              {isPrinting ? 'Génération...' : 'Imprimer tout'}
-            </Button>
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+// Modal de filtres
+const FilterModal = ({
+  isOpen,
+  onClose,
+  tickets,
+  filterType,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  tickets: HistoriqueTicketDto[];
+  filterType: FilterType;
+}) => {
+  // ✅ 1. D'ABORD : Appeler TOUS les hooks (toujours dans le même ordre)
+  const filterConfig = FILTER_OPTIONS.find((f) => f.value === filterType)!;
+
+  const filteredTickets = useMemo(() => {
+    if (!tickets) return [];
+
+    if (filterType === 'all') return tickets;
+
+    if (filterType === 'valid') {
+      // Billets VALID qui ne sont pas USED
+      return tickets.filter((t) => t.status === 'VALID');
+    }
+
+    const targetStatus = filterType.toUpperCase();
+    return tickets.filter((t) => t.status === targetStatus);
+  }, [tickets, filterType]);
+
+  const groupedByEvent = useMemo(() => {
+    return filteredTickets.reduce(
+      (acc, ticket) => {
+        if (!ticket.event?.id) return acc;
+
+        const eventId = ticket.event.id;
+
+        if (!acc[eventId]) {
+          acc[eventId] = { event: ticket.event, tickets: [] };
+        }
+
+        acc[eventId].tickets.push(ticket);
+        return acc;
+      },
+      {} as Record<string, { event: EventDto; tickets: HistoriqueTicketDto[] }>,
+    );
+  }, [filteredTickets]);
+
+  // ✅ 2. ENSUITE : Faire le return conditionnel
+  if (!isOpen) return null;
+
+  // ✅ 3. ENFIN : Retourner le JSX
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl max-h-[90vh] bg-background rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+        {/* Header du modal */}
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-brand to-teal-600 text-white p-6 border-b border-white/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                {filterConfig.icon}
+              </div>
+              <div>
+                <h2 className="text-2xl font-black">{filterConfig.label}</h2>
+                <p className="text-sm text-white/80 mt-1">
+                  {filterConfig.description}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-all active:scale-95"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Stats */}
+          <div className="mt-4 flex items-center gap-4">
+            <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
+              <p className="text-xs text-white/80">Total</p>
+              <p className="text-2xl font-black">{filteredTickets.length}</p>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
+              <p className="text-xs text-white/80">Événements</p>
+              <p className="text-2xl font-black">
+                {Object.keys(groupedByEvent).length}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Contenu scrollable */}
+        <div className="overflow-y-auto max-h-[calc(90vh-180px)] p-6">
+          {filteredTickets.length > 0 ? (
+            <div className="space-y-6">
+              {Object.values(groupedByEvent).map(
+                ({ event, tickets: eventTickets }) => (
+                  <div
+                    key={event.id}
+                    className="bg-surface rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+                  >
+                    {/* Event header compact */}
+                    <div className="flex items-center gap-4 p-4 bg-muted/5 border-b border-gray-200 dark:border-gray-700">
+                      <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 border-brand/20">
+                        <Image
+                          src={event.imageUrl}
+                          alt={event.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-foreground truncate">
+                          {event.title}
+                        </h3>
+                        <div className="flex items-center gap-3 text-xs text-muted mt-1">
+                          <span className="flex items-center gap-1">
+                            <MapPin size={12} />
+                            {event.location}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar size={12} />
+                            {new Date(event.date).toLocaleDateString('fr-FR')}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="bg-brand/10 text-brand text-xs font-bold px-3 py-1.5 rounded-lg">
+                        {eventTickets.length} billet
+                        {eventTickets.length > 1 ? 's' : ''}
+                      </span>
+                    </div>
+
+                    {/* Tickets list */}
+                    <div className="p-4 space-y-2">
+                      {eventTickets.map((ticket, i) => (
+                        <TicketRow key={i} t={ticket} />
+                      ))}
+                    </div>
+                  </div>
+                ),
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-20">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted/10 flex items-center justify-center">
+                <Ticket size={32} className="text-muted" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-2">
+                Aucun billet trouvé
+              </h3>
+              <p className="text-sm text-muted">
+                Vous n&apos;avez pas de billets avec ce statut
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const TicketHistoryPage = () => {
   const [tickets, setTickets] = useState<HistoriqueTicketDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<FilterType | null>(null);
   const { user } = useAuth();
   const userId = user?.id;
+
   useEffect(() => {
     if (!user) return;
     const fetchTickets = async () => {
@@ -197,12 +481,18 @@ export const TicketHistoryPage = () => {
     };
     fetchTickets();
   }, [user]);
+
   const groupedByEvent = useMemo(() => {
     return tickets.reduce(
       (acc, ticket) => {
         if (!ticket.event?.id) return acc;
+
         const eventId = ticket.event.id;
-        if (!acc[eventId]) acc[eventId] = { event: ticket.event, tickets: [] };
+
+        if (!acc[eventId]) {
+          acc[eventId] = { event: ticket.event, tickets: [] };
+        }
+
         acc[eventId].tickets.push(ticket);
         return acc;
       },
@@ -210,49 +500,123 @@ export const TicketHistoryPage = () => {
     );
   }, [tickets]);
 
+  // Stats globales
+  const stats = useMemo(() => {
+    return {
+      total: tickets.length,
+      // Tickets avec statut VALID
+      valid: tickets.filter((t) => t.status === 'VALID').length,
+      // Tickets avec statut USED
+      used: tickets.filter((t) => t.status === 'USED').length,
+      // Tickets avec statut CANCELLED
+      cancelled: tickets.filter((t) => t.status === 'CANCELLED').length,
+    };
+  }, [tickets]);
   if (loading)
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <Loader2 className="w-10 h-10 text-brand animate-spin" />
-        <p className="mt-3 font-title text-muted text-sm tracking-wide">
-          SÉCURISATION DE VOS BILLETS...
+        <Loader2 className="w-12 h-12 text-brand animate-spin" />
+        <p className="mt-4 font-title text-muted text-sm tracking-wide">
+          CHARGEMENT DE VOS BILLETS...
         </p>
       </div>
     );
   return (
-    <div className="max-w-4xl mx-auto p-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <header className="mb-10 pl-5 border-l-4 border-brand">
-        <h1 className="font-title text-3xl font-bold text-title uppercase tracking-tighter">
-          Historique des Tickets
-        </h1>
-        <p className="text-muted mt-1 text-sm">
-          Gérez vos accès pour vos{' '}
-          <span className="text-brand font-bold">
-            {Object.keys(groupedByEvent).length}
-          </span>{' '}
-          événements à venir.
-        </p>
-      </header>
-      <div className="flex flex-col gap-6">
-        {Object.values(groupedByEvent).map(
-          ({ event, tickets: eventTickets }) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              tickets={eventTickets}
-              userId={userId ?? ''}
-            />
-          ),
-        )}
-        {tickets.length === 0 && !loading && (
-          <div className="text-center py-20 bg-surface rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-800">
-            <Ticket size={48} className="mx-auto text-gray-300 mb-4" />
-            <p className="text-muted font-title">
-              Vous n&apos;avez pas encore acheté de tickets.
-            </p>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header avec filtres */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
+            <div className="border-l-4 border-brand pl-6">
+              <h1 className="font-title text-3xl md:text-4xl font-black text-title uppercase tracking-tight">
+                Mes Billets
+              </h1>
+              <p className="text-muted mt-2 text-sm md:text-base">
+                Gérez vos{' '}
+                <span className="text-brand font-bold">{stats.total}</span>{' '}
+                billets pour{' '}
+                <span className="text-brand font-bold">
+                  {Object.keys(groupedByEvent).length}
+                </span>{' '}
+                événement{Object.keys(groupedByEvent).length > 1 ? 's' : ''}
+              </p>
+            </div>
+
+            {/* Boutons de filtres */}
+            <div className="flex items-center gap-2">
+              <Filter size={20} className="text-muted" />
+              <div className="flex flex-wrap gap-2">
+                {FILTER_OPTIONS.slice(1).map((filter) => {
+                  const count =
+                    filter.value === 'valid'
+                      ? stats.valid
+                      : filter.value === 'used'
+                        ? stats.used
+                        : stats.cancelled;
+
+                  return (
+                    <button
+                      key={filter.value}
+                      onClick={() => setActiveFilter(filter.value)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 border-2 ${
+                        filter.value === 'valid'
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                          : filter.value === 'used'
+                            ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
+                            : 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30'
+                      } active:scale-95`}
+                    >
+                      {filter.icon}
+                      <span className="hidden sm:inline">{filter.label}</span>
+                      <span className="bg-current/20 text-current px-2 py-0.5 rounded-full text-xs font-black">
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-        )}
+        </div>
+        {/* Liste des événements */}
+        <div className="space-y-6">
+          {Object.values(groupedByEvent).map(
+            ({ event, tickets: eventTickets }) => (
+              <EventCard
+                key={event.id}
+                event={event}
+                tickets={eventTickets}
+                userId={userId ?? ''}
+              />
+            ),
+          )}
+
+          {tickets.length === 0 && (
+            <div className="text-center py-20 bg-surface rounded-3xl border-2 border-dashed border-gray-300 dark:border-gray-700">
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-muted/10 flex items-center justify-center">
+                <Ticket size={48} className="text-muted" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">
+                Aucun billet
+              </h3>
+              <p className="text-muted mb-6">
+                Vous n&apos;avez pas encore acheté de billets
+              </p>
+              <Button className="bg-brand text-white hover:bg-brand/90">
+                Explorer les événements
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Modal de filtres */}
+      <FilterModal
+        isOpen={activeFilter !== null}
+        onClose={() => setActiveFilter(null)}
+        tickets={tickets}
+        filterType={activeFilter || 'all'}
+      />
     </div>
   );
 };

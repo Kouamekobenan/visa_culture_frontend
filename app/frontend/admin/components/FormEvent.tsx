@@ -22,6 +22,7 @@ interface EventFormModalProps {
   onClose: () => void;
   onSubmit: (data: CreateEventDto, file: File | null) => Promise<void>;
   initialData?: CreateEventDto;
+  isSubmitting?: boolean;
 }
 
 export default function EventFormModal({
@@ -29,11 +30,13 @@ export default function EventFormModal({
   onClose,
   onSubmit,
   initialData,
+  isSubmitting: isSubmittingExternal,
 }: EventFormModalProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
+  const isPending = isSubmittingExternal || isSubmitting;
 
   const { register, handleSubmit, reset } = useForm({
     defaultValues: initialData || {
@@ -58,17 +61,23 @@ export default function EventFormModal({
   };
 
   const onFormSubmit = async (data: CreateEventDto) => {
+    if (isSubmitting) return; // Sécurité supplémentaire anti-double-clic
+
     setIsSubmitting(true);
     try {
       const combinedDate = new Date(`${data.date}T${data.time}`);
       const finalDto = { ...data, date: combinedDate.toISOString() };
+
       await onSubmit(finalDto, selectedFile);
+
+      // Reset après succès uniquement
       reset();
       setPreview(null);
       onClose();
     } catch (error) {
       console.error('Erreur soumission:', error);
     } finally {
+      // IMPORTANT: On ne remet à false que si le composant est encore monté
       setIsSubmitting(false);
     }
   };
@@ -146,7 +155,6 @@ export default function EventFormModal({
               )}
             </div>
           </div>
-
           <div className="space-y-4">
             {/* TITRE */}
             <div className="space-y-1.5">
@@ -162,7 +170,6 @@ export default function EventFormModal({
                 />
               </div>
             </div>
-
             {/* LIEU */}
             <div className="space-y-1.5">
               <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1">
@@ -177,7 +184,6 @@ export default function EventFormModal({
                 />
               </div>
             </div>
-
             {/* DATE & HEURE */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
@@ -236,7 +242,8 @@ export default function EventFormModal({
             </button>
             <Button
               type="submit"
-              disabled={isSubmitting}
+              // disabled={isSubmitting}
+              disabled={isPending}
               className="flex-[2] py-3 bg-brand hover:bg-brand/90 text-white rounded-xl shadow-lg shadow-brand/20 transition-all active:scale-95"
             >
               {isSubmitting ? (

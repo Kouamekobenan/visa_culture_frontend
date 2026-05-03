@@ -52,13 +52,12 @@ const getThemeSnapshot = () => {
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
 const getServerSnapshot = () => false;
-
 // ─── Services ─────────────────────────────────────────────────────────────────
 const eventRepo = new EventRepository();
 const serviceEvent = new EventService(eventRepo);
 const lotteryRepo = new LotteryRepository();
 const serviceLottery = new LotteryService(lotteryRepo);
-const LIMIT = 4;
+const LIMIT = 12;
 
 export default function AdminEventPage() {
   const isDark = useSyncExternalStore(
@@ -66,7 +65,6 @@ export default function AdminEventPage() {
     getThemeSnapshot,
     getServerSnapshot,
   );
-
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,15 +76,26 @@ export default function AdminEventPage() {
     total: 0,
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // 1. Ajoute un état au sommet de ton composant parent
+  const [isCreating, setIsCreating] = useState(false);
+  // 2. Modifie la fonction pour inclure le verrouillage
   const handleCreateEvent = async (dto: CreateEventDto, file: File | null) => {
+    // SI on est déjà en train de créer, on bloque l'exécution
+    if (isCreating) return;
+    setIsCreating(true); // On verrouille
     try {
-      // Appel à ton service (le code que tu as posté dans la question)
       await serviceEvent.create(dto, file);
+
       // Rafraîchir la liste après création
       fetchData(1);
+
       toast.success('Événement créé avec succès !');
+      setIsModalOpen(false); // On ferme la modal seulement en cas de succès
     } catch (err) {
       toast.error('Erreur lors de la création');
+      console.error(err);
+    } finally {
+      setIsCreating(false); // On déverrouille quoi qu'il arrive
     }
   };
   // -------------CREATE LOTTERY-----------------------------------------------
@@ -116,11 +125,9 @@ export default function AdminEventPage() {
       setLoading(false);
     }
   }, []);
-
   useEffect(() => {
     fetchData(1);
   }, [fetchData]);
-
   // ─── Toggle loterie ───────────────────────────────────────────────────────
   const toggleLottery = async (eventId: string, currentState: boolean) => {
     if (processingId) return;
@@ -143,13 +150,11 @@ export default function AdminEventPage() {
       setProcessingId(null);
     }
   };
-
   const handlePageChange = (page: number) => {
     if (page < 1 || page > pagination.totalPages) return;
     fetchData(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
   const filteredEvents = useMemo(
     () =>
       events.filter((e) =>
@@ -235,6 +240,7 @@ export default function AdminEventPage() {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             onSubmit={handleCreateEvent}
+            isSubmitting={isCreating} // Passe l'état ici pour le Loader du bouton
           />
         </div>
         {/* ── Recherche ── */}

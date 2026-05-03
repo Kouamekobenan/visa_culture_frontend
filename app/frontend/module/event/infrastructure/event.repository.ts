@@ -12,7 +12,7 @@ import {
 export class EventRepository implements IEventRepository {
   private readonly baseUrl = 'events';
   async create(dto: CreateEventDto, file?: File | null): Promise<Event> {
-    let resonse;
+    let response; 
     if (file) {
       const formData = new FormData();
       formData.append('imageUrl', file);
@@ -22,14 +22,16 @@ export class EventRepository implements IEventRepository {
       formData.append('date', dto.date);
       formData.append('isActivate', String(dto.isActivate));
       formData.append('organizerId', dto.organizerId);
-      resonse = await api.post(this.baseUrl, formData, {
+      response = await api.post(this.baseUrl, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
     } else {
-      resonse = await api.post(this.baseUrl, dto);
+      // Si pas de fichier, on envoie le DTO normalement
+      response = await api.post(this.baseUrl, dto);
     }
-    const newEvent = await api.post(this.baseUrl, dto);
-    return newEvent.data;
+
+    // On retourne directement la donnée de la réponse obtenue dans le bloc if/else
+    return response.data;
   }
   // ...existing code...
   async updateEvent(

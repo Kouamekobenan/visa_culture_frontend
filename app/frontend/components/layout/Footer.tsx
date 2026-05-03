@@ -74,10 +74,10 @@ export default function Footer() {
                 Navigation
               </h4>
               <ul className="space-y-3">
-                <FooterLink href="/event">Événements</FooterLink>
-                <FooterLink href="/about">À propos</FooterLink>
-                <FooterLink href="/tickets">Billetterie</FooterLink>
-                <FooterLink href="/faq">Support</FooterLink>
+                <FooterLink href="/frontend/page/event">Événements</FooterLink>
+                <FooterLink href="/frontend/page/about">À propos</FooterLink>
+                <FooterLink href="/frontend/page/profile/history">Billetterie</FooterLink>
+                <FooterLink href="/#">Support</FooterLink>
               </ul>
             </div>
             <div className="space-y-5">
@@ -110,7 +110,6 @@ export default function Footer() {
               </ul>
             </div>
           </div>
-
           {/* NEWSLETTER SECTION */}
           <div className="lg:col-span-4 space-y-6 bg-muted/5 p-6 rounded-2xl lg:bg-transparent lg:p-0">
             <div className="space-y-2 text-center lg:text-left">

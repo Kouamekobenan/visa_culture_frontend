@@ -60,7 +60,6 @@ export default function EventDetail() {
         </p>
       </div>
     );
-
   if (error || !event)
     return (
       <div className="max-w-md mx-auto my-20 p-6 bg-error/5 border border-error/20 rounded-2xl text-center">
