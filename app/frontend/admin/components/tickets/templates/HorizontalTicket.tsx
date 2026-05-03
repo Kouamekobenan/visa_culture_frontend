@@ -1,4 +1,5 @@
 import { Calendar, MapPin, Banknote } from 'lucide-react';
+import Image from 'next/image';
 
 export const HorizontalTicket = ({ ticket }: { ticket: any }) => {
   const dateStr = new Date(ticket.event.date).toLocaleDateString('fr-FR', {
@@ -6,7 +7,6 @@ export const HorizontalTicket = ({ ticket }: { ticket: any }) => {
     month: 'long',
     year: 'numeric',
   });
-
   return (
     <div className="ticket-container w-[190mm] h-[65mm] bg-[#111827] text-white rounded-xl flex relative overflow-hidden shadow-xl mb-[10mm]">
       {/* SECTION GAUCHE : QR & INFOS */}
@@ -14,7 +14,7 @@ export const HorizontalTicket = ({ ticket }: { ticket: any }) => {
         <div className="font-[900] text-[18px] tracking-tighter">TICKET</div>
         <div className="flex flex-col items-center gap-1">
           <div className="bg-white p-1.5 rounded-lg">
-            <img
+            <Image
               src={ticket.qrDataUrl}
               alt="QR"
               className="w-[80px] h-[80px]"
@@ -26,7 +26,6 @@ export const HorizontalTicket = ({ ticket }: { ticket: any }) => {
         </div>
         <div className="text-[10px] font-medium italic">visaForCulture.com</div>
       </div>
-
       {/* SECTION DROITE : EVENT DETAILS */}
       <div className="ticket-right flex-1 relative flex">
         {/* Image avec masque dégradé */}
@@ -65,7 +64,6 @@ export const HorizontalTicket = ({ ticket }: { ticket: any }) => {
             </div>
           </div>
         </div>
-
         {/* Lucky Number */}
         {ticket.participation && (
           <div className="absolute bottom-4 right-5 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20 text-center">
