@@ -45,7 +45,7 @@ export default function ContactForm() {
         {/* Colonne Gauche : Texte Descriptif & Branding */}
         <div className="lg:col-span-2 bg-green-600 p-8 md:p-12 text-white rounded-2xl flex flex-col justify-between">
           <div>
-            <h2 className="text-3xl text-title font-bold mb-6 leading-tight">
+            <h2 className="text-3xl text-teal-50 font-bold mb-6 leading-tight">
               Donnez vie à vos projets culturels
             </h2>
             <p className="text-teal-50 text-lg leading-relaxed mb-8">

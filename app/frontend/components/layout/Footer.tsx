@@ -1,14 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { Mail, Phone, MapPin, Send, ShieldCheck } from 'lucide-react';
+import { Mail, Phone, MapPin, ShieldCheck } from 'lucide-react';
 import { Button } from '../ui/Button';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative bg-surface border-t border-muted/10 pt-12 pb-20 md:pt-16 md:pb-12">
+    <footer className="relative bg-surface border-t border-muted/10  pb-24 md:pt-16 md:pb-12 ">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-12">
           {/* BRAND SECTION */}

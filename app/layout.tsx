@@ -3,8 +3,12 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from './frontend/context/useContext';
 // import { Toaster } from "react-hot-toast";
-import { Toaster } from 'sonner';
-import { Bounce, ToastContainer } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
+
+import { Plus_Jakarta_Sans } from 'next/font/google'
+const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'] })
+
+// Et applique-la au body
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -30,7 +34,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body  className="min-h-full flex flex-col">
         <AuthProvider>
           {/* <Header />  */}
           <main className="flex-1">

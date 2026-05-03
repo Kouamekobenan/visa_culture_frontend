@@ -3,7 +3,6 @@ import { EventService } from '@/app/frontend/module/event/application/event.serv
 import { Event } from '@/app/frontend/module/event/domain/entities/event.entity';
 import { EventRepository } from '@/app/frontend/module/event/infrastructure/event.repository';
 import {
-  daysUntil,
   formatFullDateTime,
   isFutureDate,
   isToday,
@@ -14,19 +13,17 @@ import { Button } from '../../ui/Button';
 import { NAME } from '@/app/frontend/utils/types/manager.type';
 import {
   MapPin,
-  Search,
   CalendarDays,
-  Ticket,
   Loader2,
   ChevronLeft,
   ChevronRight,
+  History, // Icône plus adaptée pour le passé
 } from 'lucide-react';
 import Link from 'next/link';
 
 const eventRepo = new EventRepository();
 const serviceEvent = new EventService(eventRepo);
 const LIMIT = 20;
-
 function getPaginationRange(
   currentPage: number,
   totalPages: number,
@@ -61,7 +58,10 @@ function getPaginationRange(
   ];
 }
 
-export default function EventPage() {
+// ... (Fonction getPaginationRange inchangée)
+
+
+export default function PastEventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,20 +70,32 @@ export default function EventPage() {
     totalPages: 1,
     total: 0,
   });
-  const [searchQuery, setSearchQuery] = useState<string>(''); // ← AJOUT
+  const paginationRange = getPaginationRange(
+    pagination.page,
+    pagination.totalPages,
+  );
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const fetchData = useCallback(async (page: number) => {
     try {
       setLoading(true);
+      // Note: Idéalement, ton service devrait avoir une méthode .findPast()
+      // pour éviter de charger des événements futurs inutilement.
       const res = await serviceEvent.findAll(LIMIT, page);
-      setEvents(res.data);
+
+      // FILTRE : On ne garde que les événements qui ne sont PAS dans le futur et PAS aujourd'hui
+      const pastEvents = res.data.filter(
+        (e) => !isFutureDate(e.date) && !isToday(e.date),
+      );
+
+      setEvents(pastEvents);
       setPagination({
         page: res.page,
         totalPages: res.totalPages,
         total: res.total,
       });
     } catch (err: unknown) {
-      setError('Erreur lors de la récupération des événements');
+      setError('Erreur lors de la récupération des archives');
     } finally {
       setLoading(false);
     }
@@ -99,19 +111,13 @@ export default function EventPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const paginationRange = getPaginationRange(
-    pagination.page,
-    pagination.totalPages,
-  );
-
-  // ← AJOUT : filtre côté client par titre
   const filteredEvents = events.filter((e) =>
     e.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (error)
     return (
-      <div className="p-4 text-error bg-error/10 rounded-lg text-center font-sans font-medium">
+      <div className="p-4 text-error bg-error/10 rounded-lg text-center">
         {error}
       </div>
     );
@@ -121,119 +127,96 @@ export default function EventPage() {
       {/* Header section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
         <div>
-          <h1 className="text-4xl md:text-5xl font-bold text-title uppercase tracking-tight">
-            Vos Événements
-          </h1>
-          <p className="text-muted mt-2 text-lg">
-            Vivez votre meilleure Coupe du Monde avec {NAME}.
+          <div className="flex items-center gap-3 mb-2">
+            <History className="h-8 w-8 text-brand" />
+            <h1 className="text-4xl md:text-5xl font-bold text-title uppercase tracking-tight">
+              Archives
+            </h1>
+          </div>
+          <p className="text-muted text-lg">
+            Revivez les moments forts des événements passés de {NAME}.
           </p>
         </div>
-        {/* Barre de recherche */}
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted h-4 w-4 pointer-events-none" />
+
+        {/* Barre de recherche (Optionnelle mais utile) */}
+        <div className="relative w-full md:w-72">
           <input
             type="text"
-            placeholder="Rechercher un événement..."
-            value={searchQuery} // ← AJOUT
-            onChange={(e) => setSearchQuery(e.target.value)} // ← AJOUT
-            className="w-full pl-11 pr-5 py-3 rounded-full bg-surface border border-muted/20 focus:outline-none focus:ring-2 focus:ring-brand transition-all text-foreground"
+            placeholder="Rechercher dans l'archive..."
+            className="w-full pl-4 pr-4 py-2 rounded-xl border border-muted/20 bg-surface focus:border-brand outline-none transition-all"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
-      {/* Compteur de résultats */}
+
       {!loading && (
         <p className="text-muted text-sm mb-6">
-          Plus de {filteredEvents.length} événement
-          {filteredEvents.length > 1 ? 's' : ''} à votre disposition{' '}
-          {/* ← MODIFIÉ */}
+          {filteredEvents.length} souvenir{filteredEvents.length > 1 ? 's' : ''}{' '}
+          trouvé{filteredEvents.length > 1 ? 's' : ''}
         </p>
       )}
-      {/* Grille des événements */}
+
       {loading ? (
         <div className="flex justify-center items-center min-h-[400px]">
           <Loader2 className="h-10 w-10 animate-spin text-brand" />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredEvents.map(
-            (
-              e, // ← MODIFIÉ : filteredEvents au lieu de events
-            ) => (
-              <div
-                key={e.id}
-                className="group bg-surface rounded-2xl overflow-hidden border border-muted/10 hover:shadow-xl hover:shadow-brand/5 transition-all duration-300 flex flex-col"
+          {filteredEvents.map((e) => (
+            <div
+              key={e.id}
+              className="group bg-surface rounded-2xl overflow-hidden border border-muted/10 grayscale hover:grayscale-0 transition-all duration-500 flex flex-col"
+            >
+              <Link
+                href={`/frontend/page/details/${e.id}`}
+                className="relative h-56 w-full overflow-hidden block"
               >
-                {/* Image cliquable → page détail */}
-                <Link
-                  href={`/frontend/page/details/${e.id}`}
-                  className="relative h-56 w-full overflow-hidden block"
-                >
-                  <Image
-                    src={e.imageUrl ?? '/placeholder.jpg'}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    alt={e.title}
-                  />
-                  {/* Overlay au hover */}
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-background/80 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold text-title">
-                    <CalendarDays className="h-3.5 w-3.5 text-brand" />
+                <Image
+                  src={e.imageUrl ?? '/placeholder.jpg'}
+                  fill
+                  className="object-cover"
+                  alt={e.title}
+                />
+                <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold text-white">
+                  Événement terminé
+                </div>
+              </Link>
 
-                    {isToday(e.date)
-                      ? "Aujourd'hui"
-                      : isFutureDate(e.date)
-                        ? `J-${daysUntil(e.date)}`
-                        : 'Terminé'}
-                  </div>
-                </Link>
-                {/* Contenu de la carte */}
-                <div className="p-6 flex flex-col flex-grow">
-                  <h3 className="text-2xl font-bold mb-2 leading-tight">
-                    {e.title}
-                  </h3>
-                  <div className="flex items-center gap-1.5 text-muted text-sm mb-2">
-                    <MapPin className="h-4 w-4 text-brand shrink-0" />
-                    <span className="truncate">{e.location}</span>
-                  </div>
-                  <div className="flex items-center mb-2 gap-1.5  backdrop-blur-md  py-1.5 rounded-lg text-xs font-bold text-muted">
-                    <CalendarDays className="h-3.5 w-3.5 text-brand" />
-                    {formatFullDateTime(e.date)}
-                  </div>
-                  {/* Description masquée sur mobile */}
-                  <p className="hidden md:block text-muted text-sm truncate whitespace-nowrap mb-6 flex-grow">
-                    {e.description}
-                  </p>
-                  {/* Actions */}
-                  <div className="flex items-center justify-between pt-4 border-t border-muted/10 mt-auto">
-                    <Link
-                      href={`/frontend/page/details/${e.id}`}
-                      className="flex items-center gap-1 text-brand font-bold text-sm hover:underline underline-offset-4 transition-all"
-                    >
-                      Voir plus
-                      {/* <ArrowRight className="h-3.5 w-3.5" /> */}
-                    </Link>
+              <div className="p-6 flex flex-col flex-grow">
+                <h3 className="text-2xl font-bold mb-2 leading-tight text-title/80 group-hover:text-brand transition-colors">
+                  {e.title}
+                </h3>
 
-                    {isFutureDate(e.date) || isToday(e.date) ? (
-                      <Link href={`/frontend/page/tickets/${e.id}`}>
-                        <Button className="...">
-                          <Ticket className="h-4 w-4" />
-                          Acheter
-                        </Button>
-                      </Link>
-                    ) : (
-                      <span className="text-xs text-muted font-semibold px-5 py-2">
-                        Événement passé
-                      </span>
-                    )}
-                  </div>
+                <div className="flex items-center gap-1.5 text-muted text-sm mb-2">
+                  <MapPin className="h-4 w-4 text-muted/60 shrink-0" />
+                  <span className="truncate">{e.location}</span>
+                </div>
+
+                <div className="flex items-center mb-6 gap-1.5 text-xs font-bold text-muted">
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  {formatFullDateTime(e.date)}
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-muted/10 mt-auto">
+                  <Link
+                    href={`/frontend/page/details/${e.id}`}
+                    className="text-muted font-bold text-sm hover:text-brand transition-all"
+                  >
+                    Voir le récapitulatif
+                  </Link>
+                  <span className="text-[10px] uppercase tracking-widest text-muted font-black bg-muted/10 px-3 py-1 rounded-full">
+                    Terminé
+                  </span>
                 </div>
               </div>
-            ),
-          )}
+            </div>
+          ))}
         </div>
       )}
-      {/* Pagination */}
+
+      {/* Pagination (inchangée) */}
+      {/* ... */}
       {!loading && pagination.totalPages > 1 && (
         <div className="flex items-center justify-center gap-1.5 mt-12">
           {/* Bouton Précédent */}
