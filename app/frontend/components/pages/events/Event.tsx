@@ -75,7 +75,7 @@ export default function EventPage() {
   const fetchData = useCallback(async (page: number) => {
     try {
       setLoading(true);
-      const res = await serviceEvent.findAll(LIMIT, page);
+      const res = await eventRepo.getAllEventActivate(LIMIT, page);
       setEvents(res.data);
       setPagination({
         page: res.page,

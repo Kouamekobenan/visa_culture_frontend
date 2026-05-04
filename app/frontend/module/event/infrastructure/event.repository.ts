@@ -79,6 +79,21 @@ export class EventRepository implements IEventRepository {
       page: res.data.page,
     };
   }
+
+  async getAllEventActivate(
+    limit: number,
+    page: number,
+  ): Promise<PaginatedResponseRepository<Event>> {
+    const res = await api.get(`/events/activate/?page=${page}&limit=${limit}`);
+    return {
+      data: res.data.data,
+      total: res.data.total,
+      totalPages: res.data.totalPages,
+      limit: res.data.limit,
+      page: res.data.page,
+    };
+  }
+
   // event.service.ts
   async searchEventsByTitle(title: string): Promise<Event[]> {
     const res = await api.get(
