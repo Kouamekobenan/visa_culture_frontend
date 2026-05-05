@@ -24,6 +24,7 @@ import {
   LayoutDashboard,
   ChevronRight,
   TrendingUp,
+  MapPin,
 } from 'lucide-react';
 import { Event } from '../../module/event/domain/entities/event.entity';
 import { EventRepository } from '../../module/event/infrastructure/event.repository';
@@ -335,29 +336,24 @@ export default function Header() {
               ))}
             </nav>
 
-            {/* Zone de recherche Desktop - Élargie */}
             <div className="flex-1 max-w-2xl relative" ref={searchRef}>
               <form onSubmit={onSearchSubmit} className="relative group">
-                {isSearching ? (
-                  <Loader2
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-brand animate-spin"
-                    size={20}
-                  />
-                ) : (
-                  <Search
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-brand transition-all duration-300 group-focus-within:scale-110"
-                    size={20}
-                  />
-                )}
+                <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-title rounded-xl shadow-lg shadow-title/20 text-white transition-all duration-300 group-focus-within:scale-110 group-focus-within:rotate-[360deg] z-10">
+                  {isSearching ? (
+                    <Loader2 className="animate-spin" size={20} />
+                  ) : (
+                    <Search size={20} />
+                  )}
+                </div>
                 <input
                   type="text"
-                  placeholder="Rechercher un événement, une tombola..."
+                  placeholder="Rechercher un événement, ex : concert, conférence..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() =>
                     searchQuery.length >= 2 && setShowDropdown(true)
                   }
-                  className="w-full bg-background/80 border-2 border-muted/20 rounded-2xl py-3 pl-12 pr-4 text-sm font-medium focus:outline-none focus:border-brand focus:bg-background transition-all duration-300 placeholder:text-muted/60"
+                  className="w-full bg-background/80 backdrop-blur-sm border-2 border-muted/10 rounded-2xl py-3.5 pl-14 pr-4 text-sm font-semibold focus:outline-none focus:border-title/50 focus:ring-4 focus:ring-title/10 transition-all duration-300 placeholder:text-muted/50 shadow-sm group-hover:shadow-md group-hover:border-muted/20"
                 />
               </form>
 
@@ -397,8 +393,8 @@ export default function Header() {
                               <p className="text-sm font-bold text-foreground truncate group-hover:text-brand transition-colors duration-200">
                                 {event.title}
                               </p>
-                              <p className="text-xs text-muted truncate">
-                                📍 {event.location}
+                              <p className="text-xs text-muted truncate flex items-center gap-1">
+                                <MapPin size={12} className="shrink-0" /> {event.location}
                               </p>
                             </div>
                             <ArrowRight
@@ -440,8 +436,10 @@ export default function Header() {
         {/* ============================================ */}
         {isMobileSearchOpen && (
           <div className="fixed inset-0 z-[60] bg-background animate-in slide-in-from-top duration-300 flex flex-col">
-            <div className="flex items-center gap-3 w-full p-4 border-b border-muted/10 bg-surface/50">
-              <Search className="text-brand shrink-0" size={20} />
+            <div className="flex items-center gap-4 w-full p-4 border-b border-muted/10 bg-surface/50">
+              <div className="w-10 h-10 flex items-center justify-center bg-title rounded-xl shadow-lg shadow-title/20 text-white shrink-0">
+                <Search size={20} />
+              </div>
               <input
                 autoFocus
                 type="text"
@@ -462,7 +460,6 @@ export default function Header() {
                 <X size={24} />
               </button>
             </div>
-
             <div className="flex-1 overflow-y-auto p-4">
               {isSearching ? (
                 <div className="flex justify-center p-12">
@@ -496,8 +493,8 @@ export default function Header() {
                         <p className="font-bold text-foreground truncate">
                           {event.title}
                         </p>
-                        <p className="text-xs text-muted truncate">
-                          📍 {event.location}
+                        <p className="text-xs text-muted truncate flex items-center gap-1">
+                          <MapPin size={12} className="shrink-0" /> {event.location}
                         </p>
                       </div>
                       <ArrowRight size={18} className="text-brand" />

@@ -84,50 +84,78 @@ const StatCard = ({
 }: StatCardProps) => {
   const t = {
     card: isDark
-      ? 'bg-[#111827]/50 border-white/[0.08]'
-      : 'bg-white border-gray-200',
+      ? 'bg-surface/40 border-white/[0.05] hover:border-white/[0.15]'
+      : 'bg-white/80 border-gray-100 hover:border-gray-200',
     textMuted: isDark ? 'text-gray-400' : 'text-gray-500',
     textMain: isDark ? 'text-white' : 'text-gray-900',
+    glow: colorClass.replace('text-', 'bg-'),
   };
 
   return (
     <div
-      className={`border rounded-2xl p-6 shadow-sm transition-all duration-300 hover:shadow-md group ${t.card} backdrop-blur-sm`}
+      className={`relative overflow-hidden border rounded-3xl p-6 transition-all duration-500 hover:-translate-y-2 group ${t.card} backdrop-blur-xl shadow-sm hover:shadow-2xl hover:shadow-current/5`}
     >
-      <div className="flex items-start justify-between mb-4">
-        <div>
+      {/* Decorative Glow */}
+      <div
+        className={`absolute -right-4 -top-4 w-24 h-24 blur-3xl opacity-10 group-hover:opacity-25 transition-opacity duration-500 ${t.glow}`}
+      />
+
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-6">
+          <div
+            className={`p-3.5 rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 ${colorClass} bg-current/10 shadow-inner`}
+          >
+            <Icon size={22} strokeWidth={2.5} />
+          </div>
+
+          {trend !== undefined && (
+            <div
+              className={`flex items-center text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                trend >= 0
+                  ? 'bg-emerald-500/10 text-emerald-500'
+                  : 'bg-red-500/10 text-red-500'
+              }`}
+            >
+              {trend >= 0 ? (
+                <ArrowUpRight size={12} className="mr-1" />
+              ) : (
+                <ArrowDownRight size={12} className="mr-1" />
+              )}
+              {Math.abs(trend)}%
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-1">
           <p
-            className={`text-xs font-bold uppercase tracking-wider mb-1 ${t.textMuted}`}
+            className={`text-[10px] font-black uppercase tracking-[0.15em] ${t.textMuted} opacity-80`}
           >
             {title}
           </p>
-          <h3 className={`text-2xl font-black ${t.textMain}`}>{value}</h3>
-        </div>
-        <div
-          className={`p-3 rounded-xl transition-transform group-hover:scale-110 ${colorClass} bg-current/10`}
-        >
-          <Icon size={24} strokeWidth={2.5} />
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        {trend !== undefined && (
-          <div
-            className={`flex items-center text-xs font-bold px-2 py-0.5 rounded-full ${trend >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}
+          <h3
+            className={`text-3xl font-black font-title tracking-tight ${t.textMain}`}
           >
-            {trend >= 0 ? (
-              <ArrowUpRight size={12} className="mr-1" />
-            ) : (
-              <ArrowDownRight size={12} className="mr-1" />
-            )}
-            {Math.abs(trend)}%
+            {value}
+          </h3>
+        </div>
+
+        {subtitle && (
+          <div className="mt-5 pt-4 border-t border-current/5 flex items-center justify-between">
+            <span
+              className={`text-[11px] font-bold ${t.textMuted} flex items-center gap-1.5`}
+            >
+              <Activity size={12} className="opacity-50" />
+              {subtitle}
+            </span>
           </div>
         )}
-        {subtitle && (
-          <span className={`text-xs font-medium ${t.textMuted}`}>
-            {subtitle}
-          </span>
-        )}
       </div>
+
+      {/* Decorative line at bottom */}
+      <div
+        className={`absolute bottom-0 left-0 h-1 transition-all duration-500 group-hover:h-1.5 opacity-40 ${t.glow}`}
+        style={{ width: '100%' }}
+      />
     </div>
   );
 };
@@ -161,8 +189,8 @@ export default function EventDashboard({ eventId }: { eventId: string }) {
   const t = {
     page: isDark ? 'bg-[#030712]' : 'bg-[#f8fafc]',
     card: isDark
-      ? 'bg-[#111827] border-white/[0.08]'
-      : 'bg-white border-gray-200',
+      ? 'bg-[#111827]/60 border-white/[0.05] backdrop-blur-xl'
+      : 'bg-white border-gray-100 shadow-sm backdrop-blur-xl',
     title: isDark ? 'text-white' : 'text-gray-900',
     subtitle: isDark ? 'text-gray-400' : 'text-gray-500',
     accent: 'text-teal-500',

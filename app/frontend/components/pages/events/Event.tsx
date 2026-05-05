@@ -20,11 +20,11 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  Users,
 } from 'lucide-react';
 import Link from 'next/link';
 
 const eventRepo = new EventRepository();
-const serviceEvent = new EventService(eventRepo);
 const LIMIT = 20;
 
 function getPaginationRange(
@@ -37,7 +37,6 @@ function getPaginationRange(
   if (currentPage <= 4) {
     return [1, 2, 3, 4, 5, '...', totalPages];
   }
-
   if (currentPage >= totalPages - 3) {
     return [
       1,
@@ -103,19 +102,16 @@ export default function EventPage() {
     pagination.page,
     pagination.totalPages,
   );
-
   // ← AJOUT : filtre côté client par titre
   const filteredEvents = events.filter((e) =>
     e.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
-
   if (error)
     return (
       <div className="p-4 text-error bg-error/10 rounded-lg text-center font-sans font-medium">
         {error}
       </div>
     );
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 font-sans bg-background text-foreground transition-colors">
       {/* Header section */}
@@ -154,83 +150,105 @@ export default function EventPage() {
           <Loader2 className="h-10 w-10 animate-spin text-brand" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredEvents.map(
-            (
-              e, // ← MODIFIÉ : filteredEvents au lieu de events
-            ) => (
-              <div
-                key={e.id}
-                className="group bg-surface rounded-2xl overflow-hidden border border-muted/10 hover:shadow-xl hover:shadow-brand/5 transition-all duration-300 flex flex-col"
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredEvents.map((e) => (
+            <div
+              key={e.id}
+              className="group relative bg-surface rounded-[1.5rem] overflow-hidden border border-muted/10 hover:shadow-xl hover:shadow-brand/10
+               transition-all duration-500 flex flex-col h-full"
+            >
+              {/* Badge Image */}
+              <Link
+                href={`/frontend/page/details/${e.id}`}
+                className="relative h-64 w-full overflow-hidden block"
               >
-                {/* Image cliquable → page détail */}
-                <Link
-                  href={`/frontend/page/details/${e.id}`}
-                  className="relative h-56 w-full overflow-hidden block"
-                >
-                  <Image
-                    src={e.imageUrl ?? '/placeholder.jpg'}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    alt={e.title}
-                  />
-                  {/* Overlay au hover */}
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-background/80 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold text-title">
-                    <CalendarDays className="h-3.5 w-3.5 text-brand" />
+                <Image
+                  src={e.imageUrl ?? '/placeholder.jpg'}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  alt={e.title}
+                />
+                {/* Overlay Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                    {isToday(e.date)
-                      ? "Aujourd'hui"
-                      : isFutureDate(e.date)
-                        ? `J-${daysUntil(e.date)}`
-                        : 'Terminé'}
+                {/* Status Badge */}
+                <div className="absolute top-5 right-5 flex items-center gap-2 bg-background/90 backdrop-blur-xl px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest text-title shadow-2xl border border-white/10">
+                  <span
+                    className={`w-2 h-2 rounded-full animate-pulse ${
+                      isFutureDate(e.date) || isToday(e.date)
+                        ? 'bg-emerald-500'
+                        : 'bg-red-500'
+                    }`}
+                  />
+                  {isToday(e.date)
+                    ? "Aujourd'hui"
+                    : isFutureDate(e.date)
+                      ? `J-${daysUntil(e.date)}`
+                      : 'Terminé'}
+                </div>
+              </Link>
+              {/* Contenu de la carte */}
+              <div className="p-5 flex flex-col flex-grow relative">
+                {/* Organizer Info */}
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded-full bg-brand/10 flex items-center justify-center">
+                    <Users size={12} className="text-brand" />
                   </div>
-                </Link>
-                {/* Contenu de la carte */}
-                <div className="p-6 flex flex-col flex-grow">
-                  <h3 className="text-2xl font-bold mb-2 leading-tight">
-                    {e.title}
-                  </h3>
-                  <div className="flex items-center gap-1.5 text-muted text-sm mb-2">
-                    <MapPin className="h-4 w-4 text-brand shrink-0" />
+                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider truncate">
+                    {e.organizer?.name || 'Visa For Culture'}
+                  </span>
+                </div>
+                <h3 className="text-2xl font-black font-title mb-4 leading-tight group-hover:text-brand transition-colors duration-300 line-clamp-2">
+                  {e.title}
+                </h3>
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center gap-3 text-muted/80 text-xs font-bold">
+                    <div className="w-8 h-8 rounded-xl bg-muted/5 flex items-center justify-center shrink-0">
+                      <MapPin className="h-4 w-4 text-brand" />
+                    </div>
                     <span className="truncate">{e.location}</span>
                   </div>
-                  <div className="flex items-center mb-2 gap-1.5  backdrop-blur-md  py-1.5 rounded-lg text-xs font-bold text-muted">
-                    <CalendarDays className="h-3.5 w-3.5 text-brand" />
+                  <div className="flex items-center gap-3 text-muted/80 text-xs font-bold">
+                    <div className="w-8 h-8 rounded-xl bg-muted/5 flex items-center justify-center shrink-0">
+                      <CalendarDays className="h-4 w-4 text-brand" />
+                    </div>
                     {formatFullDateTime(e.date)}
                   </div>
-                  {/* Description masquée sur mobile */}
-                  <p className="hidden md:block text-muted text-sm truncate whitespace-nowrap mb-6 flex-grow">
-                    {e.description}
-                  </p>
-                  {/* Actions */}
-                  <div className="flex items-center justify-between pt-4 border-t border-muted/10 mt-auto">
-                    <Link
-                      href={`/frontend/page/details/${e.id}`}
-                      className="flex items-center gap-1 text-brand font-bold text-sm hover:underline underline-offset-4 transition-all"
-                    >
-                      Voir plus
-                      {/* <ArrowRight className="h-3.5 w-3.5" /> */}
-                    </Link>
+                </div>
+                {/* Description */}
+                <p className="hidden md:block text-muted/70 text-sm line-clamp-2 mb-4 flex-grow leading-relaxed">
+                  {e.description}
+                </p>
+                {/* Footer Actions */}
+                <div className="pt-2 border-t border-muted/10 flex items-center justify-between mt-auto">
+                  <Link
+                    href={`/frontend/page/details/${e.id}`}
+                    className="group/link flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted hover:text-brand transition-all"
+                  >
+                    Détails
+                    <ChevronRight
+                      size={14}
+                      className="group-hover/link:translate-x-1 transition-transform"
+                    />
+                  </Link>
 
-                    {isFutureDate(e.date) || isToday(e.date) ? (
-                      <Link href={`/frontend/page/tickets/${e.id}`}>
-                        <Button className="...">
-                          <Ticket className="h-4 w-4" />
-                          Acheter
-                        </Button>
-                      </Link>
-                    ) : (
-                      <span className="text-xs text-muted font-semibold px-5 py-2">
-                        Événement passé
-                      </span>
-                    )}
-                  </div>
+                  {isFutureDate(e.date) || isToday(e.date) ? (
+                    <Link href={`/frontend/page/tickets/${e.id}`}>
+                      <Button className=" font-black text-xs uppercase tracking-widest shadow-xl shadow-brand/20 hover:shadow-brand/40 hover:scale-[1.02] active:scale-95 transition-all">
+                        <Ticket className="h-4 w-4 mr-2" />
+                        Réserver
+                      </Button>
+                    </Link>
+                  ) : (
+                    <div className="px-4 py-2 rounded-xl bg-muted/10 text-[10px] font-black uppercase tracking-widest text-muted/50">
+                      Événement Passé
+                    </div>
+                  )}
                 </div>
               </div>
-            ),
-          )}
+            </div>
+          ))}
         </div>
       )}
       {/* Pagination */}

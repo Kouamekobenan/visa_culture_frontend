@@ -454,34 +454,53 @@ function StatCard({
   trend,
   isSmall,
 }: StatCardProps) {
-  const colorMap: Record<StatColor, string> = {
-    teal: 'bg-brand/10 text-brand',
-    orange: 'bg-orange-500/10 text-orange-500',
-    green: 'bg-btn/10 text-btn',
-    indigo: 'bg-indigo-500/10 text-indigo-500',
+  const colorMap: Record<StatColor, { text: string; bg: string }> = {
+    teal: { text: 'text-brand', bg: 'bg-brand' },
+    orange: { text: 'text-orange-500', bg: 'bg-orange-500' },
+    green: { text: 'text-btn', bg: 'bg-btn' },
+    indigo: { text: 'text-indigo-500', bg: 'bg-indigo-500' },
   };
-
+  const colors = colorMap[color];
   return (
-    <div className="group bg-surface p-7 rounded-[2.5rem] border border-slate-200 dark:border-white/5 transition-all hover:shadow-xl hover:border-brand/30">
+    <div className="relative group bg-surface/50 backdrop-blur-xl p-7 rounded-[2.5rem] border border-slate-200 dark:border-white/5 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:border-brand/20 overflow-hidden">
+      {/* Decorative Glow */}
       <div
-        className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform ${colorMap[color]}`}
-      >
-        {icon}
-      </div>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-muted mb-1">
-        {label}
-      </p>
-      <h4
-        className={`font-title font-black text-foreground tracking-tighter ${isSmall ? 'text-lg' : 'text-3xl'}`}
-      >
-        {value}
-      </h4>
-      {trend && (
-        <div className="mt-3 flex items-center gap-1.5 text-[10px] font-black text-btn">
-          <TrendingUp className="w-3 h-3" /> {trend}{' '}
-          <span className="text-muted font-medium lowercase">vs hier</span>
+        className={`absolute -right-4 -top-4 w-24 h-24 blur-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 ${colors.bg}`}
+      />
+      <div className="relative z-10">
+        <div
+          className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ${colors.text} ${colors.bg}/10 shadow-inner`}
+        >
+          {icon}
         </div>
-      )}
+        <div className="space-y-1">
+          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-muted opacity-80">
+            {label}
+          </p>
+          <h4
+            className={`font-title font-black text-foreground tracking-tighter transition-colors ${isSmall ? 'text-lg' : 'text-3xl'}`}
+          >
+            {value}
+          </h4>
+        </div>
+
+        {trend && (
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/5 flex items-center gap-2">
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-btn/10 text-btn text-[10px] font-black">
+              <TrendingUp className="w-3 h-3" /> {trend}
+            </div>
+            <span className="text-[10px] font-bold text-muted opacity-60 uppercase tracking-wider">
+              vs hier
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Decorative line at bottom */}
+      <div
+        className={`absolute bottom-0 left-0 h-1 transition-all duration-500 group-hover:h-1.5 opacity-30 ${colors.bg}`}
+        style={{ width: '100%' }}
+      />
     </div>
   );
 }

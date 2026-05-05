@@ -6,7 +6,6 @@ import { AuthProvider } from './frontend/context/useContext';
 import { ToastContainer } from 'react-toastify';
 
 import { Plus_Jakarta_Sans } from 'next/font/google'
-const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'] })
 
 // Et applique-la au body
 

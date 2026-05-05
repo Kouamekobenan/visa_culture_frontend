@@ -6,6 +6,7 @@ import {
   CreateTicketFormValues,
   createTicketSchema,
 } from './ValuedateTypeTicketDto';
+import { Button } from '../../components/ui/Button';
 
 interface TicketModalProps {
   isOpen: boolean;
@@ -166,17 +167,19 @@ export const CreateTicketModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2 px-4 rounded-lg font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="flex-1 py-2 px-4 cursor-pointer rounded-lg font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               Annuler
             </button>
-            <button
+            <Button
+              size="md"
+              variant="primary"
               type="submit"
               disabled={isLoading}
-              className="flex-[2] py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-black shadow-lg shadow-teal-500/20 transition-all disabled:opacity-50"
+              className="flex-[2] py-2 px-4 cursor-pointer rounded-lg font-black shadow-lg shadow-teal-500/20 transition-all disabled:opacity-50"
             >
               {isLoading ? 'Création...' : 'Créer le type de ticket'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
